@@ -5,6 +5,10 @@ import 'dart:async';
 
 import 'event_detail.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
+
+
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -28,6 +32,99 @@ class _MainScreenState extends State<MainScreen> {
 
   DisplayMode _displayMode = DisplayMode.absolute;
 
+  bool isInDeleteMode = false; // To track the delete mode
+  List<bool> selectedEvents = []; // To track selected events for deletion
+
+  void toggleDeleteMode() {
+    setState(() {
+      isInDeleteMode = !isInDeleteMode;
+      selectedEvents = List.filled(events.length, false);
+    });
+  }
+
+  void deleteSelectedEvents() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Confirm Deletion'),
+          content: const Text('Are you sure you want to delete selected events?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              child: Text('Delete'),
+              onPressed: () {
+                setState(() {
+                  for (int i = selectedEvents.length - 1; i >= 0; i--) {
+                    if (selectedEvents[i]) {
+                      events.removeAt(i);
+                    }
+                  }
+                  saveData();
+                  toggleDeleteMode();
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void deleteAllEvents() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Confirm Deletion'),
+          content: const Text('Are you sure you want to delete all events?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              child: const Text('Delete'),
+              onPressed: () {
+                setState(() {
+                  events.clear();
+                  saveData();
+                  toggleDeleteMode();
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> saveData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final eventsStringList = events.map((e) => e.toJson()).toList();
+    await prefs.setStringList('events', eventsStringList);
+
+    if (referenceEvent != null) {
+      await prefs.setString('referenceEvent', referenceEvent!.toJson());
+    }
+  }
+
+  Future<void> loadData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final eventsStringList = prefs.getStringList('events') ?? [];
+    events = eventsStringList.map((e) => Event.fromJson(e)).toList();
+
+    final referenceEventString = prefs.getString('referenceEvent');
+    if (referenceEventString != null) {
+      referenceEvent = Event.fromJson(referenceEventString);
+    }
+  }
+
   Future<void> _updateNtpOffset() async {
     if (_lastSyncTime == null || DateTime.now().difference(_lastSyncTime!).inMinutes >= 30) { // Every 30 minutes
       _ntpData = await NTP.getNtpOffset();
@@ -45,15 +142,13 @@ class _MainScreenState extends State<MainScreen> {
     if (_displayMode == DisplayMode.absolute) {
       return "${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}:${dateTime.second.toString().padLeft(2, '0')}.${(dateTime.millisecond ~/ 100).toString()}";
     } else {
-      if (referenceEvent == null) {
-        return "0s";
-      }
+      DateTime timeToCompare = referenceEvent == null ? _currentTime : referenceEvent!.time;
 
-      Duration difference = dateTime.isAfter(referenceEvent!.time)
-          ? dateTime.difference(referenceEvent!.time)
-          : referenceEvent!.time.difference(dateTime);
+      Duration difference = dateTime.isAfter(timeToCompare)
+          ? dateTime.difference(timeToCompare)
+          : timeToCompare.difference(dateTime);
 
-      String sign = dateTime.isAfter(referenceEvent!.time) ? "+" : "-";
+      String sign = dateTime.isAfter(timeToCompare) ? "+" : "-";
       if (difference == Duration.zero) {
         sign = "";
       }
@@ -82,10 +177,9 @@ class _MainScreenState extends State<MainScreen> {
 
 
   void addEvent(Event evt) {
-    if(referenceEvent == null){
-      referenceEvent = evt;
-    }
+    referenceEvent ??= evt;
     events.insert(0, evt);
+    saveData();
   }
 
   void toggleDisplayMode(){
@@ -104,6 +198,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
+    loadData();
     _updateNtpOffset();
     _timer = Timer.periodic(const Duration(milliseconds: 10), (timer) {
       setState(() {
@@ -131,6 +226,10 @@ class _MainScreenState extends State<MainScreen> {
               style: const TextStyle(fontSize: 18),
             ),
           ),
+          ElevatedButton(
+            child: Text(isInDeleteMode ? 'Cancel' : 'Delete Mode'),
+            onPressed: toggleDeleteMode,
+          ),
         ],
       ),
       body: Column(
@@ -143,7 +242,7 @@ class _MainScreenState extends State<MainScreen> {
                 toggleDisplayMode();
               },
               child: Text(
-                "${formatTime(_currentTime)}",
+                formatTime(_currentTime),
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -164,7 +263,8 @@ class _MainScreenState extends State<MainScreen> {
 
             child: const Icon(Icons.arrow_downward),
           ),
-          Expanded(
+
+          /*Expanded(
             child: ListView.builder(
               itemCount: events.length,
               itemBuilder: (context, index) {
@@ -181,9 +281,49 @@ class _MainScreenState extends State<MainScreen> {
                 );
               },
             ),
+          ),*/
+
+          Expanded(
+            child: ListView.builder(
+              itemCount: events.length,
+              itemBuilder: (context, index) {
+                if (isInDeleteMode) {
+                  return CheckboxListTile(
+                    value: selectedEvents[index],
+                    onChanged: (bool? value) {
+                      setState(() {
+                        selectedEvents[index] = value!;
+                      });
+                    },
+                    title: Text(formatEventTime(events[index])),
+                  );
+                } else {
+                  return ListTile(
+                    title: Text(formatEventTime(events[index])),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => EventDetailPage(event: events[index]),
+                        ),
+                      );
+                    },
+                  );
+                }
+              },
+            ),
           ),
         ],
       ),
+      bottomNavigationBar: isInDeleteMode ? SafeArea(
+        child: Padding(
+          padding: EdgeInsets.all(8.0),
+          child: ElevatedButton(
+            child: Text(selectedEvents.contains(true) ? 'Delete Selected' : 'Delete All'),
+            onPressed: selectedEvents.contains(true) ? deleteSelectedEvents : deleteAllEvents,
+          ),
+        ),
+      ) : null,
     );
   }
 }
