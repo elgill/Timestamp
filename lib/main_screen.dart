@@ -174,8 +174,6 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-
-
   void addEvent(Event evt) {
     referenceEvent ??= evt;
     events.insert(0, evt);
@@ -193,7 +191,6 @@ class _MainScreenState extends State<MainScreen> {
       });
     }
   }
-
 
   @override
   void initState() {
@@ -244,7 +241,7 @@ class _MainScreenState extends State<MainScreen> {
               child: Text(
                 formatTime(_currentTime),
                 style: const TextStyle(
-                  fontSize: 20,
+                  fontSize: 40,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'Courier New',
                 ),
@@ -252,7 +249,7 @@ class _MainScreenState extends State<MainScreen> {
 
             )
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 5),
           ElevatedButton(
             onPressed: () async {
               DateTime now = _currentTime;
@@ -320,7 +317,7 @@ class _MainScreenState extends State<MainScreen> {
       ),
       bottomNavigationBar: isInDeleteMode ? SafeArea(
         child: Padding(
-          padding: EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8.0),
           child: ElevatedButton(
             onPressed: selectedEvents.contains(true) ? deleteSelectedEvents : deleteAllEvents,
             child: Text(selectedEvents.contains(true) ? 'Delete Selected' : 'Delete All'),
