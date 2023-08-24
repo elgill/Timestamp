@@ -126,13 +126,45 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Future<void> _updateNtpOffset() async {
-    if (_lastSyncTime == null || DateTime.now().difference(_lastSyncTime!).inMinutes >= 30) { // Every 30 minutes
-      _ntpData = await NTP.getNtpOffset();
-      _ntpOffset = _ntpData?['offset'] ?? 9999;
-      _ntpError = _ntpData?['error'] ?? 9999;
-      _lastSyncTime = DateTime.now();
+    try {
+      if (_lastSyncTime == null || DateTime.now().difference(_lastSyncTime!).inMinutes >= 30) {
+        _ntpData = await NTP.getNtpOffset(/*lookUpAddress: 'pool.ntp.org'*/);
+        _ntpOffset = _ntpData?['offset'] ?? 0;
+        _ntpError = _ntpData?['error'] ?? 9999;
+        _lastSyncTime = DateTime.now();
+        saveNtpData();
+      }
+    } catch (error) {
+      // Here, handle the exception and notify the user.
+      loadNtpData();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to update time from the NTP server. Please check your internet connection.'),
+          duration: Duration(seconds: 5),
+        ),
+      );
     }
   }
+
+  Future<void> saveNtpData() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (_ntpOffset != null) {
+      prefs.setInt('ntpOffset', _ntpOffset!);
+    }
+    if (_lastSyncTime != null) {
+      prefs.setString('lastSyncTime', _lastSyncTime!.toIso8601String());
+    }
+  }
+
+  Future<void> loadNtpData() async {
+    final prefs = await SharedPreferences.getInstance();
+    _ntpOffset ??= prefs.getInt('ntpOffset');
+    String? lastSyncTimeString = prefs.getString('lastSyncTime');
+    if (lastSyncTimeString != null) {
+      _lastSyncTime ??= DateTime.tryParse(lastSyncTimeString);
+    }
+  }
+
 
   String formatEventTime(Event event) {
     return formatTime(event.time);
@@ -210,6 +242,85 @@ class _MainScreenState extends State<MainScreen> {
     super.dispose();
   }
 
+  Future<void> _showNtpDetailsDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('NTP Details'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                //Text('Time Server: $_ntpServer'),
+                //Text('Received NTP Time: ${_ntpTime?.toLocal().toString() ?? "N/A"}'),
+                Text('Offset: ${_ntpOffset ?? "N/A"}ms'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Get Time'),
+              onPressed: () async {
+                await _updateNtpOffset();
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildBottomBar() {
+    return BottomAppBar(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // First row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: TextButton(
+                    onPressed: _showNtpDetailsDialog,
+                    child: Text('Last Sync: ${_lastSyncTime?.toLocal().toString() ?? "N/A"}'),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          // Second row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: TextButton(
+                    onPressed: _showNtpDetailsDialog,
+                    child: Text('Offset: ${_ntpOffset ?? "N/A"}ms'),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -219,7 +330,7 @@ class _MainScreenState extends State<MainScreen> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
-              '±${(_ntpError ?? 0)}ms',
+              '±${(_ntpError ?? 9999)}ms',
               style: const TextStyle(fontSize: 18),
             ),
           ),
@@ -254,7 +365,7 @@ class _MainScreenState extends State<MainScreen> {
             onPressed: () async {
               DateTime now = _currentTime;
               setState(() {
-                addEvent(Event(now, _ntpError ?? 0));
+                addEvent(Event(now, _ntpError ?? 9999));
               });
             },
 
@@ -323,7 +434,7 @@ class _MainScreenState extends State<MainScreen> {
             child: Text(selectedEvents.contains(true) ? 'Delete Selected' : 'Delete All'),
           ),
         ),
-      ) : null,
+      ) : _buildBottomBar(),
     );
   }
 }
