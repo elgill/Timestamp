@@ -267,33 +267,52 @@ class _MainScreenState extends State<MainScreen> {
             child: ListView.builder(
               itemCount: events.length,
               itemBuilder: (context, index) {
-                if (isInDeleteMode) {
-                  return CheckboxListTile(
-                    value: selectedEvents[index],
-                    onChanged: (bool? value) {
-                      setState(() {
-                        selectedEvents[index] = value!;
-                      });
-                    },
-                    title: Text(formatEventTime(events[index])),
-                  );
-                } else {
-                  return ListTile(
-                    title: Text(formatEventTime(events[index])),
-                    onTap: () async {
+                return ListTile(
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 0.5),
+                  title: events[index].description.isEmpty ? Text(
+                    formatEventTime(events[index]),
+                    style: const TextStyle(fontSize: 24),  // Adjust this size to make the time as big as you want it to be.
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ) :
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        events[index].description,
+                        style: TextStyle(fontSize: 20),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        formatEventTime(events[index]),
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ],
+                  ),
+                  onTap: () async {
+                    if (!isInDeleteMode) {
                       Event updatedEvent = await Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => EventDetailPage(event: events[index]),
                         ),
                       ) as Event;
-
-                      // Update the event and save
-                      events[index] = updatedEvent;
-                      saveData();
+                      setState(() {
+                        events[index] = updatedEvent;
+                        saveData();
+                      });
+                    }
+                  },
+                  trailing: isInDeleteMode ? Checkbox(
+                    value: selectedEvents[index],
+                    onChanged: (bool? value) {
+                      setState(() {
+                        selectedEvents[index] = value!;
+                      });
                     },
-                  );
-                }
+                  ) : null,
+                );
               },
             ),
           ),
@@ -303,8 +322,8 @@ class _MainScreenState extends State<MainScreen> {
         child: Padding(
           padding: EdgeInsets.all(8.0),
           child: ElevatedButton(
-            child: Text(selectedEvents.contains(true) ? 'Delete Selected' : 'Delete All'),
             onPressed: selectedEvents.contains(true) ? deleteSelectedEvents : deleteAllEvents,
+            child: Text(selectedEvents.contains(true) ? 'Delete Selected' : 'Delete All'),
           ),
         ),
       ) : null,
