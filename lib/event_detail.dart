@@ -1,31 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:timestamp/event.dart';
 
-class EventDetailPage extends StatelessWidget {
+class EventDetailPage extends StatefulWidget {
   final Event event;
 
-  const EventDetailPage({super.key, required this.event});
+  const EventDetailPage({Key? key, required this.event}) : super(key: key);
+
+  @override
+  _EventDetailPageState createState() => _EventDetailPageState();
+}
+
+class _EventDetailPageState extends State<EventDetailPage> {
+  late TextEditingController _descriptionController;
+
+  @override
+  void initState() {
+    super.initState();
+    _descriptionController = TextEditingController(text: widget.event.description);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Event Details'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            widget.event.description = _descriptionController.text;
+            Navigator.pop(context, widget.event); // Return the updated event
+          },
+        ),
       ),
       body: Column(
         children: [
-          Text('Time: ${event.time}'),
-          Text(
-            'Precision: ±${event.precision}ms',
-            style: const TextStyle(fontSize: 20),
-          ),
+          Text('Time: ${widget.event.time}'),
+          Text('Precision: ±${widget.event.precision}ms', style: const TextStyle(fontSize: 20)),
           TextField(
-            onChanged: (value) {
-              event.description = value;
-            },
+            controller: _descriptionController,
             decoration: const InputDecoration(labelText: 'Event description'),
           ),
-
           // More details and functionalities to be added here.
         ],
       ),

@@ -51,11 +51,11 @@ class _MainScreenState extends State<MainScreen> {
           content: const Text('Are you sure you want to delete selected events?'),
           actions: <Widget>[
             TextButton(
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
               onPressed: () => Navigator.of(context).pop(),
             ),
             TextButton(
-              child: Text('Delete'),
+              child: const Text('Delete'),
               onPressed: () {
                 setState(() {
                   for (int i = selectedEvents.length - 1; i >= 0; i--) {
@@ -227,8 +227,8 @@ class _MainScreenState extends State<MainScreen> {
             ),
           ),
           ElevatedButton(
-            child: Text(isInDeleteMode ? 'Cancel' : 'Delete Mode'),
             onPressed: toggleDeleteMode,
+            child: Text(isInDeleteMode ? 'Cancel' : 'Edit'),
           ),
         ],
       ),
@@ -263,26 +263,6 @@ class _MainScreenState extends State<MainScreen> {
 
             child: const Icon(Icons.arrow_downward),
           ),
-
-          /*Expanded(
-            child: ListView.builder(
-              itemCount: events.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(formatEventTime(events[index])), // For simplicity, we're using ISO format.
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => EventDetailPage(event: events[index]),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-          ),*/
-
           Expanded(
             child: ListView.builder(
               itemCount: events.length,
@@ -300,13 +280,17 @@ class _MainScreenState extends State<MainScreen> {
                 } else {
                   return ListTile(
                     title: Text(formatEventTime(events[index])),
-                    onTap: () {
-                      Navigator.push(
+                    onTap: () async {
+                      Event updatedEvent = await Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => EventDetailPage(event: events[index]),
                         ),
-                      );
+                      ) as Event;
+
+                      // Update the event and save
+                      events[index] = updatedEvent;
+                      saveData();
                     },
                   );
                 }
