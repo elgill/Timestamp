@@ -7,9 +7,6 @@ import 'event_manager.dart';
 import 'ntp_service.dart';
 import 'package:timestamp/time_utls.dart';
 
-
-
-
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
@@ -143,9 +140,11 @@ class _MainScreenState extends State<MainScreen> {
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                //Text('Time Server: $_ntpServer'),
-                //Text('Received NTP Time: ${_ntpTime?.toLocal().toString() ?? "N/A"}'),
+                Text('Time Server: ${ntpService.timeServer}'),
+                Text('NTP Stratum: ${ntpService.ntpStratum}'),
+                Text('Last Sync Time: ${formatAbsoluteTime(ntpService.lastSyncTime.toLocal())}'),
                 Text('Offset: ${ntpService.ntpOffset ?? "N/A"}ms'),
+                Text('Round Trip Time(RTT): ${ntpService.roundTripTime}ms'),
               ],
             ),
           ),
@@ -221,7 +220,7 @@ class _MainScreenState extends State<MainScreen> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
-              '±${(ntpService.ntpError ?? 9999)}ms',
+              '±${(ntpService.roundTripTime~/2)}ms',
               style: const TextStyle(fontSize: 18),
             ),
           ),
@@ -256,7 +255,7 @@ class _MainScreenState extends State<MainScreen> {
             onPressed: () async {
               DateTime now = ntpService.currentTime;
               setState(() {
-                eventManager.addEvent(Event(now, ntpService.ntpError ?? 9999));
+                eventManager.addEvent(Event(now, ntpService.roundTripTime~/2));
               });
             },
 

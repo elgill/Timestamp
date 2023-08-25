@@ -1,17 +1,21 @@
 import 'dart:developer';
 
-import 'package:ntp/ntp.dart';
+import 'package:advanced_ntp/ntp.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class NtpService {
-  Map<String, int>? _ntpData;
   int? _ntpOffset; //ms
-  int? _ntpError; //ms
+  int? _roundTripTime; //ms
+  int? _ntpStratum;
+  String? _timeServer;
   DateTime? _lastSyncTime;
 
   DateTime get currentTime => DateTime.now().add(Duration(milliseconds: _ntpOffset ?? 0));
+
+  String get timeServer => _timeServer ?? "N/A";
   int get ntpOffset => _ntpOffset ?? 0;
-  int get ntpError => _ntpError ?? 9999;
+  int get roundTripTime => _roundTripTime ?? 9999;
+  int get ntpStratum => _ntpStratum ?? 9999;
   DateTime get lastSyncTime => _lastSyncTime ?? DateTime.fromMillisecondsSinceEpoch(0);
 
   NtpService() {
@@ -20,17 +24,14 @@ class NtpService {
 
   Future<void> updateNtpOffset() async {
     try {
-      log("Getting ntp offset");
-      _ntpData = await NTP.getNtpOffset(/*lookUpAddress: 'pool.ntp.org'*/);
-      _ntpOffset = _ntpData?['offset'] ?? 0;
-      _ntpError = _ntpData?['error'] ?? 9999;
-      _lastSyncTime = currentTime;
-      log("ntp error: $_ntpError");
-
+      NTPResponse ntpResponse = await getNtpData();
+      _timeServer = ntpResponse.lookupServer;
+      _ntpOffset = ntpResponse.offset;
+      _ntpStratum = ntpResponse.stratum;
+      _roundTripTime = ntpResponse.roundTripDelay.toInt();
+      _lastSyncTime = ntpResponse.dateTime;
       saveNtpData();
-
     } catch (error) {
-      log("Failed to update ntp offset");
       loadNtpData();
       // TODO: Handle exception here, perhaps through a callback or stream.
     }
