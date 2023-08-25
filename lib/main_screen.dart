@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:ntp/ntp.dart';
 import 'package:timestamp/event.dart';
 import 'dart:async';
 
 import 'event_detail.dart';
-
-import 'package:shared_preferences/shared_preferences.dart';
-
 import 'event_manager.dart';
+import 'ntp_service.dart';
 
 
 
@@ -23,14 +20,10 @@ enum DisplayMode { absolute, relative }
 
 class _MainScreenState extends State<MainScreen> {
   final EventManager eventManager = EventManager();
-  //final NtpService ntpService = NtpService();
+  final NtpService ntpService = NtpService();
 
-  DateTime _currentTime = DateTime.now();
+  DateTime displayTime = DateTime.now();
   late Timer _timer;
-  Map<String, int>? _ntpData;
-  int? _ntpOffset; //ms
-  int? _ntpError; //ms
-  DateTime? _lastSyncTime;
 
   DisplayMode _displayMode = DisplayMode.absolute;
 
@@ -100,47 +93,6 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  Future<void> _updateNtpOffset() async {
-    try {
-      if (_lastSyncTime == null || DateTime.now().difference(_lastSyncTime!).inMinutes >= 30) {
-        _ntpData = await NTP.getNtpOffset(/*lookUpAddress: 'pool.ntp.org'*/);
-        _ntpOffset = _ntpData?['offset'] ?? 0;
-        _ntpError = _ntpData?['error'] ?? 9999;
-        _lastSyncTime = DateTime.now();
-        saveNtpData();
-      }
-    } catch (error) {
-      // Here, handle the exception and notify the user.
-      loadNtpData();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to update time from the NTP server. Please check your internet connection.'),
-          duration: Duration(seconds: 5),
-        ),
-      );
-    }
-  }
-
-  Future<void> saveNtpData() async {
-    final prefs = await SharedPreferences.getInstance();
-    if (_ntpOffset != null) {
-      prefs.setInt('ntpOffset', _ntpOffset!);
-    }
-    if (_lastSyncTime != null) {
-      prefs.setString('lastSyncTime', _lastSyncTime!.toIso8601String());
-    }
-  }
-
-  Future<void> loadNtpData() async {
-    final prefs = await SharedPreferences.getInstance();
-    _ntpOffset ??= prefs.getInt('ntpOffset');
-    String? lastSyncTimeString = prefs.getString('lastSyncTime');
-    if (lastSyncTimeString != null) {
-      _lastSyncTime ??= DateTime.tryParse(lastSyncTimeString);
-    }
-  }
-
-
   String formatEventTime(Event event) {
     return formatTime(event.time);
   }
@@ -149,7 +101,7 @@ class _MainScreenState extends State<MainScreen> {
     if (_displayMode == DisplayMode.absolute) {
       return "${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}:${dateTime.second.toString().padLeft(2, '0')}.${(dateTime.millisecond ~/ 100).toString()}";
     } else {
-      DateTime timeToCompare = eventManager.referenceEvent == null ? _currentTime : eventManager.referenceEvent!.time;
+      DateTime timeToCompare = eventManager.referenceEvent == null ? ntpService.currentTime : eventManager.referenceEvent!.time;
 
       Duration difference = dateTime.isAfter(timeToCompare)
           ? dateTime.difference(timeToCompare)
@@ -197,10 +149,10 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     eventManager.loadData();
-    _updateNtpOffset();
+    ntpService.updateNtpOffset();
     _timer = Timer.periodic(const Duration(milliseconds: 10), (timer) {
       setState(() {
-        _currentTime = DateTime.now().add(Duration(milliseconds: _ntpOffset ?? 0));
+        displayTime = ntpService.currentTime;
       });
     });
   }
@@ -217,27 +169,27 @@ class _MainScreenState extends State<MainScreen> {
       barrierDismissible: true,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('NTP Details'),
+          title: const Text('NTP Details'),
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
                 //Text('Time Server: $_ntpServer'),
                 //Text('Received NTP Time: ${_ntpTime?.toLocal().toString() ?? "N/A"}'),
-                Text('Offset: ${_ntpOffset ?? "N/A"}ms'),
+                Text('Offset: ${ntpService.ntpOffset ?? "N/A"}ms'),
               ],
             ),
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('Get Time'),
+              child: const Text('Get Time'),
               onPressed: () async {
-                await _updateNtpOffset();
+                ntpService.updateNtpOffset();
                 Navigator.of(context).pop();
               },
             ),
@@ -261,7 +213,7 @@ class _MainScreenState extends State<MainScreen> {
                   scrollDirection: Axis.horizontal,
                   child: TextButton(
                     onPressed: _showNtpDetailsDialog,
-                    child: Text('Last Sync: ${_lastSyncTime?.toLocal().toString() ?? "N/A"}'),
+                    child: Text('Last Sync: ${ntpService.lastSyncTime.toLocal().toString() ?? "N/A"}'),
                   ),
                 ),
               ),
@@ -277,7 +229,7 @@ class _MainScreenState extends State<MainScreen> {
                   scrollDirection: Axis.horizontal,
                   child: TextButton(
                     onPressed: _showNtpDetailsDialog,
-                    child: Text('Offset: ${_ntpOffset ?? "N/A"}ms'),
+                    child: Text('Offset: ${ntpService.ntpOffset ?? "N/A"}ms'),
                   ),
                 ),
               ),
@@ -299,7 +251,7 @@ class _MainScreenState extends State<MainScreen> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
-              '±${(_ntpError ?? 9999)}ms',
+              '±${(ntpService.ntpError ?? 9999)}ms',
               style: const TextStyle(fontSize: 18),
             ),
           ),
@@ -319,7 +271,7 @@ class _MainScreenState extends State<MainScreen> {
                 toggleDisplayMode();
               },
               child: Text(
-                formatTime(_currentTime),
+                formatTime(ntpService.currentTime),
                 style: const TextStyle(
                   fontSize: 40,
                   //fontWeight: FontWeight.bold,
@@ -332,9 +284,9 @@ class _MainScreenState extends State<MainScreen> {
           const SizedBox(height: 5),
           ElevatedButton(
             onPressed: () async {
-              DateTime now = _currentTime;
+              DateTime now = ntpService.currentTime;
               setState(() {
-                eventManager.addEvent(Event(now, _ntpError ?? 9999));
+                eventManager.addEvent(Event(now, ntpService.ntpError ?? 9999));
               });
             },
 
@@ -358,12 +310,12 @@ class _MainScreenState extends State<MainScreen> {
                     children: [
                       Text(
                         eventManager.events[index].description,
-                        style: TextStyle(fontSize: 20),
+                        style: const TextStyle(fontSize: 20),
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
                         formatEventTime(eventManager.events[index]),
-                        style: TextStyle(fontSize: 16),
+                        style: const TextStyle(fontSize: 16),
                       ),
                     ],
                   ),
