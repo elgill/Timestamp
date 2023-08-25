@@ -60,7 +60,12 @@ class _MainScreenState extends State<MainScreen> {
                 setState(() {
                   for (int i = selectedEvents.length - 1; i >= 0; i--) {
                     if (selectedEvents[i]) {
+                      Event removedEvent = events[i];
                       events.removeAt(i);
+                      if (removedEvent == referenceEvent) {
+                        referenceEvent = null;
+                        referenceEvent = events.last;
+                      }
                     }
                   }
                   saveData();
@@ -91,6 +96,7 @@ class _MainScreenState extends State<MainScreen> {
               child: const Text('Delete'),
               onPressed: () {
                 setState(() {
+                  referenceEvent = null;
                   events.clear();
                   saveData();
                   toggleDeleteMode();

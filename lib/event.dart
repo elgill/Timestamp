@@ -23,4 +23,16 @@ class Event {
     event.description = data['description'] ?? ""; // If null, assign empty string
     return event;
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Event &&
+          runtimeType == other.runtimeType &&
+          time == other.time &&
+          precision == other.precision &&
+          description == other.description;
+
+  @override
+  int get hashCode => time.hashCode ^ precision.hashCode ^ description.hashCode;
 }
