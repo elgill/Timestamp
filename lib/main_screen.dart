@@ -7,6 +7,8 @@ import 'event_detail.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'event_manager.dart';
+
 
 
 
@@ -20,8 +22,8 @@ class MainScreen extends StatefulWidget {
 enum DisplayMode { absolute, relative }
 
 class _MainScreenState extends State<MainScreen> {
-  List<Event> events = [];
-  Event? referenceEvent;
+  final EventManager eventManager = EventManager();
+  //final NtpService ntpService = NtpService();
 
   DateTime _currentTime = DateTime.now();
   late Timer _timer;
@@ -38,7 +40,7 @@ class _MainScreenState extends State<MainScreen> {
   void toggleDeleteMode() {
     setState(() {
       isInDeleteMode = !isInDeleteMode;
-      selectedEvents = List.filled(events.length, false);
+      selectedEvents = List.filled(eventManager.events.length, false);
     });
   }
 
@@ -58,17 +60,7 @@ class _MainScreenState extends State<MainScreen> {
               child: const Text('Delete'),
               onPressed: () {
                 setState(() {
-                  for (int i = selectedEvents.length - 1; i >= 0; i--) {
-                    if (selectedEvents[i]) {
-                      Event removedEvent = events[i];
-                      events.removeAt(i);
-                      if (removedEvent == referenceEvent) {
-                        referenceEvent = null;
-                        referenceEvent = events.last;
-                      }
-                    }
-                  }
-                  saveData();
+                  eventManager.deleteSelectedEvents(selectedEvents);
                   toggleDeleteMode();
                 });
                 Navigator.of(context).pop();
@@ -96,9 +88,7 @@ class _MainScreenState extends State<MainScreen> {
               child: const Text('Delete'),
               onPressed: () {
                 setState(() {
-                  referenceEvent = null;
-                  events.clear();
-                  saveData();
+                  eventManager.deleteAllEvents();
                   toggleDeleteMode();
                 });
                 Navigator.of(context).pop();
@@ -108,27 +98,6 @@ class _MainScreenState extends State<MainScreen> {
         );
       },
     );
-  }
-
-  Future<void> saveData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final eventsStringList = events.map((e) => e.toJson()).toList();
-    await prefs.setStringList('events', eventsStringList);
-
-    if (referenceEvent != null) {
-      await prefs.setString('referenceEvent', referenceEvent!.toJson());
-    }
-  }
-
-  Future<void> loadData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final eventsStringList = prefs.getStringList('events') ?? [];
-    events = eventsStringList.map((e) => Event.fromJson(e)).toList();
-
-    final referenceEventString = prefs.getString('referenceEvent');
-    if (referenceEventString != null) {
-      referenceEvent = Event.fromJson(referenceEventString);
-    }
   }
 
   Future<void> _updateNtpOffset() async {
@@ -180,7 +149,7 @@ class _MainScreenState extends State<MainScreen> {
     if (_displayMode == DisplayMode.absolute) {
       return "${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}:${dateTime.second.toString().padLeft(2, '0')}.${(dateTime.millisecond ~/ 100).toString()}";
     } else {
-      DateTime timeToCompare = referenceEvent == null ? _currentTime : referenceEvent!.time;
+      DateTime timeToCompare = eventManager.referenceEvent == null ? _currentTime : eventManager.referenceEvent!.time;
 
       Duration difference = dateTime.isAfter(timeToCompare)
           ? dateTime.difference(timeToCompare)
@@ -212,12 +181,6 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-  void addEvent(Event evt) {
-    referenceEvent ??= evt;
-    events.insert(0, evt);
-    saveData();
-  }
-
   void toggleDisplayMode(){
     if (_displayMode == DisplayMode.absolute) {
       setState(() {
@@ -233,7 +196,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
-    loadData();
+    eventManager.loadData();
     _updateNtpOffset();
     _timer = Timer.periodic(const Duration(milliseconds: 10), (timer) {
       setState(() {
@@ -371,7 +334,7 @@ class _MainScreenState extends State<MainScreen> {
             onPressed: () async {
               DateTime now = _currentTime;
               setState(() {
-                addEvent(Event(now, _ntpError ?? 9999));
+                eventManager.addEvent(Event(now, _ntpError ?? 9999));
               });
             },
 
@@ -379,12 +342,12 @@ class _MainScreenState extends State<MainScreen> {
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: events.length,
+              itemCount: eventManager.events.length,
               itemBuilder: (context, index) {
                 return ListTile(
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 0.5),
-                  title: events[index].description.isEmpty ? Text(
-                    formatEventTime(events[index]),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0.5),
+                  title: eventManager.events[index].description.isEmpty ? Text(
+                    formatEventTime(eventManager.events[index]),
                     style: const TextStyle(fontSize: 24),  // Adjust this size to make the time as big as you want it to be.
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -394,12 +357,12 @@ class _MainScreenState extends State<MainScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        events[index].description,
+                        eventManager.events[index].description,
                         style: TextStyle(fontSize: 20),
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        formatEventTime(events[index]),
+                        formatEventTime(eventManager.events[index]),
                         style: TextStyle(fontSize: 16),
                       ),
                     ],
@@ -409,12 +372,12 @@ class _MainScreenState extends State<MainScreen> {
                       Event updatedEvent = await Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => EventDetailPage(event: events[index]),
+                          builder: (context) => EventDetailPage(event: eventManager.events[index]),
                         ),
                       ) as Event;
                       setState(() {
-                        events[index] = updatedEvent;
-                        saveData();
+                        eventManager.events[index] = updatedEvent;
+                        eventManager.saveData();
                       });
                     }
                   },

@@ -32,6 +32,8 @@ dependencies:
     sdk: flutter
 
   shared_preferences: ^2.0.5
+  #provider: ^5.0.0
+
   ntp:
     path: ../ntp
   # The following adds the Cupertino Icons font to your application.
