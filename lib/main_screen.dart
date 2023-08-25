@@ -294,7 +294,15 @@ class _MainScreenState extends State<MainScreen> {
                       Event updatedEvent = await Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => EventDetailPage(event: eventManager.events[index]),
+                          builder: (context) => EventDetailPage(
+                            event: eventManager.events[index],
+                            onSetAsReference: (event) {
+                              setState(() {
+                                eventManager.referenceEvent = event;
+                                eventManager.saveData();
+                              });
+                            },
+                          ),
                         ),
                       ) as Event;
                       setState(() {

@@ -3,12 +3,18 @@ import 'package:timestamp/event.dart';
 
 class EventDetailPage extends StatefulWidget {
   final Event event;
+  final Function(Event) onSetAsReference;
 
-  const EventDetailPage({Key? key, required this.event}) : super(key: key);
+  const EventDetailPage({
+    Key? key,
+    required this.event,
+    required this.onSetAsReference,
+  }) : super(key: key);
 
   @override
   _EventDetailPageState createState() => _EventDetailPageState();
 }
+
 
 class _EventDetailPageState extends State<EventDetailPage> {
   late TextEditingController _descriptionController;
@@ -40,7 +46,12 @@ class _EventDetailPageState extends State<EventDetailPage> {
             controller: _descriptionController,
             decoration: const InputDecoration(labelText: 'Event description'),
           ),
-          // More details and functionalities to be added here.
+          ElevatedButton(
+            onPressed: () {
+              widget.onSetAsReference(widget.event);
+            },
+            child: Text('Set as Reference'),
+          )
         ],
       ),
     );
