@@ -5,6 +5,7 @@ import 'dart:async';
 import 'event_detail.dart';
 import 'event_manager.dart';
 import 'ntp_service.dart';
+import 'package:timestamp/time_utls.dart';
 
 
 
@@ -93,43 +94,12 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  String formatEventTime(Event event) {
-    return formatTime(event.time);
-  }
-
   String formatTime(DateTime dateTime) {
     if (_displayMode == DisplayMode.absolute) {
-      return "${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}:${dateTime.second.toString().padLeft(2, '0')}.${(dateTime.millisecond ~/ 100).toString()}";
+      return formatAbsoluteTime(dateTime);
     } else {
       DateTime timeToCompare = eventManager.referenceEvent == null ? ntpService.currentTime : eventManager.referenceEvent!.time;
-
-      Duration difference = dateTime.isAfter(timeToCompare)
-          ? dateTime.difference(timeToCompare)
-          : timeToCompare.difference(dateTime);
-
-      String sign = dateTime.isAfter(timeToCompare) ? "+" : "-";
-      if (difference == Duration.zero) {
-        sign = "";
-      }
-
-      int years = (difference.inDays / 365).floor();
-      int days = difference.inDays % 365;
-      int hours = difference.inHours.remainder(24);
-      int minutes = difference.inMinutes.remainder(60);
-      int seconds = difference.inSeconds.remainder(60);
-      int tenthsOfSeconds = (difference.inMilliseconds.remainder(1000) / 100).floor();
-
-      List<String> timeComponents = [];
-
-      if (years > 0) {
-        timeComponents.add("${years}y");
-      }
-      if (days > 0) {
-        timeComponents.add("${days}d");
-      }
-      timeComponents.add("${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}.${tenthsOfSeconds}");
-
-      return "$sign${timeComponents.join(' ')}";
+      return formatRelativeTime(dateTime, timeToCompare);
     }
   }
 
@@ -181,7 +151,7 @@ class _MainScreenState extends State<MainScreen> {
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('Cancel'),
+              child: const Text('Close'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -299,7 +269,7 @@ class _MainScreenState extends State<MainScreen> {
                 return ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0.5),
                   title: eventManager.events[index].description.isEmpty ? Text(
-                    formatEventTime(eventManager.events[index]),
+                    formatTime(eventManager.events[index].time),
                     style: const TextStyle(fontSize: 24),  // Adjust this size to make the time as big as you want it to be.
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -314,7 +284,7 @@ class _MainScreenState extends State<MainScreen> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        formatEventTime(eventManager.events[index]),
+                        formatTime(eventManager.events[index].time),
                         style: const TextStyle(fontSize: 16),
                       ),
                     ],

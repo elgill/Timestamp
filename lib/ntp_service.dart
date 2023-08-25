@@ -24,7 +24,7 @@ class NtpService {
       _ntpData = await NTP.getNtpOffset(/*lookUpAddress: 'pool.ntp.org'*/);
       _ntpOffset = _ntpData?['offset'] ?? 0;
       _ntpError = _ntpData?['error'] ?? 9999;
-      _lastSyncTime = DateTime.now();
+      _lastSyncTime = currentTime;
       log("ntp error: $_ntpError");
 
       saveNtpData();
