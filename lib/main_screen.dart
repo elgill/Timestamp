@@ -95,7 +95,8 @@ class _MainScreenState extends State<MainScreen> {
     if (_displayMode == DisplayMode.absolute) {
       return formatAbsoluteTime(dateTime);
     } else {
-      DateTime timeToCompare = eventManager.referenceEvent == null ? ntpService.currentTime : eventManager.referenceEvent!.time;
+      DateTime timeToCompare = eventManager.referenceEvent == null ?
+          dateTime : eventManager.referenceEvent!.time;
       return formatRelativeTime(dateTime, timeToCompare);
     }
   }
@@ -119,7 +120,7 @@ class _MainScreenState extends State<MainScreen> {
     ntpService.updateNtpOffset();
     _timer = Timer.periodic(const Duration(milliseconds: 10), (timer) {
       setState(() {
-        displayTime = ntpService.currentTime;
+        //displayTime = ntpService.currentTime;
       });
     });
   }
@@ -200,8 +201,6 @@ class _MainScreenState extends State<MainScreen> {
       ),
     );
   }
-
-
 
   @override
   Widget build(BuildContext context) {

@@ -1,5 +1,5 @@
 String formatAbsoluteTime(DateTime dateTime){
-  return "${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}:${dateTime.second.toString().padLeft(2, '0')}.${(dateTime.millisecond ~/ 100).toString()}";
+  return "${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}:${dateTime.second.toString().padLeft(2, '0')}.${(dateTime.millisecond ~/ 100).toString()} ${dateTime.timeZoneName}";
 }
 
 String formatRelativeTime(DateTime time, DateTime timeToCompare){
