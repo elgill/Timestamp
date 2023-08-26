@@ -170,39 +170,24 @@ class _MainScreenState extends State<MainScreen> {
 
   Widget _buildBottomBar() {
     return BottomAppBar(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // First row
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: TextButton(
-                    onPressed: _showNtpDetailsDialog,
-                    child: Text('Last Sync: ${ntpService.lastSyncTime.toLocal().toString() ?? "N/A"}'),
-                  ),
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: TextButton(
+                onPressed: _showNtpDetailsDialog,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('Last Sync: ${formatAbsoluteTime(ntpService.lastSyncTime.toLocal())}'),
+                    Text('Offset: ${ntpService.ntpOffset}ms'),
+                  ],
                 ),
               ),
-            ],
-          ),
-
-          // Second row
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: TextButton(
-                    onPressed: _showNtpDetailsDialog,
-                    child: Text('Offset: ${ntpService.ntpOffset ?? "N/A"}ms'),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ],
       ),
