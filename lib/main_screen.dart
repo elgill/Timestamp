@@ -171,9 +171,9 @@ class _MainScreenState extends State<MainScreen> {
   Widget _buildBottomBar() {
     return BottomAppBar(
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Expanded(
+          !isInDeleteMode ? Expanded(
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: TextButton(
@@ -183,11 +183,18 @@ class _MainScreenState extends State<MainScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text('Last Sync: ${formatAbsoluteTime(ntpService.lastSyncTime.toLocal())}'),
-                    Text('Offset: ${ntpService.ntpOffset}ms'),
+                    Text('Offset: ${ntpService.ntpOffset ?? "N/A"}ms'),
                   ],
                 ),
               ),
             ),
+          ) : ElevatedButton(
+                onPressed: selectedEvents.contains(true) ? deleteSelectedEvents : deleteAllEvents,
+                child: Text(selectedEvents.contains(true) ? 'Delete Selected' : 'Delete All'),
+          ),
+          ElevatedButton(
+            onPressed: toggleDeleteMode,
+            child: Text(isInDeleteMode ? 'Cancel' : 'Edit'),
           ),
         ],
       ),
@@ -208,10 +215,6 @@ class _MainScreenState extends State<MainScreen> {
               '±${(ntpService.roundTripTime~/2)}ms',
               style: const TextStyle(fontSize: 18),
             ),
-          ),
-          ElevatedButton(
-            onPressed: toggleDeleteMode,
-            child: Text(isInDeleteMode ? 'Cancel' : 'Edit'),
           ),
         ],
       ),
@@ -309,15 +312,7 @@ class _MainScreenState extends State<MainScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: isInDeleteMode ? SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: ElevatedButton(
-            onPressed: selectedEvents.contains(true) ? deleteSelectedEvents : deleteAllEvents,
-            child: Text(selectedEvents.contains(true) ? 'Delete Selected' : 'Delete All'),
-          ),
-        ),
-      ) : _buildBottomBar(),
+      bottomNavigationBar: _buildBottomBar(),
     );
   }
 }
