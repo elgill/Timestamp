@@ -185,6 +185,7 @@ class _MainScreenState extends State<MainScreen> {
                   children: [
                     Text('Last Sync: ${formatAbsoluteTime(ntpService.lastSyncTime.toLocal())}'),
                     Text('Offset: ${ntpService.ntpOffset ?? "N/A"}ms'),
+                    Text('Accuracy: ±${(ntpService.roundTripTime~/2)}ms'),
                   ],
                 ),
               ),
@@ -208,13 +209,13 @@ class _MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         title: const Text('Timestamp'),
         actions: [
-          Padding(
+/*          Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
               '±${(ntpService.roundTripTime~/2)}ms',
               style: const TextStyle(fontSize: 18),
             ),
-          ),
+          ),*/
         ],
       ),
       body: Column(
