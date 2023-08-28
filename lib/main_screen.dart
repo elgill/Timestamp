@@ -42,7 +42,8 @@ class _MainScreenState extends State<MainScreen> {
       builder: (context) {
         return AlertDialog(
           title: const Text('Confirm Deletion'),
-          content: const Text('Are you sure you want to delete selected events?'),
+          content:
+              const Text('Are you sure you want to delete selected events?'),
           actions: <Widget>[
             TextButton(
               child: const Text('Cancel'),
@@ -96,13 +97,14 @@ class _MainScreenState extends State<MainScreen> {
     if (_displayMode == DisplayMode.absolute) {
       return formatAbsoluteTime(dateTime, false);
     } else {
-      DateTime timeToCompare = eventManager.referenceEvent == null ?
-          dateTime : eventManager.referenceEvent!.time;
+      DateTime timeToCompare = eventManager.referenceEvent == null
+          ? dateTime
+          : eventManager.referenceEvent!.time;
       return formatRelativeTime(dateTime, timeToCompare);
     }
   }
 
-  void toggleDisplayMode(){
+  void toggleDisplayMode() {
     if (_displayMode == DisplayMode.absolute) {
       setState(() {
         _displayMode = DisplayMode.relative;
@@ -135,11 +137,13 @@ class _MainScreenState extends State<MainScreen> {
   Map<DateTime, List<Event>> get _groupedEvents {
     final grouped = groupBy<Event, DateTime>(
       eventManager.events,
-          (event) => DateTime(event.time.year, event.time.month, event.time.day),
+      (event) => DateTime(event.time.year, event.time.month, event.time.day),
     );
     final sortedKeys = grouped.keys.toList()
-      ..sort((a, b) => b.compareTo(a)); // this sorts the dates in descending order
-    return Map.fromEntries(sortedKeys.map((key) => MapEntry(key, grouped[key]!)));
+      ..sort(
+          (a, b) => b.compareTo(a)); // this sorts the dates in descending order
+    return Map.fromEntries(
+        sortedKeys.map((key) => MapEntry(key, grouped[key]!)));
   }
 
   Future<void> _showNtpDetailsDialog() async {
@@ -154,7 +158,8 @@ class _MainScreenState extends State<MainScreen> {
               children: <Widget>[
                 Text('Time Server: ${ntpService.timeServer}'),
                 Text('NTP Stratum: ${ntpService.ntpStratum}'),
-                Text('Last Sync Time: ${formatAbsoluteTime(ntpService.lastSyncTime.toLocal(),false)}'),
+                Text(
+                    'Last Sync Time: ${formatAbsoluteTime(ntpService.lastSyncTime.toLocal(), false)}'),
                 Text('Offset: ${ntpService.ntpOffset ?? "N/A"}ms'),
                 Text('Round Trip Time(RTT): ${ntpService.roundTripTime}ms'),
               ],
@@ -185,32 +190,40 @@ class _MainScreenState extends State<MainScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          !isInDeleteMode ? Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: TextButton(
-                  onPressed: _showNtpDetailsDialog,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('Last Sync: ${formatAbsoluteTime(ntpService.lastSyncTime.toLocal(),false)}'),
-                      Text('Offset: ${ntpService.ntpOffset ?? "N/A"}ms'),
-                      Text('Accuracy: ±${(ntpService.roundTripTime~/2)}ms'),
-                    ],
+          !isInDeleteMode
+              ? Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: TextButton(
+                        onPressed: _showNtpDetailsDialog,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                                'Last Sync: ${formatAbsoluteTime(ntpService.lastSyncTime.toLocal(), false)}'),
+                            Text('Offset: ${ntpService.ntpOffset ?? "N/A"}ms'),
+                            Text(
+                                'Accuracy: ±${(ntpService.roundTripTime ~/ 2)}ms'),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              : Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: ElevatedButton(
+                    onPressed: selectedEvents.contains(true)
+                        ? deleteSelectedEvents
+                        : deleteAllEvents,
+                    child: Text(selectedEvents.contains(true)
+                        ? 'Delete Selected'
+                        : 'Delete All'),
                   ),
                 ),
-              ),
-            ),
-          ) : Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: ElevatedButton(
-              onPressed: selectedEvents.contains(true) ? deleteSelectedEvents : deleteAllEvents,
-              child: Text(selectedEvents.contains(true) ? 'Delete Selected' : 'Delete All'),
-            ),
-          ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: ElevatedButton(
@@ -221,6 +234,91 @@ class _MainScreenState extends State<MainScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildEventTile(Event event) {
+    final eventIndex = eventManager.events.indexOf(event);
+
+    return Column(
+      children: [
+        ListTile(
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0.5),
+          //leading: Icon(Icons.event), // As an example
+          title: _buildEventTitle(event, eventIndex),
+          onTap: () => _onEventTap(event, eventIndex),
+          trailing: isInDeleteMode ? _buildEventCheckbox(eventIndex) : null,
+        ),
+        const Divider(),
+      ],
+    );
+  }
+
+  Widget _buildEventTitle(Event event, int eventIndex) {
+    if (eventManager.events[eventIndex].description.isEmpty) {
+      return Text(
+        formatTime(eventManager.events[eventIndex].time),
+        style: const TextStyle(
+            fontSize: 24,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      );
+    } else {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            eventManager.events[eventIndex].description,
+            style: const TextStyle(
+                fontSize: 20,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+          Text(
+            formatTime(eventManager.events[eventIndex].time),
+            style: const TextStyle(
+                fontSize: 16,
+            ),
+          ),
+        ],
+      );
+    }
+  }
+
+  Widget _buildEventCheckbox(int eventIndex) {
+    return Checkbox(
+      value: selectedEvents[eventIndex],
+      onChanged: (bool? value) {
+        setState(() {
+          selectedEvents[eventIndex] = value!;
+        });
+      },
+    );
+  }
+
+  _onEventTap(Event event, int eventIndex) async {
+    if (!isInDeleteMode) {
+      Event updatedEvent = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => EventDetailPage(
+            event: eventManager.events[eventIndex],
+            onSetAsReference: (event) {
+              setState(() {
+                eventManager.referenceEvent = event;
+                eventManager.saveData();
+              });
+            },
+          ),
+        ),
+      ) as Event;
+      setState(() {
+        eventManager.events[eventIndex] = updatedEvent;
+        eventManager.saveData();
+      });
+    }
   }
 
   @override
@@ -234,25 +332,26 @@ class _MainScreenState extends State<MainScreen> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Center(
-            child: GestureDetector(  // Wrap with GestureDetector to toggle on tap
-              onTap: () {
-                toggleDisplayMode();
-              },
-              child: Text(
-                formatTime(ntpService.currentTime),
-                style: const TextStyle(
-                  fontSize: 35,
-                  fontFamily: 'Courier New',
-                ),
+              child: GestureDetector(
+            // Wrap with GestureDetector to toggle on tap
+            onTap: () {
+              toggleDisplayMode();
+            },
+            child: Text(
+              formatTime(ntpService.currentTime),
+              style: const TextStyle(
+                fontSize: 35,
+                fontFamily: 'Courier New',
               ),
-            )
-          ),
+            ),
+          )),
           const SizedBox(height: 5),
           ElevatedButton(
             onPressed: () async {
               DateTime now = ntpService.currentTime;
               setState(() {
-                eventManager.addEvent(Event(now, ntpService.roundTripTime~/2));
+                eventManager
+                    .addEvent(Event(now, ntpService.roundTripTime ~/ 2));
               });
             },
             child: const Icon(Icons.arrow_downward),
@@ -270,35 +369,43 @@ class _MainScreenState extends State<MainScreen> {
                       padding: const EdgeInsets.all(8.0),
                       child: Text(
                         '${sectionDate.year}-${sectionDate.month}-${sectionDate.day}',
-                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                     ),
+/*
                     Column(
                       children: eventsOfThisDate.map((event) {
                         final eventIndex = eventManager.events.indexOf(event);
                         return ListTile(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0.5),
-                          title: eventManager.events[eventIndex].description.isEmpty ? Text(
-                            formatTime(eventManager.events[eventIndex].time),
-                            style: const TextStyle(fontSize: 24),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ) :
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                eventManager.events[eventIndex].description,
-                                style: const TextStyle(fontSize: 20),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              Text(
-                                formatTime(eventManager.events[eventIndex].time),
-                                style: const TextStyle(fontSize: 16),
-                              ),
-                            ],
-                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16.0, vertical: 0.5),
+                          title: eventManager
+                                  .events[eventIndex].description.isEmpty
+                              ? Text(
+                                  formatTime(
+                                      eventManager.events[eventIndex].time),
+                                  style: const TextStyle(fontSize: 24),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                )
+                              : Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      eventManager
+                                          .events[eventIndex].description,
+                                      style: const TextStyle(fontSize: 20),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    Text(
+                                      formatTime(
+                                          eventManager.events[eventIndex].time),
+                                      style: const TextStyle(fontSize: 16),
+                                    ),
+                                  ],
+                                ),
                           onTap: () async {
                             if (!isInDeleteMode) {
                               Event updatedEvent = await Navigator.push(
@@ -321,15 +428,23 @@ class _MainScreenState extends State<MainScreen> {
                               });
                             }
                           },
-                          trailing: isInDeleteMode ? Checkbox(
-                            value: selectedEvents[eventIndex],
-                            onChanged: (bool? value) {
-                              setState(() {
-                                selectedEvents[eventIndex] = value!;
-                              });
-                            },
-                          ) : null,
+                          trailing: isInDeleteMode
+                              ? Checkbox(
+                                  value: selectedEvents[eventIndex],
+                                  onChanged: (bool? value) {
+                                    setState(() {
+                                      selectedEvents[eventIndex] = value!;
+                                    });
+                                  },
+                                )
+                              : null,
                         );
+                      }).toList(),
+                    ),
+*/
+                    Column(
+                      children: eventsOfThisDate.map((event) {
+                        return _buildEventTile(event);
                       }).toList(),
                     )
                   ],
@@ -337,67 +452,6 @@ class _MainScreenState extends State<MainScreen> {
               },
             ),
           ),
-          /*Expanded(
-            child: ListView.builder(
-              itemCount: eventManager.events.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0.5),
-                  title: eventManager.events[index].description.isEmpty ? Text(
-                    formatTime(eventManager.events[index].time),
-                    style: const TextStyle(fontSize: 24),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ) :
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        eventManager.events[index].description,
-                        style: const TextStyle(fontSize: 20),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        formatTime(eventManager.events[index].time),
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                    ],
-                  ),
-                  onTap: () async {
-                    if (!isInDeleteMode) {
-                      Event updatedEvent = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => EventDetailPage(
-                            event: eventManager.events[index],
-                            onSetAsReference: (event) {
-                              setState(() {
-                                eventManager.referenceEvent = event;
-                                eventManager.saveData();
-                              });
-                            },
-                          ),
-                        ),
-                      ) as Event;
-                      setState(() {
-                        eventManager.events[index] = updatedEvent;
-                        eventManager.saveData();
-                      });
-                    }
-                  },
-                  trailing: isInDeleteMode ? Checkbox(
-                    value: selectedEvents[index],
-                    onChanged: (bool? value) {
-                      setState(() {
-                        selectedEvents[index] = value!;
-                      });
-                    },
-                  ) : null,
-                );
-              },
-            ),
-          ),*/
         ],
       ),
       bottomNavigationBar: _buildBottomBar(),
