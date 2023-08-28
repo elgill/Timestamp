@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:collection/collection.dart';
 import 'package:timestamp/event.dart';
 import 'dart:async';
 
@@ -131,6 +132,16 @@ class _MainScreenState extends State<MainScreen> {
     super.dispose();
   }
 
+  Map<DateTime, List<Event>> get _groupedEvents {
+    final grouped = groupBy<Event, DateTime>(
+      eventManager.events,
+          (event) => DateTime(event.time.year, event.time.month, event.time.day),
+    );
+    final sortedKeys = grouped.keys.toList()
+      ..sort((a, b) => b.compareTo(a)); // this sorts the dates in descending order
+    return Map.fromEntries(sortedKeys.map((key) => MapEntry(key, grouped[key]!)));
+  }
+
   Future<void> _showNtpDetailsDialog() async {
     return showDialog<void>(
       context: context,
@@ -248,6 +259,86 @@ class _MainScreenState extends State<MainScreen> {
           ),
           Expanded(
             child: ListView.builder(
+              itemCount: _groupedEvents.entries.length,
+              itemBuilder: (context, sectionIndex) {
+                final sectionDate = _groupedEvents.keys.toList()[sectionIndex];
+                final eventsOfThisDate = _groupedEvents[sectionDate]!;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        '${sectionDate.year}-${sectionDate.month}-${sectionDate.day}',
+                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    Column(
+                      children: eventsOfThisDate.map((event) {
+                        final eventIndex = eventManager.events.indexOf(event);
+                        return ListTile(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0.5),
+                          title: eventManager.events[eventIndex].description.isEmpty ? Text(
+                            formatTime(eventManager.events[eventIndex].time),
+                            style: const TextStyle(fontSize: 24),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ) :
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                eventManager.events[eventIndex].description,
+                                style: const TextStyle(fontSize: 20),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                formatTime(eventManager.events[eventIndex].time),
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ],
+                          ),
+                          onTap: () async {
+                            if (!isInDeleteMode) {
+                              Event updatedEvent = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => EventDetailPage(
+                                    event: eventManager.events[eventIndex],
+                                    onSetAsReference: (event) {
+                                      setState(() {
+                                        eventManager.referenceEvent = event;
+                                        eventManager.saveData();
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ) as Event;
+                              setState(() {
+                                eventManager.events[eventIndex] = updatedEvent;
+                                eventManager.saveData();
+                              });
+                            }
+                          },
+                          trailing: isInDeleteMode ? Checkbox(
+                            value: selectedEvents[eventIndex],
+                            onChanged: (bool? value) {
+                              setState(() {
+                                selectedEvents[eventIndex] = value!;
+                              });
+                            },
+                          ) : null,
+                        );
+                      }).toList(),
+                    )
+                  ],
+                );
+              },
+            ),
+          ),
+          /*Expanded(
+            child: ListView.builder(
               itemCount: eventManager.events.length,
               itemBuilder: (context, index) {
                 return ListTile(
@@ -306,7 +397,7 @@ class _MainScreenState extends State<MainScreen> {
                 );
               },
             ),
-          ),
+          ),*/
         ],
       ),
       bottomNavigationBar: _buildBottomBar(),
