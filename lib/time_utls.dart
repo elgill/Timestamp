@@ -1,5 +1,22 @@
-String formatAbsoluteTime(DateTime dateTime){
-  return "${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}:${dateTime.second.toString().padLeft(2, '0')}.${(dateTime.millisecond ~/ 100).toString()} ${dateTime.timeZoneName}";
+String formatAbsoluteTime(DateTime dateTime, bool useTwelveHourTime){
+
+  String hour = dateTime.hour.toString().padLeft(2, '0');
+  String minute = dateTime.minute.toString().padLeft(2, '0');
+  String second = dateTime.second.toString().padLeft(2, '0');
+  String deciSeconds = (dateTime.millisecond ~/ 100).toString();
+  String amPM ="";
+
+  if(useTwelveHourTime){
+    if(dateTime.hour > 12){
+      amPM = "PM ";
+      hour = (dateTime.hour-12).toString().padLeft(2, '0');
+    }
+    else {
+      amPM = "AM ";
+    }
+  }
+
+  return "$hour:$minute:$second.$deciSeconds $amPM${dateTime.timeZoneName}";
 }
 
 String formatRelativeTime(DateTime time, DateTime timeToCompare){

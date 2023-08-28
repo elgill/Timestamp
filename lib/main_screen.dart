@@ -93,7 +93,7 @@ class _MainScreenState extends State<MainScreen> {
 
   String formatTime(DateTime dateTime) {
     if (_displayMode == DisplayMode.absolute) {
-      return formatAbsoluteTime(dateTime);
+      return formatAbsoluteTime(dateTime, false);
     } else {
       DateTime timeToCompare = eventManager.referenceEvent == null ?
           dateTime : eventManager.referenceEvent!.time;
@@ -143,7 +143,7 @@ class _MainScreenState extends State<MainScreen> {
               children: <Widget>[
                 Text('Time Server: ${ntpService.timeServer}'),
                 Text('NTP Stratum: ${ntpService.ntpStratum}'),
-                Text('Last Sync Time: ${formatAbsoluteTime(ntpService.lastSyncTime.toLocal())}'),
+                Text('Last Sync Time: ${formatAbsoluteTime(ntpService.lastSyncTime.toLocal(),false)}'),
                 Text('Offset: ${ntpService.ntpOffset ?? "N/A"}ms'),
                 Text('Round Trip Time(RTT): ${ntpService.roundTripTime}ms'),
               ],
@@ -177,26 +177,35 @@ class _MainScreenState extends State<MainScreen> {
           !isInDeleteMode ? Expanded(
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              child: TextButton(
-                onPressed: _showNtpDetailsDialog,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('Last Sync: ${formatAbsoluteTime(ntpService.lastSyncTime.toLocal())}'),
-                    Text('Offset: ${ntpService.ntpOffset ?? "N/A"}ms'),
-                    Text('Accuracy: ±${(ntpService.roundTripTime~/2)}ms'),
-                  ],
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: TextButton(
+                  onPressed: _showNtpDetailsDialog,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('Last Sync: ${formatAbsoluteTime(ntpService.lastSyncTime.toLocal(),false)}'),
+                      Text('Offset: ${ntpService.ntpOffset ?? "N/A"}ms'),
+                      Text('Accuracy: ±${(ntpService.roundTripTime~/2)}ms'),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ) : ElevatedButton(
-                onPressed: selectedEvents.contains(true) ? deleteSelectedEvents : deleteAllEvents,
-                child: Text(selectedEvents.contains(true) ? 'Delete Selected' : 'Delete All'),
+          ) : Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: ElevatedButton(
+              onPressed: selectedEvents.contains(true) ? deleteSelectedEvents : deleteAllEvents,
+              child: Text(selectedEvents.contains(true) ? 'Delete Selected' : 'Delete All'),
+            ),
           ),
-          ElevatedButton(
-            onPressed: toggleDeleteMode,
-            child: Text(isInDeleteMode ? 'Cancel' : 'Edit'),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: ElevatedButton(
+              onPressed: toggleDeleteMode,
+              child: Text(isInDeleteMode ? 'Cancel' : 'Edit'),
+            ),
           ),
         ],
       ),
@@ -208,15 +217,6 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Timestamp'),
-        actions: [
-/*          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              '±${(ntpService.roundTripTime~/2)}ms',
-              style: const TextStyle(fontSize: 18),
-            ),
-          ),*/
-        ],
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -230,12 +230,10 @@ class _MainScreenState extends State<MainScreen> {
               child: Text(
                 formatTime(ntpService.currentTime),
                 style: const TextStyle(
-                  fontSize: 40,
-                  //fontWeight: FontWeight.bold,
+                  fontSize: 35,
                   fontFamily: 'Courier New',
                 ),
               ),
-
             )
           ),
           const SizedBox(height: 5),
@@ -246,7 +244,6 @@ class _MainScreenState extends State<MainScreen> {
                 eventManager.addEvent(Event(now, ntpService.roundTripTime~/2));
               });
             },
-
             child: const Icon(Icons.arrow_downward),
           ),
           Expanded(
@@ -257,7 +254,7 @@ class _MainScreenState extends State<MainScreen> {
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0.5),
                   title: eventManager.events[index].description.isEmpty ? Text(
                     formatTime(eventManager.events[index].time),
-                    style: const TextStyle(fontSize: 24),  // Adjust this size to make the time as big as you want it to be.
+                    style: const TextStyle(fontSize: 24),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ) :
