@@ -32,7 +32,7 @@ class _MainScreenState extends State<MainScreen> {
   void toggleDeleteMode() {
     setState(() {
       isInDeleteMode = !isInDeleteMode;
-      selectedEvents = List.filled(eventManager.events.length, false);
+      selectedEvents = List.generate(eventManager.events.length, (index) => false);
     });
   }
 
@@ -350,12 +350,13 @@ class _MainScreenState extends State<MainScreen> {
             onPressed: () async {
               DateTime now = ntpService.currentTime;
               setState(() {
-                eventManager
-                    .addEvent(Event(now, ntpService.roundTripTime ~/ 2));
+                eventManager.addEvent(Event(now, ntpService.roundTripTime ~/ 2));
+                selectedEvents.insert(0,false);  // <-- Add this line
               });
             },
             child: const Icon(Icons.arrow_downward),
           ),
+
           Expanded(
             child: ListView.builder(
               itemCount: _groupedEvents.entries.length,
@@ -373,75 +374,6 @@ class _MainScreenState extends State<MainScreen> {
                             fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                     ),
-/*
-                    Column(
-                      children: eventsOfThisDate.map((event) {
-                        final eventIndex = eventManager.events.indexOf(event);
-                        return ListTile(
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16.0, vertical: 0.5),
-                          title: eventManager
-                                  .events[eventIndex].description.isEmpty
-                              ? Text(
-                                  formatTime(
-                                      eventManager.events[eventIndex].time),
-                                  style: const TextStyle(fontSize: 24),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                )
-                              : Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      eventManager
-                                          .events[eventIndex].description,
-                                      style: const TextStyle(fontSize: 20),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    Text(
-                                      formatTime(
-                                          eventManager.events[eventIndex].time),
-                                      style: const TextStyle(fontSize: 16),
-                                    ),
-                                  ],
-                                ),
-                          onTap: () async {
-                            if (!isInDeleteMode) {
-                              Event updatedEvent = await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => EventDetailPage(
-                                    event: eventManager.events[eventIndex],
-                                    onSetAsReference: (event) {
-                                      setState(() {
-                                        eventManager.referenceEvent = event;
-                                        eventManager.saveData();
-                                      });
-                                    },
-                                  ),
-                                ),
-                              ) as Event;
-                              setState(() {
-                                eventManager.events[eventIndex] = updatedEvent;
-                                eventManager.saveData();
-                              });
-                            }
-                          },
-                          trailing: isInDeleteMode
-                              ? Checkbox(
-                                  value: selectedEvents[eventIndex],
-                                  onChanged: (bool? value) {
-                                    setState(() {
-                                      selectedEvents[eventIndex] = value!;
-                                    });
-                                  },
-                                )
-                              : null,
-                        );
-                      }).toList(),
-                    ),
-*/
                     Column(
                       children: eventsOfThisDate.map((event) {
                         return _buildEventTile(event);
