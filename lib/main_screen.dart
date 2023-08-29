@@ -6,7 +6,7 @@ import 'dart:async';
 import 'event_detail.dart';
 import 'event_manager.dart';
 import 'ntp_service.dart';
-import 'package:timestamp/time_utls.dart';
+import 'package:timestamp/time_utils.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -159,8 +159,7 @@ class _MainScreenState extends State<MainScreen> {
               children: <Widget>[
                 Text('Time Server: ${ntpService.timeServer}'),
                 Text('NTP Stratum: ${ntpService.ntpStratum}'),
-                Text(
-                    'Last Sync Time: ${formatAbsoluteTime(ntpService.lastSyncTime.toLocal(), false)}'),
+                Text('Last Sync Time: ${formatAbsoluteTime(ntpService.lastSyncTime.toLocal(), false)}'),
                 Text('Offset: ${ntpService.ntpOffset ?? "N/A"}ms'),
                 Text('Round Trip Time(RTT): ${ntpService.roundTripTime}ms'),
               ],
