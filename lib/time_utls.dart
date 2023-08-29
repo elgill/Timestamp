@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 String formatAbsoluteTime(DateTime dateTime, bool useTwelveHourTime){
 
   String hour = dateTime.hour.toString().padLeft(2, '0');
@@ -47,4 +49,8 @@ String formatRelativeTime(DateTime time, DateTime timeToCompare){
   timeComponents.add("${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}.${tenthsOfSeconds}");
 
   return "$sign${timeComponents.join(' ')}";
+}
+
+String formatDate(DateTime dateTime){
+  return DateFormat('EEE MMM dd, y').format(dateTime);
 }

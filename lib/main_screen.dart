@@ -368,7 +368,7 @@ class _MainScreenState extends State<MainScreen> {
                     Padding(
                       padding: const EdgeInsets.all(1.0),
                       child: Text(
-                        '${sectionDate.year}-${sectionDate.month}-${sectionDate.day}',
+                        formatDate(sectionDate),
                         style: const TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold),
                       ),

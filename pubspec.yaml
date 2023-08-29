@@ -33,6 +33,7 @@ dependencies:
 
   shared_preferences: ^2.0.5
   collection: ^1.15.0
+  intl: ^0.18.1 # Check the latest version
 
   #provider: ^5.0.0
 
