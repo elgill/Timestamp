@@ -32,7 +32,8 @@ class _MainScreenState extends State<MainScreen> {
   void toggleDeleteMode() {
     setState(() {
       isInDeleteMode = !isInDeleteMode;
-      selectedEvents = List.generate(eventManager.events.length, (index) => false);
+      selectedEvents =
+          List.generate(eventManager.events.length, (index) => false);
     });
   }
 
@@ -245,7 +246,7 @@ class _MainScreenState extends State<MainScreen> {
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),
           //leading: Icon(Icons.event), // As an example
-          title: _buildEventTitle(event, eventIndex),
+          title: _buildEventTitle(event),
           onTap: () => _onEventTap(event, eventIndex),
           trailing: isInDeleteMode ? _buildEventCheckbox(eventIndex) : null,
         ),
@@ -254,12 +255,12 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  Widget _buildEventTitle(Event event, int eventIndex) {
-    if (eventManager.events[eventIndex].description.isEmpty) {
+  Widget _buildEventTitle(Event event) {
+    if (event.description.isEmpty) {
       return Text(
-        formatTime(eventManager.events[eventIndex].time),
+        formatTime(event.time),
         style: const TextStyle(
-            fontSize: 24,
+          fontSize: 24,
         ),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
@@ -270,16 +271,16 @@ class _MainScreenState extends State<MainScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            eventManager.events[eventIndex].description,
+            event.description,
             style: const TextStyle(
-                fontSize: 20,
+              fontSize: 20,
             ),
             overflow: TextOverflow.ellipsis,
           ),
           Text(
-            formatTime(eventManager.events[eventIndex].time),
+            formatTime(event.time),
             style: const TextStyle(
-                fontSize: 16,
+              fontSize: 16,
             ),
           ),
         ],
@@ -350,8 +351,9 @@ class _MainScreenState extends State<MainScreen> {
             onPressed: () async {
               DateTime now = ntpService.currentTime;
               setState(() {
-                eventManager.addEvent(Event(now, ntpService.roundTripTime ~/ 2));
-                selectedEvents.insert(0,false);  // <-- Add this line
+                eventManager
+                    .addEvent(Event(now, ntpService.roundTripTime ~/ 2));
+                selectedEvents.insert(0, false); // <-- Add this line
               });
             },
             child: const Icon(Icons.arrow_downward),
