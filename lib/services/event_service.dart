@@ -1,7 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:timestamp/event.dart';
+import 'package:timestamp/models/event.dart';
 
-class EventManager {
+class EventService {
   List<Event> events = [];
   Event? referenceEvent;
 
@@ -53,6 +53,4 @@ class EventManager {
     events.clear();
     saveData();
   }
-
-//... other event management functions
 }

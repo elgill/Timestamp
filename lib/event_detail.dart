@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:timestamp/event.dart';
+import 'package:timestamp/models/event.dart';
 
 class EventDetailPage extends StatefulWidget {
   final Event event;

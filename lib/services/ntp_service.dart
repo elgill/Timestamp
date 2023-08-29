@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:advanced_ntp/ntp.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

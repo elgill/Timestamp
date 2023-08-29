@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:collection/collection.dart';
-import 'package:timestamp/event.dart';
 import 'dart:async';
 
+// External package imports
+import 'package:collection/collection.dart';
+
+// Local imports
 import 'event_detail.dart';
-import 'event_manager.dart';
-import 'ntp_service.dart';
-import 'package:timestamp/time_utils.dart';
+import 'services/event_service.dart';
+import 'services/ntp_service.dart';
+import 'package:timestamp/utils/time_utils.dart';
+import 'package:timestamp/models/event.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -18,7 +21,7 @@ class MainScreen extends StatefulWidget {
 enum DisplayMode { absolute, relative }
 
 class _MainScreenState extends State<MainScreen> {
-  final EventManager eventManager = EventManager();
+  final EventService eventManager = EventService();
   final NtpService ntpService = NtpService();
 
   DateTime displayTime = DateTime.now();
@@ -160,7 +163,7 @@ class _MainScreenState extends State<MainScreen> {
                 Text('Time Server: ${ntpService.timeServer}'),
                 Text('NTP Stratum: ${ntpService.ntpStratum}'),
                 Text('Last Sync Time: ${formatAbsoluteTime(ntpService.lastSyncTime.toLocal(), false)}'),
-                Text('Offset: ${ntpService.ntpOffset ?? "N/A"}ms'),
+                Text('Offset: ${ntpService.ntpOffset}ms'),
                 Text('Round Trip Time(RTT): ${ntpService.roundTripTime}ms'),
               ],
             ),
@@ -204,7 +207,7 @@ class _MainScreenState extends State<MainScreen> {
                           children: [
                             Text(
                                 'Last Sync: ${formatAbsoluteTime(ntpService.lastSyncTime.toLocal(), false)}'),
-                            Text('Offset: ${ntpService.ntpOffset ?? "N/A"}ms'),
+                            Text('Offset: ${ntpService.ntpOffset}ms'),
                             Text(
                                 'Accuracy: ±${(ntpService.roundTripTime ~/ 2)}ms'),
                           ],
@@ -327,66 +330,70 @@ class _MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         title: const Text('Timestamp'),
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Center(
-              child: GestureDetector(
-            // Wrap with GestureDetector to toggle on tap
-            onTap: () {
-              toggleDisplayMode();
-            },
-            child: Text(
-              formatTime(ntpService.currentTime),
-              style: const TextStyle(
-                fontSize: 35,
-                fontFamily: 'Courier New',
-              ),
-            ),
-          )),
-          const SizedBox(height: 5),
-          ElevatedButton(
-            onPressed: () async {
-              DateTime now = ntpService.currentTime;
-              setState(() {
-                eventManager
-                    .addEvent(Event(now, ntpService.roundTripTime ~/ 2));
-                selectedEvents.insert(0, false); // <-- Add this line
-              });
-            },
-            child: const Icon(Icons.arrow_downward),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: _groupedEvents.entries.length,
-              itemBuilder: (context, sectionIndex) {
-                final sectionDate = _groupedEvents.keys.toList()[sectionIndex];
-                final eventsOfThisDate = _groupedEvents[sectionDate]!;
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(1.0),
-                      child: Text(
-                        formatDate(sectionDate),
-                        style: const TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    Column(
-                      children: eventsOfThisDate.map((event) {
-                        return _buildEventTile(event);
-                      }).toList(),
-                    )
-                  ],
-                );
-              },
-            ),
-          ),
-        ],
-      ),
+      body: _buildBody(),
       bottomNavigationBar: _buildBottomBar(),
+    );
+  }
+
+  Widget _buildBody(){
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Center(
+            child: GestureDetector(
+              // Wrap with GestureDetector to toggle on tap
+              onTap: () {
+                toggleDisplayMode();
+              },
+              child: Text(
+                formatTime(ntpService.currentTime),
+                style: const TextStyle(
+                  fontSize: 35,
+                  fontFamily: 'Courier New',
+                ),
+              ),
+            )),
+        const SizedBox(height: 5),
+        ElevatedButton(
+          onPressed: () async {
+            DateTime now = ntpService.currentTime;
+            setState(() {
+              eventManager
+                  .addEvent(Event(now, ntpService.roundTripTime ~/ 2));
+              selectedEvents.insert(0, false); // <-- Add this line
+            });
+          },
+          child: const Icon(Icons.arrow_downward),
+        ),
+        Expanded(
+          child: ListView.builder(
+            itemCount: _groupedEvents.entries.length,
+            itemBuilder: (context, sectionIndex) {
+              final sectionDate = _groupedEvents.keys.toList()[sectionIndex];
+              final eventsOfThisDate = _groupedEvents[sectionDate]!;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(1.0),
+                    child: Text(
+                      formatDate(sectionDate),
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Column(
+                    children: eventsOfThisDate.map((event) {
+                      return _buildEventTile(event);
+                    }).toList(),
+                  )
+                ],
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }
