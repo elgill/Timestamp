@@ -243,13 +243,13 @@ class _MainScreenState extends State<MainScreen> {
       children: [
         ListTile(
           contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0.5),
+              const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),
           //leading: Icon(Icons.event), // As an example
           title: _buildEventTitle(event, eventIndex),
           onTap: () => _onEventTap(event, eventIndex),
           trailing: isInDeleteMode ? _buildEventCheckbox(eventIndex) : null,
         ),
-        const Divider(),
+        const Divider(height: 1.0),
       ],
     );
   }
@@ -356,7 +356,6 @@ class _MainScreenState extends State<MainScreen> {
             },
             child: const Icon(Icons.arrow_downward),
           ),
-
           Expanded(
             child: ListView.builder(
               itemCount: _groupedEvents.entries.length,
@@ -367,7 +366,7 @@ class _MainScreenState extends State<MainScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.all(1.0),
                       child: Text(
                         '${sectionDate.year}-${sectionDate.month}-${sectionDate.day}',
                         style: const TextStyle(
