@@ -41,7 +41,9 @@ class _EventDetailPageState extends State<EventDetailPage> {
       body: Column(
         children: [
           Text('Time: ${widget.event.time}'),
-          Text('Precision: ±${widget.event.precision}ms', style: const TextStyle(fontSize: 20)),
+          widget.event.precision >= 0 ?
+          Text('Precision: ±${widget.event.precision}ms', style: const TextStyle(fontSize: 20)):
+          const Text('Precision: Unknown', style: TextStyle(fontSize: 20)),
           TextField(
             controller: _descriptionController,
             decoration: const InputDecoration(labelText: 'Event description'),
@@ -50,7 +52,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
             onPressed: () {
               widget.onSetAsReference(widget.event);
             },
-            child: Text('Set as Reference'),
+            child: const Text('Set as Reference'),
           )
         ],
       ),

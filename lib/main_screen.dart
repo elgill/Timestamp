@@ -369,9 +369,13 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         ElevatedButton(
           onPressed: () async {
             DateTime now = ntpService.currentTime;
+            int precision = -1;
+            if(ntpService.isInfoRecieved){
+              precision = ntpService.roundTripTime ~/ 2;
+            }
             setState(() {
               eventManager
-                  .addEvent(Event(now, ntpService.roundTripTime ~/ 2));
+                  .addEvent(Event(now, precision));
               selectedEvents.insert(0, false);
             });
           },
