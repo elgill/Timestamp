@@ -3,6 +3,7 @@ import 'dart:async';
 
 // External package imports
 import 'package:collection/collection.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Local imports
 import 'event_detail.dart';
@@ -11,7 +12,7 @@ import 'services/ntp_service.dart';
 import 'package:timestamp/utils/time_utils.dart';
 import 'package:timestamp/models/event.dart';
 
-class MainScreen extends StatefulWidget {
+class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
 
   @override
@@ -20,9 +21,9 @@ class MainScreen extends StatefulWidget {
 
 enum DisplayMode { absolute, relative }
 
-class _MainScreenState extends State<MainScreen> {
-  final EventService eventManager = EventService();
-  final NtpService ntpService = NtpService();
+class _MainScreenState extends ConsumerState<MainScreen> {
+  late EventService eventManager = EventService();
+  late NtpService ntpService = NtpService();
 
   DateTime displayTime = DateTime.now();
   late Timer _timer;
@@ -40,7 +41,7 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
-  void deleteSelectedEvents() {
+  void showDeleteSelectedEventsDialog() {
     showDialog(
       context: context,
       builder: (context) {
@@ -69,7 +70,7 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  void deleteAllEvents() {
+  void showDeleteAllEventsDialog() {
     showDialog(
       context: context,
       builder: (context) {
@@ -123,6 +124,10 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
+
+    eventManager = ref.read(eventServiceProvider);
+    ntpService = ref.read(ntpServiceProvider);
+
     eventManager.loadData();
     ntpService.updateNtpOffset();
     _timer = Timer.periodic(const Duration(milliseconds: 10), (timer) {
@@ -220,8 +225,8 @@ class _MainScreenState extends State<MainScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: ElevatedButton(
                     onPressed: selectedEvents.contains(true)
-                        ? deleteSelectedEvents
-                        : deleteAllEvents,
+                        ? showDeleteSelectedEventsDialog
+                        : showDeleteAllEventsDialog,
                     child: Text(selectedEvents.contains(true)
                         ? 'Delete Selected'
                         : 'Delete All'),
@@ -361,7 +366,7 @@ class _MainScreenState extends State<MainScreen> {
             setState(() {
               eventManager
                   .addEvent(Event(now, ntpService.roundTripTime ~/ 2));
-              selectedEvents.insert(0, false); // <-- Add this line
+              selectedEvents.insert(0, false);
             });
           },
           child: const Icon(Icons.arrow_downward),

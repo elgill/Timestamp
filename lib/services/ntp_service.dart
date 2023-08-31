@@ -1,7 +1,11 @@
 import 'package:advanced_ntp/ntp.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+final ntpServiceProvider = Provider<NtpService>((ref) => NtpService());
+
 class NtpService {
+  bool _isInfoRecieved = false;
   int? _ntpOffset; //ms
   int? _roundTripTime; //ms
   int? _ntpStratum;
@@ -10,6 +14,7 @@ class NtpService {
 
   DateTime get currentTime => DateTime.now().add(Duration(milliseconds: _ntpOffset ?? 0));
 
+  bool get isInfoRecieved => _isInfoRecieved;
   String get timeServer => _timeServer ?? "N/A";
   int get ntpOffset => _ntpOffset ?? 0;
   int get roundTripTime => _roundTripTime ?? 9999;
@@ -28,6 +33,7 @@ class NtpService {
       _ntpStratum = ntpResponse.stratum;
       _roundTripTime = ntpResponse.roundTripDelay.toInt();
       _lastSyncTime = ntpResponse.dateTime;
+      _isInfoRecieved = true;
       saveNtpData();
     } catch (error) {
       loadNtpData();

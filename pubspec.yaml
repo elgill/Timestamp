@@ -33,9 +33,7 @@ dependencies:
 
   shared_preferences: ^2.0.5
   collection: ^1.15.0
-  intl: ^0.18.1 # Check the latest version
-
-  #provider: ^5.0.0
+  intl: ^0.18.1
 
   advanced_ntp:
     git:
@@ -46,7 +44,7 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
-  #ntp: ^2.0.0
+  flutter_riverpod: ^2.3.10
 
 dev_dependencies:
   flutter_test:

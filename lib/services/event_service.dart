@@ -1,5 +1,8 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timestamp/models/event.dart';
+
+final eventServiceProvider = Provider<EventService>((ref) => EventService());
 
 class EventService {
   List<Event> events = [];
