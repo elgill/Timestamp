@@ -163,7 +163,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         return AlertDialog(
           title: const Text('NTP Details'),
           content: SingleChildScrollView(
-            child: ListBody(
+            child: ntpService.isInfoRecieved ? ListBody(
               children: <Widget>[
                 Text('Time Server: ${ntpService.timeServer}'),
                 Text('NTP Stratum: ${ntpService.ntpStratum}'),
@@ -171,7 +171,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 Text('Offset: ${ntpService.ntpOffset}ms'),
                 Text('Round Trip Time(RTT): ${ntpService.roundTripTime}ms'),
               ],
-            ),
+            ) : const Text('No Time Data Received'),
           ),
           actions: <Widget>[
             TextButton(
@@ -206,7 +206,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: TextButton(
                         onPressed: _showNtpDetailsDialog,
-                        child: Column(
+                        child: ntpService.isInfoRecieved ? Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -215,6 +215,12 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                             Text('Offset: ${ntpService.ntpOffset}ms'),
                             Text(
                                 'Accuracy: ±${(ntpService.roundTripTime ~/ 2)}ms'),
+                          ],
+                        ): const Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('No Time Data Recieved'),
                           ],
                         ),
                       ),
