@@ -4,6 +4,7 @@ import 'dart:async';
 // External package imports
 import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:timestamp/pages/settings.dart';
 
 // Local imports
 import 'event_detail.dart';
@@ -340,6 +341,18 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Timestamp'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const SettingsScreen(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: _buildBody(),
       bottomNavigationBar: _buildBottomBar(),
