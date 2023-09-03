@@ -14,7 +14,11 @@ class TimestampApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Timestamp',
-      theme: ThemeData(primarySwatch: Colors.green),
+      theme: ThemeData(
+        primarySwatch: Colors.teal,
+      ), // Light mode
+      darkTheme: ThemeData.dark(), // Dark mode
+      themeMode: ThemeMode.system,
       home: const MainScreen(),
     );
   }

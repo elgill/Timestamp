@@ -1,5 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'dart:io' show Platform;
+
 
 // External package imports
 import 'package:collection/collection.dart';
@@ -12,6 +15,8 @@ import 'services/event_service.dart';
 import 'services/ntp_service.dart';
 import 'package:timestamp/utils/time_utils.dart';
 import 'package:timestamp/models/event.dart';
+
+bool isIOS = Platform.isIOS;
 
 class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
@@ -343,7 +348,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         title: const Text('Timestamp'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings),
+            icon: isIOS ? const Icon(CupertinoIcons.settings) : const Icon(Icons.settings),
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
