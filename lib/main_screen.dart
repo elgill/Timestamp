@@ -7,6 +7,7 @@ import 'dart:io' show Platform;
 // External package imports
 import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:timestamp/enums/time_format.dart';
 import 'package:timestamp/pages/settings.dart';
 import 'package:timestamp/providers/shared_pref_provider.dart';
 
@@ -107,7 +108,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   String formatTime(DateTime dateTime) {
     if (_displayMode == DisplayMode.absolute) {
-      return formatAbsoluteTime(dateTime, !ref.watch(sharedUtilityProvider).is24HourTimeEnabled());
+      return formatAbsoluteTime(dateTime, ref.watch(sharedUtilityProvider).getTimeFormat());
     } else {
       DateTime timeToCompare = eventManager.referenceEvent == null
           ? dateTime
@@ -174,7 +175,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
               children: <Widget>[
                 Text('Time Server: ${ntpService.timeServer}'),
                 Text('NTP Stratum: ${ntpService.ntpStratum}'),
-                Text('Last Sync Time: ${formatAbsoluteTime(ntpService.lastSyncTime.toLocal(), false)}'),
+                Text('Last Sync Time: ${formatAbsoluteTime(ntpService.lastSyncTime.toLocal(), TimeFormat.local24Hour)}'),
                 Text('Offset: ${ntpService.ntpOffset}ms'),
                 Text('Round Trip Time(RTT): ${ntpService.roundTripTime}ms'),
               ],
@@ -218,7 +219,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                                'Last Sync: ${formatAbsoluteTime(ntpService.lastSyncTime.toLocal(), false)}'),
+                                'Last Sync: ${formatAbsoluteTime(ntpService.lastSyncTime.toLocal(), TimeFormat.local24Hour)}'),
                             Text('Offset: ${ntpService.ntpOffset}ms'),
                             Text(
                                 'Accuracy: ±${(ntpService.roundTripTime ~/ 2)}ms'),

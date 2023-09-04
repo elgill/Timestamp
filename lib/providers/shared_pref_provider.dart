@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timestamp/enums/time_format.dart';
+import 'package:timestamp/constants.dart';
 
-const String sharedDarkModeKey = 'isDarkModeEnabled';
-const String shareCameraResolutionKey = 'cameraResolution';
 
 final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
   throw UnimplementedError();
@@ -20,11 +20,14 @@ class SharedUtility {
 
   final SharedPreferences sharedPreferences;
 
-  bool is24HourTimeEnabled() {
-    return sharedPreferences.getBool(sharedDarkModeKey) ?? false;
+  TimeFormat getTimeFormat() {
+    final format = sharedPreferences.getString(sharedTimeFormatKey);
+    if (format == null) return TimeFormat.local12Hour;
+    return TimeFormat.values.firstWhere((e) => e.toString() == format);
   }
 
-  void set24HourTimeEnabled({required bool value}) {
-    sharedPreferences.setBool(sharedDarkModeKey, value);
+  void setTimeFormat(TimeFormat format) {
+    sharedPreferences.setString(sharedTimeFormatKey, format.toString());
   }
+
 }

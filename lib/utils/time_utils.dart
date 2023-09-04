@@ -1,24 +1,42 @@
 import 'package:intl/intl.dart';
+import 'package:timestamp/enums/time_format.dart';
 
-String formatAbsoluteTime(DateTime dateTime, bool useTwelveHourTime){
 
-  String hour = dateTime.hour.toString().padLeft(2, '0');
-  String minute = dateTime.minute.toString().padLeft(2, '0');
-  String second = dateTime.second.toString().padLeft(2, '0');
-  String deciSeconds = (dateTime.millisecond ~/ 100).toString();
-  String amPM ="";
-
-  if(useTwelveHourTime){
-    if(dateTime.hour > 12){
-      amPM = "PM ";
-      hour = (dateTime.hour-12).toString().padLeft(2, '0');
-    }
-    else {
-      amPM = "AM ";
-    }
+String formatAbsoluteTime(DateTime dateTime, TimeFormat timeFormat) {
+  switch (timeFormat) {
+    case TimeFormat.local12Hour:
+      return _formatLocal12Hour(dateTime);
+    case TimeFormat.local24Hour:
+      return _formatLocal24Hour(dateTime);
+    case TimeFormat.utc24Hour:
+      return _formatUTC24Hour(dateTime);
+    default:
+      throw Exception('Unknown TimeFormat: $timeFormat');
   }
+}
 
-  return "$hour:$minute:$second.$deciSeconds $amPM${dateTime.timeZoneName}";
+String _formatLocal12Hour(DateTime dateTime) {
+  String baseTime = DateFormat('h:mm:ss').format(dateTime);
+  String deciSeconds = (dateTime.millisecond ~/ 100).toString();
+  String period = DateFormat('a').format(dateTime); // AM or PM
+  String timeZone = dateTime.timeZoneName;
+
+  return '$baseTime.$deciSeconds $period $timeZone';
+}
+
+String _formatLocal24Hour(DateTime dateTime) {
+  String baseTime = DateFormat('HH:mm:ss').format(dateTime);
+  String deciSeconds = (dateTime.millisecond ~/ 100).toString();
+  String timeZone = dateTime.timeZoneName;
+
+  return '$baseTime.$deciSeconds $timeZone';
+}
+
+String _formatUTC24Hour(DateTime dateTime) {
+  // Convert local time to UTC before formatting
+  DateTime utcTime = dateTime.toUtc();
+
+  return _formatLocal24Hour(utcTime);
 }
 
 String formatRelativeTime(DateTime time, DateTime timeToCompare){

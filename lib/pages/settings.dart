@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:timestamp/app_providers.dart';
+import 'package:timestamp/enums/time_format.dart';
 
 import 'package:timestamp/providers/time_format_provider.dart';
 
@@ -26,17 +27,7 @@ class SettingsScreen extends ConsumerWidget {
         children: [
           ListTile(
             title: const Text('24 Hour Time'),
-            trailing: Consumer(
-              builder: (context, ref, child) {
-                final is24Hour = ref.watch(is24HourTimeProvider);
-                return Switch(
-                  value: is24Hour,
-                  onChanged: (newValue) {
-                    ref.read(is24HourTimeProvider.notifier).toggleSetting();
-                  },
-                );
-              },
-            ),
+            trailing: _timeFormatDropdown(ref),
           ),
           ListTile(
             title: const Text('Privacy Policy'),
@@ -62,4 +53,22 @@ class SettingsScreen extends ConsumerWidget {
       ),
     );
   }
+
+  DropdownButton<TimeFormat> _timeFormatDropdown(WidgetRef ref) {
+    return DropdownButton<TimeFormat>(
+      value: ref.watch(is24HourTimeProvider),
+      onChanged: (newValue) {
+        if (newValue != null) {
+          ref.read(is24HourTimeProvider.notifier).setTimeFormat(newValue);
+        }
+      },
+      items: TimeFormat.values.map((TimeFormat format) {
+        return DropdownMenuItem<TimeFormat>(
+          value: format,
+          child: Text(format.toString().split('.').last),
+        );
+      }).toList(),
+    );
+  }
+
 }
