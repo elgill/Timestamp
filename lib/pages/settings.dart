@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:timestamp/app_providers.dart';
 
-final packageInfoProvider = FutureProvider<PackageInfo>((ref) async {
-  return await PackageInfo.fromPlatform();
-});
+import 'package:timestamp/providers/time_format_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -26,6 +24,20 @@ class SettingsScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text("Settings")),
       body: ListView(
         children: [
+          ListTile(
+            title: const Text('24 Hour Time'),
+            trailing: Consumer(
+              builder: (context, ref, child) {
+                final is24Hour = ref.watch(is24HourTimeProvider);
+                return Switch(
+                  value: is24Hour,
+                  onChanged: (newValue) {
+                    ref.read(is24HourTimeProvider.notifier).toggleSetting();
+                  },
+                );
+              },
+            ),
+          ),
           ListTile(
             title: const Text('Privacy Policy'),
             onTap: () {

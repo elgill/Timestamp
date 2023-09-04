@@ -8,6 +8,7 @@ import 'dart:io' show Platform;
 import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timestamp/pages/settings.dart';
+import 'package:timestamp/providers/shared_pref_provider.dart';
 
 // Local imports
 import 'event_detail.dart';
@@ -106,7 +107,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   String formatTime(DateTime dateTime) {
     if (_displayMode == DisplayMode.absolute) {
-      return formatAbsoluteTime(dateTime, false);
+      return formatAbsoluteTime(dateTime, !ref.watch(sharedUtilityProvider).is24HourTimeEnabled());
     } else {
       DateTime timeToCompare = eventManager.referenceEvent == null
           ? dateTime
