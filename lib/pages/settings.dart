@@ -26,7 +26,7 @@ class SettingsScreen extends ConsumerWidget {
       body: ListView(
         children: [
           ListTile(
-            title: const Text('24 Hour Time'),
+            title: const Text('Time Format'),
             trailing: _timeFormatDropdown(ref),
           ),
           ListTile(
@@ -65,7 +65,7 @@ class SettingsScreen extends ConsumerWidget {
       items: TimeFormat.values.map((TimeFormat format) {
         return DropdownMenuItem<TimeFormat>(
           value: format,
-          child: Text(format.toString().split('.').last),
+          child: Text(format.displayName),
         );
       }).toList(),
     );
