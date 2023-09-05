@@ -22,7 +22,7 @@ class SharedUtility {
 
   TimeFormat getTimeFormat() {
     final format = sharedPreferences.getString(sharedTimeFormatKey);
-    if (format == null) return TimeFormat.local12Hour;
+    if (format == null) return TimeFormat.local24Hour;
     return TimeFormat.values.firstWhere((e) => e.toString() == format);
   }
 

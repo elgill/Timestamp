@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:io' show Platform;
 
-
 // External package imports
 import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -108,7 +107,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   String formatTime(DateTime dateTime) {
     if (_displayMode == DisplayMode.absolute) {
-      return formatAbsoluteTime(dateTime, ref.watch(sharedUtilityProvider).getTimeFormat());
+      return formatAbsoluteTime(
+          dateTime, ref.watch(sharedUtilityProvider).getTimeFormat());
     } else {
       DateTime timeToCompare = eventManager.referenceEvent == null
           ? dateTime
@@ -171,15 +171,19 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         return AlertDialog(
           title: const Text('NTP Details'),
           content: SingleChildScrollView(
-            child: ntpService.isInfoRecieved ? ListBody(
-              children: <Widget>[
-                Text('Time Server: ${ntpService.timeServer}'),
-                Text('NTP Stratum: ${ntpService.ntpStratum}'),
-                Text('Last Sync Time: ${formatAbsoluteTime(ntpService.lastSyncTime.toLocal(), TimeFormat.local24Hour)}'),
-                Text('Offset: ${ntpService.ntpOffset}ms'),
-                Text('Round Trip Time(RTT): ${ntpService.roundTripTime}ms'),
-              ],
-            ) : const Text('No Time Data Received'),
+            child: ntpService.isInfoRecieved
+                ? ListBody(
+                    children: <Widget>[
+                      Text('Time Server: ${ntpService.timeServer}'),
+                      Text('NTP Stratum: ${ntpService.ntpStratum}'),
+                      Text(
+                          'Last Sync Time: ${formatAbsoluteTime(ntpService.lastSyncTime.toLocal(), TimeFormat.local24Hour)}'),
+                      Text('Offset: ${ntpService.ntpOffset}ms'),
+                      Text(
+                          'Round Trip Time(RTT): ${ntpService.roundTripTime}ms'),
+                    ],
+                  )
+                : const Text('No Time Data Received'),
           ),
           actions: <Widget>[
             TextButton(
@@ -214,23 +218,25 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: TextButton(
                         onPressed: _showNtpDetailsDialog,
-                        child: ntpService.isInfoRecieved ? Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                                'Last Sync: ${formatAbsoluteTime(ntpService.lastSyncTime.toLocal(), TimeFormat.local24Hour)}'),
-                            Text('Offset: ${ntpService.ntpOffset}ms'),
-                            Text(
-                                'Accuracy: ±${(ntpService.roundTripTime ~/ 2)}ms'),
-                          ],
-                        ): const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('No Time Data Recieved'),
-                          ],
-                        ),
+                        child: ntpService.isInfoRecieved
+                            ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                      'Last Sync: ${formatAbsoluteTime(ntpService.lastSyncTime.toLocal(), TimeFormat.local24Hour)}'),
+                                  Text('Offset: ${ntpService.ntpOffset}ms'),
+                                  Text(
+                                      'Accuracy: ±${(ntpService.roundTripTime ~/ 2)}ms'),
+                                ],
+                              )
+                            : const Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text('No Time Data Recieved'),
+                                ],
+                              ),
                       ),
                     ),
                   ),
@@ -350,7 +356,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         title: const Text('Timestamp'),
         actions: [
           IconButton(
-            icon: isIOS ? const Icon(CupertinoIcons.settings) : const Icon(Icons.settings),
+            icon: isIOS
+                ? const Icon(CupertinoIcons.settings)
+                : const Icon(Icons.settings),
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
@@ -366,40 +374,43 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     );
   }
 
-  Widget _buildBody(){
+  Widget _buildBody() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Center(
             child: GestureDetector(
-              // Wrap with GestureDetector to toggle on tap
-              onTap: () {
-                toggleDisplayMode();
-              },
-              child: Text(
-                formatTime(ntpService.currentTime),
-                style: const TextStyle(
-                  fontSize: 35,
-                  fontFamily: 'Courier New',
-                ),
-              ),
-            )),
-        const SizedBox(height: 5),
+          // Wrap with GestureDetector to toggle on tap
+          onTap: () {
+            toggleDisplayMode();
+          },
+          child: Text(
+            formatTime(ntpService.currentTime),
+            style: const TextStyle(
+              fontSize: 35,
+              fontFamily: 'Courier New',
+            ),
+          ),
+        )),
         ElevatedButton(
           onPressed: () async {
             DateTime now = ntpService.currentTime;
             int precision = -1;
-            if(ntpService.isInfoRecieved){
+            if (ntpService.isInfoRecieved) {
               precision = ntpService.roundTripTime ~/ 2;
             }
             setState(() {
-              eventManager
-                  .addEvent(Event(now, precision));
+              eventManager.addEvent(Event(now, precision));
               selectedEvents.insert(0, false);
             });
-          },
-          child: const Icon(Icons.arrow_downward),
+          }, // increase icon size
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(
+                horizontal: 0, vertical: 0), // add padding
+            minimumSize: const Size(150, 40), // minimum size of the button
+          ),
+          child: const Icon(Icons.arrow_downward, size: 30),
         ),
         Expanded(
           child: ListView.builder(
