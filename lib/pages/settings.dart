@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:timestamp/providers/auto_lock_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:timestamp/app_providers.dart';
 import 'package:timestamp/enums/time_format.dart';
@@ -28,6 +29,10 @@ class SettingsScreen extends ConsumerWidget {
           ListTile(
             title: const Text('Time Format'),
             trailing: _timeFormatDropdown(ref),
+          ),
+          ListTile(
+            title: const Text('Disable Auto Lock'),
+            trailing: _disableAutoLockSwitch(ref),
           ),
           ListTile(
             title: const Text('Privacy Policy'),
@@ -69,6 +74,14 @@ class SettingsScreen extends ConsumerWidget {
         );
       }).toList(),
     );
+  }
+
+  Widget _disableAutoLockSwitch(WidgetRef ref) {
+    return Switch(
+        value: ref.watch(autoLockProvider),
+        onChanged: (newValue) {
+          ref.read(autoLockProvider.notifier).setAutoLock(newValue);
+        });
   }
 
 }
