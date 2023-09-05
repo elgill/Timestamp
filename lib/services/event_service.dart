@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timestamp/models/event.dart';
+import 'package:timestamp/constants.dart';
 
 final eventServiceProvider = Provider<EventService>((ref) => EventService());
 
@@ -14,7 +15,9 @@ class EventService {
     await prefs.setStringList('events', eventsStringList);
 
     if (referenceEvent != null) {
-      await prefs.setString('referenceEvent', referenceEvent!.toJson());
+      await prefs.setString(referenceEventKey, referenceEvent!.toJson());
+    } else {
+      await prefs.remove(referenceEventKey);
     }
   }
 
@@ -23,7 +26,7 @@ class EventService {
     final eventsStringList = prefs.getStringList('events') ?? [];
     events = eventsStringList.map((e) => Event.fromJson(e)).toList();
 
-    final referenceEventString = prefs.getString('referenceEvent');
+    final referenceEventString = prefs.getString(referenceEventKey);
     if (referenceEventString != null) {
       referenceEvent = Event.fromJson(referenceEventString);
     }
