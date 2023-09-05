@@ -1,2 +1,2 @@
 const String sharedTimeFormatKey = 'timeFormat';
-const String autoLockKey = 'autoLockEnable';
+const String disableAutoLockKey = 'autoLockEnable';

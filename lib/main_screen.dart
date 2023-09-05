@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timestamp/enums/time_format.dart';
 import 'package:timestamp/pages/settings.dart';
 import 'package:timestamp/providers/shared_pref_provider.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 // Local imports
 import 'event_detail.dart';
@@ -149,6 +150,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   void dispose() {
     _timer.cancel();
     super.dispose();
+
+    WakelockPlus.disable();
   }
 
   Map<DateTime, List<Event>> get _groupedEvents {
@@ -351,6 +354,10 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if(ref.watch(sharedUtilityProvider).getDisableAutoLock()){
+      WakelockPlus.enable();
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Timestamp'),

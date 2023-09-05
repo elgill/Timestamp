@@ -7,12 +7,12 @@ final autoLockProvider = StateNotifierProvider<AutoLockNotifier, bool>((ref) {
 
 class AutoLockNotifier extends StateNotifier<bool> {
   AutoLockNotifier({required this.ref}) : super(true) {
-    state = ref.watch(sharedUtilityProvider).getAutoLock();
+    state = ref.watch(sharedUtilityProvider).getDisableAutoLock();
   }
   Ref ref;
 
   void setAutoLock(bool enable) {
-    ref.watch(sharedUtilityProvider).setAutoLock(enable);
+    ref.watch(sharedUtilityProvider).setDisableAutoLock(enable);
     state = enable;
   }
 }

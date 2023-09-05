@@ -30,14 +30,14 @@ class SharedUtility {
     sharedPreferences.setString(sharedTimeFormatKey, format.toString());
   }
 
-  bool getAutoLock() {
-    final status = sharedPreferences.getBool(autoLockKey);
+  bool getDisableAutoLock() {
+    final status = sharedPreferences.getBool(disableAutoLockKey);
     if (status == null) return true;
     return status;
   }
 
-  void setAutoLock(bool value) {
-    sharedPreferences.setBool(autoLockKey, value);
+  void setDisableAutoLock(bool value) {
+    sharedPreferences.setBool(disableAutoLockKey, value);
   }
 
 }
