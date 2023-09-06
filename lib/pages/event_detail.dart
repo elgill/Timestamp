@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:timestamp/enums/time_format.dart';
 import 'package:timestamp/models/event.dart';
+import 'package:timestamp/utils/time_utils.dart';
 
 class EventDetailPage extends StatefulWidget {
   final Event event;
@@ -27,23 +29,27 @@ class _EventDetailPageState extends State<EventDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    Event event = widget.event;
+    DateTime dateTime = event.time;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Event Details'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            widget.event.description = _descriptionController.text;
-            Navigator.pop(context, widget.event); // Return the updated event
+            event.description = _descriptionController.text;
+            Navigator.pop(context, event); // Return the updated event
           },
         ),
       ),
       body: Column(
         children: [
-          Text('Time: ${widget.event.time}'),
+          Text(formatDate(dateTime), style: const TextStyle(fontSize: 20)),
+          Text(formatAbsoluteTime(dateTime, TimeFormat.local12Hour), style: const TextStyle(fontSize: 20)),
           widget.event.precision >= 0 ?
-          Text('Precision: ±${widget.event.precision}ms', style: const TextStyle(fontSize: 20)):
-          const Text('Precision: Unknown', style: TextStyle(fontSize: 20)),
+          Text('Precision: ±${widget.event.precision}ms', style: const TextStyle(fontSize: 15)):
+          const Text('Precision: Unknown', style: TextStyle(fontSize: 15)),
           TextField(
             controller: _descriptionController,
             decoration: const InputDecoration(labelText: 'Event description'),
@@ -58,4 +64,8 @@ class _EventDetailPageState extends State<EventDetailPage> {
       ),
     );
   }
+
 }
+
+
+

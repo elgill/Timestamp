@@ -12,7 +12,7 @@ import 'package:timestamp/providers/shared_pref_provider.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 // Local imports
-import 'event_detail.dart';
+import 'pages/event_detail.dart';
 import 'services/event_service.dart';
 import 'services/ntp_service.dart';
 import 'package:timestamp/utils/time_utils.dart';
