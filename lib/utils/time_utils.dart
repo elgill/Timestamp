@@ -69,6 +69,9 @@ String formatRelativeTime(DateTime time, DateTime timeToCompare){
   return "$sign${timeComponents.join(' ')}";
 }
 
-String formatDate(DateTime dateTime){
+String formatDate(DateTime dateTime, TimeFormat timeFormat){
+  if(timeFormat == TimeFormat.utc24Hour){
+    dateTime = dateTime.toUtc();
+  }
   return DateFormat('EEE MMM dd, y').format(dateTime);
 }

@@ -157,7 +157,13 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   Map<DateTime, List<Event>> get _groupedEvents {
     final grouped = groupBy<Event, DateTime>(
       eventManager.events,
-      (event) => DateTime(event.time.year, event.time.month, event.time.day),
+      (event) {
+        DateTime dateTime = event.time;
+        if(ref.watch(sharedUtilityProvider).getTimeFormat() == TimeFormat.utc24Hour) {
+          dateTime = dateTime.toUtc();
+        }
+        return DateTime(dateTime.year, dateTime.month, dateTime.day);
+      },
     );
     final sortedKeys = grouped.keys.toList()
       ..sort(
@@ -431,7 +437,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                   Padding(
                     padding: const EdgeInsets.all(1.0),
                     child: Text(
-                      formatDate(sectionDate),
+                      formatDate(sectionDate, ref.watch(sharedUtilityProvider).getTimeFormat()),
                       style: const TextStyle(
                           fontSize: 20, fontWeight: FontWeight.bold),
                     ),

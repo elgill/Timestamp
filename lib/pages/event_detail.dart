@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timestamp/enums/time_format.dart';
 import 'package:timestamp/models/event.dart';
+import 'package:timestamp/providers/shared_pref_provider.dart';
 import 'package:timestamp/utils/time_utils.dart';
 
-class EventDetailPage extends StatefulWidget {
+class EventDetailPage extends ConsumerStatefulWidget {
   final Event event;
   final Function(Event) onSetAsReference;
 
@@ -18,7 +20,7 @@ class EventDetailPage extends StatefulWidget {
 }
 
 
-class _EventDetailPageState extends State<EventDetailPage> {
+class _EventDetailPageState extends ConsumerState<EventDetailPage> {
   late TextEditingController _descriptionController;
 
   @override
@@ -31,6 +33,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
   Widget build(BuildContext context) {
     Event event = widget.event;
     DateTime dateTime = event.time;
+    TimeFormat timeFormat = ref.watch(sharedUtilityProvider).getTimeFormat();
 
     return Scaffold(
       appBar: AppBar(
@@ -45,8 +48,8 @@ class _EventDetailPageState extends State<EventDetailPage> {
       ),
       body: Column(
         children: [
-          Text(formatDate(dateTime), style: const TextStyle(fontSize: 20)),
-          Text(formatAbsoluteTime(dateTime, TimeFormat.local12Hour), style: const TextStyle(fontSize: 20)),
+          Text(formatDate(dateTime, timeFormat), style: const TextStyle(fontSize: 20)),
+          Text(formatAbsoluteTime(dateTime, timeFormat), style: const TextStyle(fontSize: 20)),
           widget.event.precision >= 0 ?
           Text('Precision: ±${widget.event.precision}ms', style: const TextStyle(fontSize: 15)):
           const Text('Precision: Unknown', style: TextStyle(fontSize: 15)),
