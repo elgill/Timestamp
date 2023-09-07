@@ -36,7 +36,9 @@ class NtpService {
       _isInfoRecieved = true;
       saveNtpData();
     } catch (error) {
-      loadNtpData();
+      if(!_isInfoRecieved) {
+        loadNtpData();
+      }
       // TODO: Handle exception here, perhaps through a callback or stream.
     }
   }
