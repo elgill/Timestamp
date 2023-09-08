@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timestamp/providers/auto_lock_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -77,7 +78,7 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Widget _disableAutoLockSwitch(WidgetRef ref) {
-    return Switch(
+    return PlatformSwitch(
         value: ref.watch(autoLockProvider),
         onChanged: (newValue) {
           ref.read(autoLockProvider.notifier).setAutoLock(newValue);
