@@ -5,6 +5,7 @@ import 'dart:io' show Platform;
 
 // External package imports
 import 'package:collection/collection.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timestamp/enums/time_format.dart';
 import 'package:timestamp/pages/settings.dart';
@@ -53,7 +54,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
+        return PlatformAlertDialog(
           title: const Text('Confirm Deletion'),
           content:
               const Text('Are you sure you want to delete selected events?'),
@@ -82,7 +83,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
+        return PlatformAlertDialog(
           title: const Text('Confirm Deletion'),
           content: const Text('Are you sure you want to delete all events?'),
           actions: <Widget>[
@@ -173,11 +174,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   }
 
   Future<void> _showNtpDetailsDialog() async {
-    return showDialog<void>(
+    return showPlatformDialog<void>(
       context: context,
       barrierDismissible: true,
       builder: (BuildContext context) {
-        return AlertDialog(
+        return PlatformAlertDialog(
           title: const Text('NTP Details'),
           content: SingleChildScrollView(
             child: ntpService.isInfoRecieved
