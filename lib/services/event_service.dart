@@ -34,15 +34,13 @@ class EventService {
 
   void addEvent(Event evt) {
     referenceEvent ??= evt;
-    events.insert(0, evt);
+    events.add(evt);
+    events.sort((a, b) => b.time.compareTo(a.time));
     saveData();
   }
 
   void manualAddEvent(Event evt){
-    referenceEvent ??= evt;
-    events.add(evt);
-    events.sort((a, b) => b.time.compareTo(a.time));
-    saveData();
+    addEvent(evt);
   }
 
   void deleteSelectedEvents(List<bool> selectedEvents) {
