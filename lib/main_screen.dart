@@ -205,8 +205,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             TextButton(
               child: const Text('Get Time'),
               onPressed: () async {
-                ntpService.updateNtpOffset();
                 Navigator.of(context).pop();
+                await ntpService.updateNtpOffset();  // Await the fetching response
+                _showNtpDetailsDialog();  // Reopen the dialog
               },
             ),
           ],
