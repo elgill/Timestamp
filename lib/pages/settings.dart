@@ -1,14 +1,19 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:settings_ui/settings_ui.dart';
 import 'package:timestamp/providers/auto_lock_provider.dart';
 import 'package:timestamp/providers/time_server_provider.dart';
+import 'package:timestamp/services/event_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:timestamp/app_providers.dart';
 import 'package:timestamp/enums/time_format.dart';
 
 import 'package:timestamp/providers/time_format_provider.dart';
 import 'package:timestamp/enums/time_server.dart';
+import 'package:timestamp/models/event.dart';
+import 'dart:io' show Platform;
+
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -60,6 +65,16 @@ class SettingsScreen extends ConsumerWidget {
                   initialValue: ref.watch(autoLockProvider),
                   onToggle: (bool value) {
                     ref.read(autoLockProvider.notifier).setAutoLock(value);
+                  }
+              ),
+              SettingsTile.navigation(
+                  title: const Text('Manual Event Entry'),
+                  leading: const Icon(Icons.event),
+                  onPressed: (context) {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) {
+                          return _ManualEventEntryScreen();
+                        }));
                   }
               ),
             ],
@@ -170,5 +185,222 @@ class _SelectTimeServerScreen extends ConsumerWidget {
     }
   }
 }
+
+class _ManualEventEntryScreen extends ConsumerStatefulWidget {
+  @override
+  _ManualEventEntryScreenState createState() => _ManualEventEntryScreenState();
+}
+
+class _ManualEventEntryScreenState extends ConsumerState<_ManualEventEntryScreen> {
+  DateTime selectedDate = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Manual Event Entry'),
+      ),
+      body: Column(
+        children: [
+          ListTile(
+            title: const Text('Select Date'),
+            subtitle: Text("${selectedDate.toLocal()}".split(' ')[0]),
+            onTap: _showPlatformDatePicker,
+          ),
+          ListTile(
+            title: const Text('Select Time'),
+            subtitle: Text(
+                "${selectedDate.hour.toString().padLeft(2, '0')}:${selectedDate.minute.toString().padLeft(2, '0')}:${selectedDate.second.toString().padLeft(2, '0')}.${((selectedDate.millisecond / 100).floor()).toString().padLeft(2, '0')}"),
+            onTap: _showCustomTimePicker,
+          ),
+          ElevatedButton(
+            onPressed: _addEvent,
+            child: const Text('Add Event'),
+          )
+        ],
+      ),
+    );
+  }
+
+  _selectDate(DateTime picked) async {
+    setState(() {
+      selectedDate = picked;
+    });
+  }
+
+  void _showPlatformDatePicker() {
+    if (Platform.isIOS) {
+      showModalBottomSheet(
+          context: context,
+          builder: (BuildContext builder) {
+            return Container(
+              height: MediaQuery.of(context).copyWith().size.height / 3,
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.date,
+                onDateTimeChanged: _selectDate,
+                initialDateTime: selectedDate,
+                minimumYear: 2000,
+                maximumYear: DateTime.now().year,
+              ),
+            );
+          }
+      );
+    } else {
+      showDatePicker(
+        context: context,
+        initialDate: selectedDate,
+        firstDate: DateTime(2000),
+        lastDate: DateTime.now(),
+      ).then((pickedDate) {
+        if (pickedDate != null && pickedDate != selectedDate) {
+          _selectDate(pickedDate);
+        }
+      });
+    }
+  }
+
+  void _showCustomTimePicker() {
+    showDialog(
+      context: context,
+      builder: (context) => CustomTimePickerDialog(
+        initialDateTime: selectedDate,
+        onDateTimeChanged: (newDate) {
+          setState(() {
+            selectedDate = newDate;
+          });
+        },
+      ),
+    );
+  }
+
+  _addEvent() {
+    DateTime finalDate = DateTime(
+      selectedDate.year,
+      selectedDate.month,
+      selectedDate.day,
+      selectedDate.hour,
+      selectedDate.minute,
+      selectedDate.second,
+      selectedDate.millisecond,
+    );
+    ref.watch(eventServiceProvider).manualAddEvent(Event(finalDate, -1));
+
+    Navigator.of(context).pop();
+  }
+
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+}
+
+class CustomTimePickerDialog extends StatefulWidget {
+  final DateTime initialDateTime;
+  final ValueChanged<DateTime> onDateTimeChanged;
+
+  CustomTimePickerDialog({
+    required this.initialDateTime,
+    required this.onDateTimeChanged,
+  });
+
+  @override
+  _CustomTimePickerDialogState createState() => _CustomTimePickerDialogState();
+}
+
+class _CustomTimePickerDialogState extends State<CustomTimePickerDialog> {
+  late int _selectedHour;
+  late int _selectedMinute;
+  late int _selectedSecond;
+  late int _selectedDecisecond;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedHour = widget.initialDateTime.hour;
+    _selectedMinute = widget.initialDateTime.minute;
+    _selectedSecond = widget.initialDateTime.second;
+    _selectedDecisecond = (widget.initialDateTime.millisecond / 100).floor();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text("Select Time"),
+      content: SizedBox(
+        height: 200.0,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _buildPicker(_selectedHour, 24, 2, (value) {
+              setState(() {
+                _selectedHour = value;
+              });
+            }),
+            const Text(":"),
+            _buildPicker(_selectedMinute, 60, 2, (value) {
+              setState(() {
+                _selectedMinute = value;
+              });
+            }),
+            const Text(":"),
+            _buildPicker(_selectedSecond, 60, 2, (value) {
+              setState(() {
+                _selectedSecond = value;
+              });
+            }),
+            const Text("."),
+            _buildPicker(_selectedDecisecond, 10, 1, (value) {
+              setState(() {
+                _selectedDecisecond = value;
+              });
+            }),
+          ],
+        ),
+      ),
+      actions: [
+        ElevatedButton(
+          child: const Text("OK"),
+          onPressed: () {
+            DateTime newDateTime = DateTime(
+              widget.initialDateTime.year,
+              widget.initialDateTime.month,
+              widget.initialDateTime.day,
+              _selectedHour,
+              _selectedMinute,
+              _selectedSecond,
+              _selectedDecisecond * 100,
+            );
+            widget.onDateTimeChanged(newDateTime);
+            Navigator.of(context).pop();
+          },
+        )
+      ],
+    );
+  }
+
+  Widget _buildPicker(int initialItem, int numItems, int numDigits, ValueChanged<int> onChanged) {
+    return Container(
+      width: 50,
+      child: CupertinoPicker(
+        diameterRatio: 1.2,
+        itemExtent: 30.0,
+        onSelectedItemChanged: onChanged,
+        scrollController: FixedExtentScrollController(initialItem: initialItem),
+        children: List<Widget>.generate(
+          numItems,
+              (index) => Center(child: Text(index.toString().padLeft(numDigits, '0'))),
+        ),
+      ),
+    );
+  }
+}
+
+
 
 
