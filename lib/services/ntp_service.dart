@@ -1,10 +1,13 @@
 import 'package:advanced_ntp/ntp.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timestamp/enums/time_server.dart';
+import 'package:timestamp/providers/shared_pref_provider.dart';
 
-final ntpServiceProvider = Provider<NtpService>((ref) => NtpService());
+final ntpServiceProvider = Provider<NtpService>((ref) => NtpService(ref));
 
 class NtpService {
+  final ProviderRef _ref;
   bool _isInfoRecieved = false;
   int? _ntpOffset; //ms
   int? _roundTripTime; //ms
@@ -12,22 +15,26 @@ class NtpService {
   String? _timeServer;
   DateTime? _lastSyncTime;
 
-  DateTime get currentTime => DateTime.now().add(Duration(milliseconds: _ntpOffset ?? 0));
+  DateTime get currentTime =>
+      DateTime.now().add(Duration(milliseconds: _ntpOffset ?? 0));
 
   bool get isInfoRecieved => _isInfoRecieved;
   String get timeServer => _timeServer ?? "N/A";
   int get ntpOffset => _ntpOffset ?? 0;
   int get roundTripTime => _roundTripTime ?? 9999;
   int get ntpStratum => _ntpStratum ?? 9999;
-  DateTime get lastSyncTime => _lastSyncTime ?? DateTime.fromMillisecondsSinceEpoch(0);
+  DateTime get lastSyncTime =>
+      _lastSyncTime ?? DateTime.fromMillisecondsSinceEpoch(0);
 
-  NtpService() {
+  NtpService(this._ref) {
     updateNtpOffset();
   }
 
   Future<void> updateNtpOffset() async {
     try {
-      NTPResponse ntpResponse = await getNtpData();
+      NTPResponse ntpResponse = await getNtpData(
+          lookUpAddress:
+              _ref.watch(sharedUtilityProvider).getTimeServer().displayName);
       _timeServer = ntpResponse.lookupServer;
       _ntpOffset = ntpResponse.offset;
       _ntpStratum = ntpResponse.stratum;
@@ -36,7 +43,7 @@ class NtpService {
       _isInfoRecieved = true;
       saveNtpData();
     } catch (error) {
-      if(!_isInfoRecieved) {
+      if (!_isInfoRecieved) {
         loadNtpData();
       }
       // TODO: Handle exception here, perhaps through a callback or stream.
@@ -61,5 +68,4 @@ class NtpService {
       _lastSyncTime ??= DateTime.tryParse(lastSyncTimeString);
     }
   }
-
 }

@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:settings_ui/settings_ui.dart';
 import 'package:timestamp/providers/auto_lock_provider.dart';
+import 'package:timestamp/providers/time_server_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:timestamp/app_providers.dart';
 import 'package:timestamp/enums/time_format.dart';
 
 import 'package:timestamp/providers/time_format_provider.dart';
+import 'package:timestamp/enums/time_server.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -30,6 +32,17 @@ class SettingsScreen extends ConsumerWidget {
           SettingsSection(
             title: const Text('General'),
             tiles: [
+              SettingsTile.navigation(
+                  title: const Text('Time Server'),
+                  leading: const Icon(Icons.add),
+                  value: Text(ref.watch(timeServerProvider).displayName),
+                  onPressed: (context) {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) {
+                          return _SelectTimeServerScreen();
+                        }));
+                  }
+              ),
               SettingsTile.navigation(
                 title: const Text('Time Format'),
                 leading: const Icon(Icons.access_time),
@@ -90,15 +103,6 @@ class SettingsScreen extends ConsumerWidget {
   }
 }
 
-
-/*class _TimeFormat extends StatefulWidget {
-  const _TimeFormat({super.key});
-
-  @override
-  State<_TimeFormat> createState() => __TimeFormat();
-}*/
-
-
 class _SelectTimeFormatScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -132,4 +136,39 @@ class _SelectTimeFormatScreen extends ConsumerWidget {
     }
   }
 }
+
+class _SelectTimeServerScreen extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    TimeServer currentServer = ref.watch(timeServerProvider); // Assuming you have a timeServerProvider
+    return Scaffold(
+      appBar: AppBar(title: const Text('Select Time Server')),
+      body: SettingsList(
+        sections: [
+          SettingsSection(
+            tiles: TimeServer.values.map((server) {
+              return SettingsTile(
+                title: Text(server.displayName),
+                trailing: trailingWidgetFor(server, currentServer),
+                onPressed: (context) {
+                  ref.read(timeServerProvider.notifier).setTimeServer(server);
+                  Navigator.of(context).pop();
+                },
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget trailingWidgetFor(TimeServer server, TimeServer currentServer) {
+    if (server == currentServer) {
+      return const Icon(Icons.check, color: Colors.blue);
+    } else {
+      return Container();
+    }
+  }
+}
+
 

@@ -32,7 +32,7 @@ enum DisplayMode { absolute, relative }
 
 class _MainScreenState extends ConsumerState<MainScreen> {
   late EventService eventManager = EventService();
-  late NtpService ntpService = NtpService();
+  late NtpService ntpService = ref.watch(ntpServiceProvider);
 
   DateTime displayTime = DateTime.now();
   late Timer _timer;
