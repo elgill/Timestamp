@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:settings_ui/settings_ui.dart';
 import 'package:timestamp/providers/auto_lock_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:timestamp/app_providers.dart';
@@ -25,64 +25,111 @@ class SettingsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text("Settings")),
-      body: ListView(
-        children: [
-          ListTile(
-            title: const Text('Time Format'),
-            trailing: _timeFormatDropdown(ref),
+      body: SettingsList(
+        sections: [
+          SettingsSection(
+            title: const Text('General'),
+            tiles: [
+              SettingsTile.navigation(
+                title: const Text('Time Format'),
+                leading: const Icon(Icons.access_time),
+                value: Text(ref.watch(is24HourTimeProvider).displayName),
+                  onPressed: (context) {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) {
+                          return _SelectTimeFormatScreen();
+                        }));
+                  }
+              ),
+              SettingsTile.switchTile(
+                  title: const Text('Disable Auto Lock'),
+                  leading: const Icon(Icons.lock),
+                  initialValue: ref.watch(autoLockProvider),
+                  onToggle: (bool value) {
+                    ref.read(autoLockProvider.notifier).setAutoLock(value);
+                  }
+              ),
+            ],
           ),
-          ListTile(
-            title: const Text('Disable Auto Lock'),
-            trailing: _disableAutoLockSwitch(ref),
+          SettingsSection(
+            title: const Text('Links'),
+            tiles: [
+              SettingsTile(
+                title: const Text('Privacy Policy'),
+                leading: const Icon(Icons.privacy_tip),
+                onPressed: (BuildContext context) {
+                  _launchURL('https://gillin.dev/privacy');
+                },
+              ),
+              SettingsTile(
+                title: const Text('Feedback & Support'),
+                leading: const Icon(Icons.feedback),
+                onPressed: (BuildContext context) {
+                  _launchURL('https://gillin.dev/#contact');
+                },
+              ),
+            ],
           ),
-          ListTile(
-            title: const Text('Privacy Policy'),
-            onTap: () {
-              _launchURL('https://gillin.dev/privacy');
-            },
+          SettingsSection(
+            title: const Text('App Details'),
+            tiles: [
+              SettingsTile(
+                title: packageInfoAsyncValue.when(
+                  data: (packageInfo) =>
+                      Text('Version: ${packageInfo.version}'),
+                  loading: () => const Text('Version: Fetching...'),
+                  error: (err, stack) => const Text('Version: Error fetching'),
+                ),
+                leading: const Icon(Icons.info),
+              ),
+            ],
           ),
-          ListTile(
-            title: const Text('Feedback & Support'),
-            onTap: () {
-              _launchURL('https://gillin.dev/#contact');
-            },
+        ],
+      ),
+    );
+  }
+}
+
+
+/*class _TimeFormat extends StatefulWidget {
+  const _TimeFormat({super.key});
+
+  @override
+  State<_TimeFormat> createState() => __TimeFormat();
+}*/
+
+
+class _SelectTimeFormatScreen extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    TimeFormat currentFormat = ref.watch(is24HourTimeProvider);
+    return Scaffold(
+      appBar: AppBar(title: const Text('Select Time Format')),
+      body: SettingsList(
+        sections: [
+          SettingsSection(
+            tiles: TimeFormat.values.map((format) {
+              return SettingsTile(
+                title: Text(format.displayName),
+                trailing: trailingWidgetFor(format, currentFormat),
+                onPressed: (context) {
+                  ref.read(is24HourTimeProvider.notifier).setTimeFormat(format);
+                  Navigator.of(context).pop();
+                },
+              );
+            }).toList(),
           ),
-          ListTile(
-            title: const Text('Version'),
-            subtitle: packageInfoAsyncValue.when(
-              data: (packageInfo) => Text(packageInfo.version),
-              loading: () => const Text('Fetching version...'),
-              error: (err, stack) => const Text('Error fetching version'),
-            ),
-          )
         ],
       ),
     );
   }
 
-  DropdownButton<TimeFormat> _timeFormatDropdown(WidgetRef ref) {
-    return DropdownButton<TimeFormat>(
-      value: ref.watch(is24HourTimeProvider),
-      onChanged: (newValue) {
-        if (newValue != null) {
-          ref.read(is24HourTimeProvider.notifier).setTimeFormat(newValue);
-        }
-      },
-      items: TimeFormat.values.map((TimeFormat format) {
-        return DropdownMenuItem<TimeFormat>(
-          value: format,
-          child: Text(format.displayName),
-        );
-      }).toList(),
-    );
+  Widget trailingWidgetFor(TimeFormat format, TimeFormat currentFormat) {
+    if (format == currentFormat) {
+      return const Icon(Icons.check, color: Colors.blue);
+    } else {
+      return Container();
+    }
   }
-
-  Widget _disableAutoLockSwitch(WidgetRef ref) {
-    return PlatformSwitch(
-        value: ref.watch(autoLockProvider),
-        onChanged: (newValue) {
-          ref.read(autoLockProvider.notifier).setAutoLock(newValue);
-        });
-  }
-
 }
+
