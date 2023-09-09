@@ -5,6 +5,7 @@ import 'package:settings_ui/settings_ui.dart';
 import 'package:timestamp/providers/auto_lock_provider.dart';
 import 'package:timestamp/providers/time_server_provider.dart';
 import 'package:timestamp/services/event_service.dart';
+import 'package:timestamp/utils/time_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:timestamp/app_providers.dart';
 import 'package:timestamp/enums/time_format.dart';
@@ -44,39 +45,35 @@ class SettingsScreen extends ConsumerWidget {
                   onPressed: (context) {
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) {
-                          return _SelectTimeServerScreen();
-                        }));
-                  }
-              ),
+                      return _SelectTimeServerScreen();
+                    }));
+                  }),
               SettingsTile.navigation(
-                title: const Text('Time Format'),
-                leading: const Icon(Icons.access_time),
-                value: Text(ref.watch(is24HourTimeProvider).displayName),
+                  title: const Text('Time Format'),
+                  leading: const Icon(Icons.access_time),
+                  value: Text(ref.watch(is24HourTimeProvider).displayName),
                   onPressed: (context) {
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) {
-                          return _SelectTimeFormatScreen();
-                        }));
-                  }
-              ),
+                      return _SelectTimeFormatScreen();
+                    }));
+                  }),
               SettingsTile.switchTile(
                   title: const Text('Disable Auto Lock'),
                   leading: const Icon(Icons.lock),
                   initialValue: ref.watch(autoLockProvider),
                   onToggle: (bool value) {
                     ref.read(autoLockProvider.notifier).setAutoLock(value);
-                  }
-              ),
+                  }),
               SettingsTile.navigation(
                   title: const Text('Manual Event Entry'),
                   leading: const Icon(Icons.event),
                   onPressed: (context) {
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) {
-                          return _ManualEventEntryScreen();
-                        }));
-                  }
-              ),
+                      return _ManualEventEntryScreen();
+                    }));
+                  }),
             ],
           ),
           SettingsSection(
@@ -155,7 +152,8 @@ class _SelectTimeFormatScreen extends ConsumerWidget {
 class _SelectTimeServerScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    TimeServer currentServer = ref.watch(timeServerProvider); // Assuming you have a timeServerProvider
+    TimeServer currentServer =
+        ref.watch(timeServerProvider); // Assuming you have a timeServerProvider
     return Scaffold(
       appBar: AppBar(title: const Text('Select Time Server')),
       body: SettingsList(
@@ -191,7 +189,8 @@ class _ManualEventEntryScreen extends ConsumerStatefulWidget {
   _ManualEventEntryScreenState createState() => _ManualEventEntryScreenState();
 }
 
-class _ManualEventEntryScreenState extends ConsumerState<_ManualEventEntryScreen> {
+class _ManualEventEntryScreenState
+    extends ConsumerState<_ManualEventEntryScreen> {
   DateTime selectedDate = DateTime.now();
 
   @override
@@ -205,31 +204,46 @@ class _ManualEventEntryScreenState extends ConsumerState<_ManualEventEntryScreen
       appBar: AppBar(
         title: const Text('Manual Event Entry'),
       ),
-      body: Column(
-        children: [
-          ListTile(
-            title: const Text('Select Date'),
-            subtitle: Text("${selectedDate.toLocal()}".split(' ')[0]),
-            onTap: _showPlatformDatePicker,
+      body: SettingsList(sections: [
+        SettingsSection(tiles: [
+          SettingsTile(
+              title: const Text('Select Date'),
+              trailing: Text(formatDate(selectedDate, TimeFormat.local24Hour)),
+              onPressed: (context) {
+                _showPlatformDatePicker();
+              }),
+          SettingsTile(
+              title: const Text('Select Time'),
+              trailing: Text(formatAbsoluteTime(selectedDate, TimeFormat.local24Hour)),
+              onPressed: (context) {
+                _showCustomTimePicker();
+              }),
+        ]),
+        SettingsSection(tiles: [
+          SettingsTile(
+            leading: const Icon(Icons.save),
+
+            onPressed: (context) {
+              _addEvent();
+            },
+            title: const Text('Add Event'),
           ),
-          ListTile(
-            title: const Text('Select Time'),
-            subtitle: Text(
-                "${selectedDate.hour.toString().padLeft(2, '0')}:${selectedDate.minute.toString().padLeft(2, '0')}:${selectedDate.second.toString().padLeft(2, '0')}.${((selectedDate.millisecond / 100).floor()).toString().padLeft(2, '0')}"),
-            onTap: _showCustomTimePicker,
-          ),
-          ElevatedButton(
-            onPressed: _addEvent,
-            child: const Text('Add Event'),
-          )
-        ],
-      ),
+        ])
+      ]),
     );
   }
 
   _selectDate(DateTime picked) async {
     setState(() {
-      selectedDate = picked;
+      selectedDate = DateTime(
+        picked.year,
+        picked.month,
+        picked.day,
+        selectedDate.hour,
+        selectedDate.minute,
+        selectedDate.second,
+        selectedDate.millisecond,
+      );
     });
   }
 
@@ -238,7 +252,7 @@ class _ManualEventEntryScreenState extends ConsumerState<_ManualEventEntryScreen
       showModalBottomSheet(
           context: context,
           builder: (BuildContext builder) {
-            return Container(
+            return SizedBox(
               height: MediaQuery.of(context).copyWith().size.height / 3,
               child: CupertinoDatePicker(
                 mode: CupertinoDatePickerMode.date,
@@ -248,8 +262,7 @@ class _ManualEventEntryScreenState extends ConsumerState<_ManualEventEntryScreen
                 maximumYear: DateTime.now().year,
               ),
             );
-          }
-      );
+          });
     } else {
       showDatePicker(
         context: context,
@@ -292,7 +305,6 @@ class _ManualEventEntryScreenState extends ConsumerState<_ManualEventEntryScreen
 
     Navigator.of(context).pop();
   }
-
 
   @override
   void dispose() {
@@ -384,7 +396,8 @@ class _CustomTimePickerDialogState extends State<CustomTimePickerDialog> {
     );
   }
 
-  Widget _buildPicker(int initialItem, int numItems, int numDigits, ValueChanged<int> onChanged) {
+  Widget _buildPicker(int initialItem, int numItems, int numDigits,
+      ValueChanged<int> onChanged) {
     return Container(
       width: 50,
       child: CupertinoPicker(
@@ -394,13 +407,10 @@ class _CustomTimePickerDialogState extends State<CustomTimePickerDialog> {
         scrollController: FixedExtentScrollController(initialItem: initialItem),
         children: List<Widget>.generate(
           numItems,
-              (index) => Center(child: Text(index.toString().padLeft(numDigits, '0'))),
+          (index) =>
+              Center(child: Text(index.toString().padLeft(numDigits, '0'))),
         ),
       ),
     );
   }
 }
-
-
-
-
