@@ -40,7 +40,7 @@ class SettingsScreen extends ConsumerWidget {
             tiles: [
               SettingsTile.navigation(
                   title: const Text('Time Server'),
-                  leading: const Icon(Icons.add),
+                  leading: const Icon(Icons.cloud),
                   value: Text(ref.watch(timeServerProvider).displayName),
                   onPressed: (context) {
                     Navigator.push(context,
@@ -203,6 +203,12 @@ class _ManualEventEntryScreenState
     return Scaffold(
       appBar: AppBar(
         title: const Text('Manual Event Entry'),
+        actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: _addEvent,
+          ),
+        ],
       ),
       body: SettingsList(sections: [
         SettingsSection(tiles: [
@@ -219,16 +225,6 @@ class _ManualEventEntryScreenState
                 _showCustomTimePicker();
               }),
         ]),
-        SettingsSection(tiles: [
-          SettingsTile(
-            leading: const Icon(Icons.save),
-
-            onPressed: (context) {
-              _addEvent();
-            },
-            title: const Text('Add Event'),
-          ),
-        ])
       ]),
     );
   }
@@ -302,6 +298,18 @@ class _ManualEventEntryScreenState
       selectedDate.millisecond,
     );
     ref.watch(eventServiceProvider).manualAddEvent(Event(finalDate, -1));
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Event added successfully!'),
+        duration: const Duration(seconds: 1),
+        backgroundColor: Colors.green,  // Setting the background to green
+        behavior: SnackBarBehavior.floating,  // Optional: This makes the snackbar appear as a floating box
+        shape: RoundedRectangleBorder(  // Optional: Gives rounded corners
+          borderRadius: BorderRadius.circular(24),
+        ),
+      ),
+    );
 
     Navigator.of(context).pop();
   }
