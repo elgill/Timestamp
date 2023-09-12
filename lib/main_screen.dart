@@ -286,7 +286,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           //leading: Icon(Icons.event), // As an example
           title: _buildEventTitle(event),
           onTap: () => _onEventTap(event, eventIndex),
-          trailing: isInDeleteMode ? _buildEventCheckbox(eventIndex) : null,
+          leading: isInDeleteMode ? _buildEventCheckbox(eventIndex) : null,
         ),
         const Divider(height: 1.0),
       ],
@@ -356,6 +356,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       setState(() {
         eventManager.events[eventIndex] = updatedEvent;
         eventManager.saveData();
+      });
+    } else {
+      setState(() {
+        // Toggle the selection state for the corresponding event
+        selectedEvents[eventIndex] = !selectedEvents[eventIndex];
       });
     }
   }
