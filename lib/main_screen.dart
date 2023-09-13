@@ -380,6 +380,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 ? const Icon(CupertinoIcons.settings)
                 : const Icon(Icons.settings),
             onPressed: () {
+              isInDeleteMode = false;
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => const SettingsScreen(),
