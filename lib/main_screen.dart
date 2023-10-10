@@ -349,6 +349,17 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 eventManager.referenceEvent = event;
                 eventManager.saveData();
               });
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('Reference Event Set!'),
+                  duration: const Duration(seconds: 1),
+                  backgroundColor: Colors.green,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                ),
+              );
             },
           ),
         ),
