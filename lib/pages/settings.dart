@@ -254,8 +254,8 @@ class _ManualEventEntryScreenState
                 mode: CupertinoDatePickerMode.date,
                 onDateTimeChanged: _selectDate,
                 initialDateTime: selectedDate,
-                minimumYear: 2000,
-                maximumYear: DateTime.now().year,
+                minimumYear: 1900,
+                maximumYear: 2100,
               ),
             );
           });
@@ -263,8 +263,8 @@ class _ManualEventEntryScreenState
       showDatePicker(
         context: context,
         initialDate: selectedDate,
-        firstDate: DateTime(2000),
-        lastDate: DateTime.now(),
+        firstDate: DateTime(1900),
+        lastDate: DateTime(2100)
       ).then((pickedDate) {
         if (pickedDate != null && pickedDate != selectedDate) {
           _selectDate(pickedDate);
@@ -409,6 +409,7 @@ class _CustomTimePickerDialogState extends State<CustomTimePickerDialog> {
     return Container(
       width: 50,
       child: CupertinoPicker(
+        looping: true,
         diameterRatio: 1.2,
         itemExtent: 30.0,
         onSelectedItemChanged: onChanged,
