@@ -64,7 +64,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
               onPressed: () => Navigator.of(context).pop(),
             ),
             TextButton(
-              child: const Text('Delete'),
+              child: const Text('Delete', style: TextStyle(color: Colors.red)),
               onPressed: () {
                 setState(() {
                   eventManager.deleteSelectedEvents(selectedEvents);
@@ -92,7 +92,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
               onPressed: () => Navigator.of(context).pop(),
             ),
             TextButton(
-              child: const Text('Delete'),
+              child: const Text('Delete', style: TextStyle(color: Colors.red)),
               onPressed: () {
                 setState(() {
                   eventManager.deleteAllEvents();
@@ -261,6 +261,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                     child: Text(selectedEvents.contains(true)
                         ? 'Delete Selected'
                         : 'Delete All'),
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.red, // This is the background color
+                    ),
                   ),
                 ),
           Padding(
