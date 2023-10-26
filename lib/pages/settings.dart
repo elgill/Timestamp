@@ -9,6 +9,7 @@ import 'package:timestamp/utils/time_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:timestamp/app_providers.dart';
 import 'package:timestamp/enums/time_format.dart';
+import 'package:timestamp/services/share_service.dart';
 
 import 'package:timestamp/providers/time_format_provider.dart';
 import 'package:timestamp/enums/time_server.dart';
@@ -65,14 +66,25 @@ class SettingsScreen extends ConsumerWidget {
                   onToggle: (bool value) {
                     ref.read(autoLockProvider.notifier).setAutoLock(value);
                   }),
+            ],
+          ),
+          SettingsSection(
+            title: const Text('Data'),
+            tiles: [
               SettingsTile.navigation(
                   title: const Text('Manual Event Entry'),
                   leading: const Icon(Icons.event),
                   onPressed: (context) {
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) {
-                      return _ManualEventEntryScreen();
-                    }));
+                          return _ManualEventEntryScreen();
+                        }));
+                  }),
+              SettingsTile(
+                  title: const Text('Share All Events'),
+                  leading: const Icon(Icons.share),
+                  onPressed: (context) {
+                    exportAndShareEventsPlainText(ref.watch(eventServiceProvider).events, ref.watch(is24HourTimeProvider));
                   }),
             ],
           ),
