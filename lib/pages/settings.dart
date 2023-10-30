@@ -81,7 +81,7 @@ class SettingsScreen extends ConsumerWidget {
                         }));
                   }),
               SettingsTile(
-                  title: const Text('Share All Events'),
+                  title: const Text('Share Event Log'),
                   leading: const Icon(Icons.share),
                   onPressed: (context) {
                     exportAndShareEventsPlainText(ref.watch(eventServiceProvider).events, ref.watch(is24HourTimeProvider));

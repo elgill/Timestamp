@@ -33,6 +33,7 @@ String convertEventsToPlainText(List<Event> events, TimeFormat timeFormat) {
   // Convert grouped events to plain text
   StringBuffer buffer = StringBuffer();
 
+  buffer.writeln("Timestamp Event Log");
   for (var day in groupedEvents.keys) {
     buffer.writeln("------------------------");
 

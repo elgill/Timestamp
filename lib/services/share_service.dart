@@ -23,9 +23,9 @@ Future<void> exportAndShareEventsCsv(List<Event> events) async {
 
 Future<void> exportAndShareEventsPlainText(List<Event> events, TimeFormat timeFormat) async {
   String plainText = convertEventsToPlainText(events, timeFormat);
-  shareRawText(plainText);
+  shareRawText(plainText, "Timestamp Event Log");
 }
 
-void shareRawText(String text) {
-  Share.share(text);
+void shareRawText(String text, String subject) {
+  Share.share(text, subject: subject);
 }
