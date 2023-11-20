@@ -443,7 +443,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(
                 horizontal: 0, vertical: 0), // add padding
-            minimumSize: const Size(150, 40), // minimum size of the button
+            minimumSize: Size(MediaQuery.of(context).size.width-20, 60), // Button width is now screen width
           ),
           child: const Icon(Icons.arrow_downward, size: 30),
         ),
