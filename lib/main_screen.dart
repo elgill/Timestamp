@@ -5,6 +5,7 @@ import 'dart:io' show Platform;
 
 // External package imports
 import 'package:collection/collection.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timestamp/enums/time_format.dart';
@@ -262,7 +263,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                         ? 'Delete Selected'
                         : 'Delete All'),
                     style: ElevatedButton.styleFrom(
-                      primary: Colors.red, // This is the background color
+                      backgroundColor: Colors.red, // This is the background color
                     ),
                   ),
                 ),
@@ -438,6 +439,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             setState(() {
               eventManager.addEvent(Event(now, precision));
               selectedEvents.insert(0, false);
+              SystemSound.play(SystemSoundType.click);
             });
           }, // increase icon size
           style: ElevatedButton.styleFrom(
