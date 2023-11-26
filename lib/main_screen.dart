@@ -440,6 +440,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
               eventManager.addEvent(Event(now, precision));
               selectedEvents.insert(0, false);
               SystemSound.play(SystemSoundType.click);
+              HapticFeedback.lightImpact();
             });
           }, // increase icon size
           style: ElevatedButton.styleFrom(
