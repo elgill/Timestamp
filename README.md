@@ -1,16 +1,53 @@
-# timestamp
 
-Precision timestamping
+# Precise Timestamp App
+
+## Overview
+
+**Precise Timestamp** is a Flutter-based application designed to provide high-precision timekeeping by capturing the exact time of events down to the tenth of a second. Utilizing Network Time Protocol (NTP) for synchronization with time servers, it offers unparalleled accuracy and is available for both iOS and Android platforms.
+
+## Features
+
+-   **NTP Synchronization**: Ensures high-precision timekeeping by syncing with NTP servers.
+-   **Dynamic Display Modes**: Offers Absolute and Relative time displays, along with organized event grouping.
+-   **Seamless Event Management**: Facilitates easy event editing and deletion through a user-friendly interface.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+### Prerequisites
 
-A few resources to get you started if this is your first Flutter project:
+-   Flutter (latest version recommended)
+-   Dart (latest version recommended)
+-   For iOS: Xcode (latest version recommended)
+-   For Android: Android Studio (latest version recommended)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Setup
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+1.  **Clone the Repository**
+    
+    `git clone https://github.com/elgill/Timestamp.git` 
+    
+2.  **Navigate to the Project Directory**
+    
+    `cd Timestamp` 
+    
+3.  **Install Dependencies**
+    
+    `flutter pub get` 
+    
+
+### Running the App
+
+-   **iOS**
+    `open -a Simulator
+    flutter run` 
+    
+-   **Android**
+    `flutter run` 
+    
+## Support
+
+For bugs, feature requests, or further assistance, please open an issue in this repository.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
