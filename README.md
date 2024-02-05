@@ -3,7 +3,7 @@
 
 ## Overview
 
-**Precise Timestamp** is a Flutter-based application designed to provide high-precision timekeeping by capturing the exact time of events down to the tenth of a second. Utilizing Network Time Protocol (NTP) for synchronization with time servers, it offers unparalleled accuracy and is available for both iOS and Android platforms.
+**Precise Timestamp** is a Flutter-based application designed to provide high-precision timekeeping by capturing the exact time of events down to the tenth of a second. Utilizing Network Time Protocol (NTP) for synchronization with time servers, it offers unparalleled accuracy and is available for both [iOS](https://apps.apple.com/us/app/precise-timestamp/id6463294734) and [Android](https://play.google.com/store/apps/details?id=dev.gillin.timestamp) platforms.
 
 ## Features
 
