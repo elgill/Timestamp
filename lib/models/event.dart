@@ -5,7 +5,7 @@ class Event {
   final int precision;
   String description = "";
 
-  Event(this.time, this.precision);
+  Event(this.time, this.precision, {this.description = ""});
 
   // Convert Event object to JSON string
   String toJson() {
