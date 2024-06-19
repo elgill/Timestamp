@@ -429,27 +429,16 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             ),
           ),
         )),
-        ElevatedButton(
-          onPressed: () async {
-            DateTime now = ntpService.currentTime;
-            int precision = -1;
-            if (ntpService.isInfoRecieved) {
-              precision = ntpService.roundTripTime ~/ 2;
-            }
-            setState(() {
-              eventManager.addEvent(Event(now, precision));
-              selectedEvents.insert(0, false);
-              SystemSound.play(SystemSoundType.click);
-              HapticFeedback.lightImpact();
-            });
-          }, // increase icon size
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(
-                horizontal: 0, vertical: 0), // add padding
-            minimumSize: Size(MediaQuery.of(context).size.width-20, 60), // Button width is now screen width
-          ),
-          child: const Icon(Icons.arrow_downward, size: 30),
+        // TODO: Lets refactor this section into a method so we can reuse this somewhere else -> _buildEventButtonSection(),
+        const Divider(
+          thickness: 2, // Increase divider thickness
         ),
+        _buildRecordEventButton(),
+        const Divider(
+          //color: Colors.blue, // Change divider color
+          thickness: 2, // Increase divider thickness
+        ),
+        // TODO: End Section
         Expanded(
           child: ListView.builder(
             itemCount: _groupedEvents.entries.length,
@@ -477,7 +466,43 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             },
           ),
         ),
+/*        const Divider(
+          //color: Colors.blue, // Change divider color
+          thickness: 2, // Increase divider thickness
+        ),
+        buildRecordEventButton(),
+        const Divider(
+          thickness: 2, // Increase divider thickness
+        ),*/
+
       ],
     );
+  }
+
+  ElevatedButton _buildRecordEventButton() {
+    return ElevatedButton(
+        onPressed: () async {
+          DateTime now = ntpService.currentTime;
+          int precision = -1;
+          if (ntpService.isInfoRecieved) {
+            precision = ntpService.roundTripTime ~/ 2;
+          }
+          setState(() {
+            eventManager.addEvent(Event(now, precision));
+            selectedEvents.insert(0, false);
+            SystemSound.play(SystemSoundType.click);
+            HapticFeedback.lightImpact();
+          });
+        }, // increase icon size
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(
+              horizontal: 0, vertical: 0), // add padding
+          minimumSize: Size(MediaQuery.of(context).size.width-20, 60), // Button width is now screen width
+        ),
+        child: const Icon(Icons.arrow_downward, size: 30),
+      );
+  }
+
+  _buildEventButtonSection() {
   }
 }
