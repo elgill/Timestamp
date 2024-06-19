@@ -429,16 +429,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             ),
           ),
         )),
-        // TODO: Lets refactor this section into a method so we can reuse this somewhere else -> _buildEventButtonSection(),
-        const Divider(
-          thickness: 2, // Increase divider thickness
-        ),
-        _buildRecordEventButton(),
-        const Divider(
-          //color: Colors.blue, // Change divider color
-          thickness: 2, // Increase divider thickness
-        ),
-        // TODO: End Section
+        _buildEventButtonSection(),
         Expanded(
           child: ListView.builder(
             itemCount: _groupedEvents.entries.length,
@@ -466,15 +457,21 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             },
           ),
         ),
-/*        const Divider(
-          //color: Colors.blue, // Change divider color
-          thickness: 2, // Increase divider thickness
-        ),
-        buildRecordEventButton(),
+        //_buildEventButtonSection(),
+      ],
+    );
+  }
+
+  Widget _buildEventButtonSection() {
+    return Column(
+      children: [
         const Divider(
           thickness: 2, // Increase divider thickness
-        ),*/
-
+        ),
+        _buildRecordEventButton(),
+        const Divider(
+          thickness: 2, // Increase divider thickness
+        ),
       ],
     );
   }
@@ -501,8 +498,5 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         ),
         child: const Icon(Icons.arrow_downward, size: 30),
       );
-  }
-
-  _buildEventButtonSection() {
   }
 }
