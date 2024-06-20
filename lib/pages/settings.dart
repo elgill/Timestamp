@@ -2,7 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:settings_ui/settings_ui.dart';
+import 'package:timestamp/enums/button_location.dart';
 import 'package:timestamp/providers/auto_lock_provider.dart';
+import 'package:timestamp/providers/button_location_provider.dart';
 import 'package:timestamp/providers/time_server_provider.dart';
 import 'package:timestamp/services/event_service.dart';
 import 'package:timestamp/utils/time_utils.dart';
@@ -58,6 +60,16 @@ class SettingsScreen extends ConsumerWidget {
                         MaterialPageRoute(builder: (context) {
                       return _SelectTimeFormatScreen();
                     }));
+                  }),
+              SettingsTile.navigation(
+                  title: const Text('Button Location'),
+                  leading: const Icon(Icons.access_time),
+                  value: Text(ref.watch(buttonLocationProvider).displayName),
+                  onPressed: (context) {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) {
+                          return _SelectButtonLocationScreen();
+                        }));
                   }),
               SettingsTile.switchTile(
                   title: const Text('Disable Auto Lock'),
@@ -195,6 +207,41 @@ class _SelectTimeServerScreen extends ConsumerWidget {
     }
   }
 }
+
+class _SelectButtonLocationScreen extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    ButtonLocation currentLocation = ref.watch(buttonLocationProvider);
+    return Scaffold(
+      appBar: AppBar(title: const Text('Select Button Location')),
+      body: SettingsList(
+        sections: [
+          SettingsSection(
+            tiles: ButtonLocation.values.map((location) {
+              return SettingsTile(
+                title: Text(location.displayName),
+                trailing: trailingWidgetFor(location, currentLocation),
+                onPressed: (context) {
+                  ref.read(buttonLocationProvider.notifier).setButtonLocation(location);
+                  Navigator.of(context).pop();
+                },
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget trailingWidgetFor(ButtonLocation location, ButtonLocation currentLocation) {
+    if (location == currentLocation) {
+      return const Icon(Icons.check, color: Colors.blue);
+    } else {
+      return Container();
+    }
+  }
+}
+
 
 class _ManualEventEntryScreen extends ConsumerStatefulWidget {
   @override

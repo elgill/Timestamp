@@ -1,11 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timestamp/enums/button_location.dart';
 import 'package:timestamp/enums/time_format.dart';
 import 'package:timestamp/constants.dart';
 import 'package:timestamp/enums/time_server.dart';
 
 
 final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
+  // This is overwritten in main.dart
   throw UnimplementedError();
 });
 
@@ -39,6 +41,16 @@ class SharedUtility {
 
   void setTimeServer(TimeServer value) {
     sharedPreferences.setString(sharedTimeServerKey, value.toString());
+  }
+
+  ButtonLocation getButtonLocation() {
+    final format = sharedPreferences.getString(buttonLocationKey);
+    if (format == null) return ButtonLocation.top;
+    return ButtonLocation.values.firstWhere((e) => e.toString() == format);
+  }
+
+  void setButtonLocation(ButtonLocation location) {
+    sharedPreferences.setString(buttonLocationKey, location.toString());
   }
 
   bool getDisableAutoLock() {

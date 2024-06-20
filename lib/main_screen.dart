@@ -8,6 +8,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:timestamp/enums/button_location.dart';
 import 'package:timestamp/enums/time_format.dart';
 import 'package:timestamp/pages/settings.dart';
 import 'package:timestamp/providers/shared_pref_provider.dart';
@@ -429,7 +430,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             ),
           ),
         )),
-        _buildEventButtonSection(),
+        ref.watch(sharedUtilityProvider).getButtonLocation() == ButtonLocation.top ?
+          _buildEventButtonSection() : const Divider(thickness: 2),
         Expanded(
           child: ListView.builder(
             itemCount: _groupedEvents.entries.length,
@@ -457,7 +459,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             },
           ),
         ),
-        //_buildEventButtonSection(),
+        ref.watch(sharedUtilityProvider).getButtonLocation() == ButtonLocation.bottom ?
+          _buildEventButtonSection() : Container(),
       ],
     );
   }
