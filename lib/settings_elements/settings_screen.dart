@@ -16,6 +16,7 @@ import 'select_time_format_screen.dart';
 import 'select_time_server_screen.dart';
 import 'select_button_location_screen.dart';
 import 'manual_event_entry_screen.dart';
+import 'manage_button_names_screen.dart';
 import 'package:timestamp/app_providers.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -68,6 +69,15 @@ class SettingsScreen extends ConsumerWidget {
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) {
                           return const SelectButtonLocationScreen();
+                        }));
+                  }),
+              SettingsTile.navigation(
+                  title: const Text('Custom Button Names'),
+                  leading: const Icon(Icons.text_fields),
+                  onPressed: (context) {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) {
+                          return const ManageButtonNamesScreen();
                         }));
                   }),
               SettingsTile.switchTile(
