@@ -431,7 +431,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           ),
         )),
         ref.watch(sharedUtilityProvider).getButtonLocation() == ButtonLocation.top ?
-          _buildEventButtonSection(false,true) : const Divider(thickness: 0),
+          _buildEventButtonSection(true,true) : const Divider(thickness: 0),
         Expanded(
           child: ListView.builder(
             itemCount: _groupedEvents.entries.length,
@@ -466,28 +466,31 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   }
 
   Widget _buildEventButtonSection(bool topDivider, bool bottomDivider) {
-    return Column(
-      children: [
-        topDivider ? SizedBox(
-          height: 8,
-          child: Center(
-            child: Container(
-              height: 1,
-              /*margin: EdgeInsetsDirectional.only(start: indent, end: endIndent),*/
+    final Color color = Theme.of(context).colorScheme.onInverseSurface;
+
+    return Container(
+      color: color,
+       child: Column(
+        children: [
+          topDivider ? SizedBox(
+            height: 8,
+            child: Center(
+              child: Container(
+                height: 0,
+              ),
             ),
-          ),
-        ):Container(),
-        _buildRecordEventButton(),
-        bottomDivider ? SizedBox(
-          height: 8,
-          child: Center(
-            child: Container(
-              height: 1,
-              /*margin: EdgeInsetsDirectional.only(start: indent, end: endIndent),*/
+          ):Container(),
+          _buildRecordEventButton(),
+          bottomDivider ? SizedBox(
+            height: 8,
+            child: Center(
+              child: Container(
+                height: 0,
+              ),
             ),
-          ),
-        ):Container(),
-      ],
+          ):Container(),
+        ],
+      )
     );
   }
 
