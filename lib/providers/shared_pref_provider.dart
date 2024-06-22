@@ -63,4 +63,14 @@ class SharedUtility {
     sharedPreferences.setBool(disableAutoLockKey, value);
   }
 
+  List<String> getCustomEventButtonList() {
+    final status = sharedPreferences.getStringList(customEventNamesKey);
+    if (status == null) return [];
+    return status;
+  }
+
+  void setCustomEventButtonList(List<String> value) {
+    sharedPreferences.setStringList(customEventNamesKey, value);
+  }
+
 }
