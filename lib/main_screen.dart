@@ -431,7 +431,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           ),
         )),
         ref.watch(sharedUtilityProvider).getButtonLocation() == ButtonLocation.top ?
-          _buildEventButtonSection() : const Divider(thickness: 2),
+          _buildEventButtonSection(false,true) : const Divider(thickness: 0),
         Expanded(
           child: ListView.builder(
             itemCount: _groupedEvents.entries.length,
@@ -460,21 +460,33 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           ),
         ),
         ref.watch(sharedUtilityProvider).getButtonLocation() == ButtonLocation.bottom ?
-          _buildEventButtonSection() : Container(),
+          _buildEventButtonSection(true, true) : Container(),
       ],
     );
   }
 
-  Widget _buildEventButtonSection() {
+  Widget _buildEventButtonSection(bool topDivider, bool bottomDivider) {
     return Column(
       children: [
-        const Divider(
-          thickness: 2, // Increase divider thickness
-        ),
+        topDivider ? SizedBox(
+          height: 8,
+          child: Center(
+            child: Container(
+              height: 1,
+              /*margin: EdgeInsetsDirectional.only(start: indent, end: endIndent),*/
+            ),
+          ),
+        ):Container(),
         _buildRecordEventButton(),
-        const Divider(
-          thickness: 2, // Increase divider thickness
-        ),
+        bottomDivider ? SizedBox(
+          height: 8,
+          child: Center(
+            child: Container(
+              height: 1,
+              /*margin: EdgeInsetsDirectional.only(start: indent, end: endIndent),*/
+            ),
+          ),
+        ):Container(),
       ],
     );
   }
