@@ -510,7 +510,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   Widget _buildRecordEventButtons(List<String> buttonNames) {
     final numberOfButtons = buttonNames.isEmpty ? 1 : buttonNames.length;
-    final buttonWidth = MediaQuery.of(context).size.width / numberOfButtons;
+    final buttonWidth =
+        (MediaQuery.of(context).size.width - (numberOfButtons + 1) * 8) /
+            numberOfButtons;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -522,36 +524,39 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     );
   }
 
-  ElevatedButton _buildRecordEventButton(String? name, double width) {
-    return ElevatedButton(
-      onPressed: () async {
-        DateTime now = ntpService.currentTime;
-        int precision = -1;
-        if (ntpService.isInfoRecieved) {
-          precision = ntpService.roundTripTime ~/ 2;
-        }
-        setState(() {
-          eventManager.addEvent(Event(now, precision));
-          selectedEvents.insert(0, false);
-          SystemSound.play(SystemSoundType.click);
-          HapticFeedback.lightImpact();
-        });
-      },
-      style: ElevatedButton.styleFrom(
-        minimumSize: Size(width, 60), // Button width is dynamically set
-        maximumSize: Size(width, 60),
-      ),
-      child: name == null
-          ? const Icon(Icons.arrow_downward, size: 30)
-          : FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                name,
-                style: const TextStyle(fontSize: 16),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+  Padding _buildRecordEventButton(String? name, double width) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+      child: ElevatedButton(
+        onPressed: () async {
+          DateTime now = ntpService.currentTime;
+          int precision = -1;
+          if (ntpService.isInfoRecieved) {
+            precision = ntpService.roundTripTime ~/ 2;
+          }
+          setState(() {
+            eventManager.addEvent(Event(now, precision));
+            selectedEvents.insert(0, false);
+            SystemSound.play(SystemSoundType.click);
+            HapticFeedback.lightImpact();
+          });
+        },
+        style: ElevatedButton.styleFrom(
+          minimumSize: Size(width, 60), // Button width is dynamically set
+          maximumSize: Size(width, 60),
+        ),
+        child: name == null
+            ? const Icon(Icons.arrow_downward, size: 30)
+            : FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  name,
+                  style: const TextStyle(fontSize: 16),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-            ),
+      ),
     );
   }
 }
