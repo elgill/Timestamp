@@ -10,6 +10,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timestamp/enums/button_location.dart';
 import 'package:timestamp/enums/time_format.dart';
+import 'package:timestamp/providers/custom_button_names_provider.dart';
 import 'package:timestamp/settings_elements/settings_screen.dart';
 import 'package:timestamp/providers/shared_pref_provider.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -162,7 +163,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       eventManager.events,
       (event) {
         DateTime dateTime = event.time;
-        if(ref.watch(sharedUtilityProvider).getTimeFormat() == TimeFormat.utc24Hour) {
+        if (ref.watch(sharedUtilityProvider).getTimeFormat() ==
+            TimeFormat.utc24Hour) {
           dateTime = dateTime.toUtc();
         }
         return DateTime(dateTime.year, dateTime.month, dateTime.day);
@@ -208,8 +210,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
               child: const Text('Get Time'),
               onPressed: () async {
                 Navigator.of(context).pop();
-                await ntpService.updateNtpOffset();  // Await the fetching response
-                _showNtpDetailsDialog();  // Reopen the dialog
+                await ntpService
+                    .updateNtpOffset(); // Await the fetching response
+                _showNtpDetailsDialog(); // Reopen the dialog
               },
             ),
           ],
@@ -264,7 +267,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                         ? 'Delete Selected'
                         : 'Delete All'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red, // This is the background color
+                      backgroundColor:
+                          Colors.red, // This is the background color
                     ),
                   ),
                 ),
@@ -383,7 +387,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if(ref.watch(sharedUtilityProvider).getDisableAutoLock()){
+    if (ref.watch(sharedUtilityProvider).getDisableAutoLock()) {
       WakelockPlus.enable();
     }
 
@@ -430,8 +434,10 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             ),
           ),
         )),
-        ref.watch(sharedUtilityProvider).getButtonLocation() == ButtonLocation.top ?
-          _buildEventButtonSection(true,true) : const Divider(thickness: 0),
+        ref.watch(sharedUtilityProvider).getButtonLocation() ==
+                ButtonLocation.top
+            ? _buildEventButtonSection(true, true)
+            : const Divider(thickness: 0),
         Expanded(
           child: ListView.builder(
             itemCount: _groupedEvents.entries.length,
@@ -444,7 +450,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                   Padding(
                     padding: const EdgeInsets.all(1.0),
                     child: Text(
-                      formatDate(sectionDate, ref.watch(sharedUtilityProvider).getTimeFormat()),
+                      formatDate(sectionDate,
+                          ref.watch(sharedUtilityProvider).getTimeFormat()),
                       style: const TextStyle(
                           fontSize: 20, fontWeight: FontWeight.bold),
                     ),
@@ -459,62 +466,92 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             },
           ),
         ),
-        ref.watch(sharedUtilityProvider).getButtonLocation() == ButtonLocation.bottom ?
-          _buildEventButtonSection(true, true) : Container(),
+        ref.watch(sharedUtilityProvider).getButtonLocation() ==
+                ButtonLocation.bottom
+            ? _buildEventButtonSection(true, true)
+            : Container(),
       ],
     );
   }
 
   Widget _buildEventButtonSection(bool topDivider, bool bottomDivider) {
+    final customButtonNames = ref.watch(customButtonNamesProvider);
     final Color color = Theme.of(context).colorScheme.onInverseSurface;
 
     return Container(
       color: color,
-       child: Column(
+      child: Column(
         children: [
-          topDivider ? SizedBox(
-            height: 8,
-            child: Center(
-              child: Container(
-                height: 0,
-              ),
-            ),
-          ):Container(),
-          _buildRecordEventButton(),
-          bottomDivider ? SizedBox(
-            height: 8,
-            child: Center(
-              child: Container(
-                height: 0,
-              ),
-            ),
-          ):Container(),
+          topDivider
+              ? SizedBox(
+                  height: 8,
+                  child: Center(
+                    child: Container(
+                      height: 0,
+                    ),
+                  ),
+                )
+              : Container(),
+          _buildRecordEventButtons(customButtonNames),
+          bottomDivider
+              ? SizedBox(
+                  height: 8,
+                  child: Center(
+                    child: Container(
+                      height: 0,
+                    ),
+                  ),
+                )
+              : Container(),
         ],
-      )
+      ),
     );
   }
 
-  ElevatedButton _buildRecordEventButton() {
+  Widget _buildRecordEventButtons(List<String> buttonNames) {
+    final numberOfButtons = buttonNames.isEmpty ? 1 : buttonNames.length;
+    final buttonWidth = MediaQuery.of(context).size.width / numberOfButtons;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: buttonNames.isEmpty
+          ? [_buildRecordEventButton(null, buttonWidth)]
+          : buttonNames
+              .map((name) => _buildRecordEventButton(name, buttonWidth))
+              .toList(),
+    );
+  }
+
+  ElevatedButton _buildRecordEventButton(String? name, double width) {
     return ElevatedButton(
-        onPressed: () async {
-          DateTime now = ntpService.currentTime;
-          int precision = -1;
-          if (ntpService.isInfoRecieved) {
-            precision = ntpService.roundTripTime ~/ 2;
-          }
-          setState(() {
-            eventManager.addEvent(Event(now, precision));
-            selectedEvents.insert(0, false);
-            SystemSound.play(SystemSoundType.click);
-            HapticFeedback.lightImpact();
-          });
-        }, // increase icon size
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(
-              horizontal: 0, vertical: 0), // add padding
-          minimumSize: Size(MediaQuery.of(context).size.width-20, 60), // Button width is now screen width
-        ),
-        child: const Icon(Icons.arrow_downward, size: 30),
-      );
+      onPressed: () async {
+        DateTime now = ntpService.currentTime;
+        int precision = -1;
+        if (ntpService.isInfoRecieved) {
+          precision = ntpService.roundTripTime ~/ 2;
+        }
+        setState(() {
+          eventManager.addEvent(Event(now, precision));
+          selectedEvents.insert(0, false);
+          SystemSound.play(SystemSoundType.click);
+          HapticFeedback.lightImpact();
+        });
+      },
+      style: ElevatedButton.styleFrom(
+        minimumSize: Size(width, 60), // Button width is dynamically set
+        maximumSize: Size(width, 60),
+      ),
+      child: name == null
+          ? const Icon(Icons.arrow_downward, size: 30)
+          : FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                name,
+                style: const TextStyle(fontSize: 16),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+    );
   }
 }
