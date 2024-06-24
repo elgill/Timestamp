@@ -75,7 +75,7 @@ class SettingsScreen extends ConsumerWidget {
                   }),
               SettingsTile.navigation(
                   title: const Text('Button Location'),
-                  leading: const Icon(Icons.access_time),
+                  leading: const Icon(Icons.place),
                   value: Text(ref.watch(buttonLocationProvider).displayName),
                   onPressed: (context) {
                     Navigator.push(context,
