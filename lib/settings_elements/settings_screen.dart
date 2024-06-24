@@ -51,6 +51,18 @@ class SettingsScreen extends ConsumerWidget {
                           return const SelectTimeServerScreen();
                         }));
                   }),
+              SettingsTile.switchTile(
+                  title: const Text('Disable Auto Lock'),
+                  leading: const Icon(Icons.lock),
+                  initialValue: ref.watch(autoLockProvider),
+                  onToggle: (bool value) {
+                    ref.read(autoLockProvider.notifier).setAutoLock(value);
+                  }),
+            ],
+          ),
+          SettingsSection(
+            title: const Text('Display Settings'),
+            tiles: [
               SettingsTile.navigation(
                   title: const Text('Time Format'),
                   leading: const Icon(Icons.access_time),
@@ -79,13 +91,6 @@ class SettingsScreen extends ConsumerWidget {
                         MaterialPageRoute(builder: (context) {
                           return const ManageButtonNamesScreen();
                         }));
-                  }),
-              SettingsTile.switchTile(
-                  title: const Text('Disable Auto Lock'),
-                  leading: const Icon(Icons.lock),
-                  initialValue: ref.watch(autoLockProvider),
-                  onToggle: (bool value) {
-                    ref.read(autoLockProvider.notifier).setAutoLock(value);
                   }),
             ],
           ),
