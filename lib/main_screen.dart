@@ -532,7 +532,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 precision = ntpService.roundTripTime ~/ 2;
               }
               setState(() {
-                eventManager.addEvent(Event(now, precision));
+                eventManager.addEvent(Event(now, precision, description: name ?? ''));
                 selectedEvents.insert(0, false);
                 SystemSound.play(SystemSoundType.click);
                 HapticFeedback.lightImpact();
