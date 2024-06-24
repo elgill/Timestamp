@@ -37,6 +37,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   late EventService eventManager = EventService();
   late NtpService ntpService = ref.watch(ntpServiceProvider);
 
+  double buttonPadding = 4.0;
+
   DateTime displayTime = DateTime.now();
   late Timer _timer;
 
@@ -509,53 +511,48 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   }
 
   Widget _buildRecordEventButtons(List<String> buttonNames) {
-    final numberOfButtons = buttonNames.isEmpty ? 1 : buttonNames.length;
-    final buttonWidth =
-        (MediaQuery.of(context).size.width - (numberOfButtons + 1) * 8) /
-            numberOfButtons;
+    //final numberOfButtons = buttonNames.isEmpty ? 1 : buttonNames.length;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: buttonNames.isEmpty
-          ? [_buildRecordEventButton(null, buttonWidth)]
-          : buttonNames
-              .map((name) => _buildRecordEventButton(name, buttonWidth))
-              .toList(),
+          ? [_buildRecordEventButton(null)]
+          : buttonNames.map((name) => _buildRecordEventButton(name)).toList(),
     );
   }
 
-  Padding _buildRecordEventButton(String? name, double width) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-      child: ElevatedButton(
-        onPressed: () async {
-          DateTime now = ntpService.currentTime;
-          int precision = -1;
-          if (ntpService.isInfoRecieved) {
-            precision = ntpService.roundTripTime ~/ 2;
-          }
-          setState(() {
-            eventManager.addEvent(Event(now, precision));
-            selectedEvents.insert(0, false);
-            SystemSound.play(SystemSoundType.click);
-            HapticFeedback.lightImpact();
-          });
-        },
-        style: ElevatedButton.styleFrom(
-          minimumSize: Size(width, 60), // Button width is dynamically set
-          maximumSize: Size(width, 60),
-        ),
-        child: name == null
-            ? const Icon(Icons.arrow_downward, size: 30)
-            : FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  name,
-                  style: const TextStyle(fontSize: 16),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+  Widget _buildRecordEventButton(String? name) {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 2.0),
+        child: ElevatedButton(
+          onPressed: () async {
+            DateTime now = ntpService.currentTime;
+            int precision = -1;
+            if (ntpService.isInfoRecieved) {
+              precision = ntpService.roundTripTime ~/ 2;
+            }
+            setState(() {
+              eventManager.addEvent(Event(now, precision));
+              selectedEvents.insert(0, false);
+              SystemSound.play(SystemSoundType.click);
+              HapticFeedback.lightImpact();
+            });
+          },
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 16),
+          ),
+          child: name == null
+              ? const Icon(Icons.arrow_downward, size: 30)
+              : FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    name,
+                    style: const TextStyle(fontSize: 16),
+                    maxLines: 1,
+                  ),
                 ),
-              ),
+        ),
       ),
     );
   }
