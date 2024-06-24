@@ -511,10 +511,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   }
 
   Widget _buildRecordEventButtons(List<String> buttonNames) {
-    //final numberOfButtons = buttonNames.isEmpty ? 1 : buttonNames.length;
-
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: buttonNames.isEmpty
           ? [_buildRecordEventButton(null)]
           : buttonNames.map((name) => _buildRecordEventButton(name)).toList(),
@@ -525,33 +522,37 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 2.0),
-        child: ElevatedButton(
-          onPressed: () async {
-            DateTime now = ntpService.currentTime;
-            int precision = -1;
-            if (ntpService.isInfoRecieved) {
-              precision = ntpService.roundTripTime ~/ 2;
-            }
-            setState(() {
-              eventManager.addEvent(Event(now, precision));
-              selectedEvents.insert(0, false);
-              SystemSound.play(SystemSoundType.click);
-              HapticFeedback.lightImpact();
-            });
-          },
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 16),
-          ),
-          child: name == null
-              ? const Icon(Icons.arrow_downward, size: 30)
-              : FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    name,
-                    style: const TextStyle(fontSize: 16),
-                    maxLines: 1,
+        child: SizedBox(
+          height: 60, // Fixed height for all buttons
+          child: ElevatedButton(
+            onPressed: () async {
+              DateTime now = ntpService.currentTime;
+              int precision = -1;
+              if (ntpService.isInfoRecieved) {
+                precision = ntpService.roundTripTime ~/ 2;
+              }
+              setState(() {
+                eventManager.addEvent(Event(now, precision));
+                selectedEvents.insert(0, false);
+                SystemSound.play(SystemSoundType.click);
+                HapticFeedback.lightImpact();
+              });
+            },
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+            ),
+            child: name == null
+                ? const Icon(Icons.arrow_downward, size: 30)
+                : FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      name,
+                      style: const TextStyle(fontSize: 16),
+                      maxLines: 1,
+                      textAlign: TextAlign.center,
+                    ),
                   ),
-                ),
+          ),
         ),
       ),
     );
