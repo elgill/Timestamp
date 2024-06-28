@@ -24,6 +24,18 @@ class _ManageButtonNamesScreenState extends ConsumerState<ManageButtonNamesScree
     }
   }
 
+  void _onReorder(int oldIndex, int newIndex) {
+    final List<String> currentNames = ref.read(customButtonNamesProvider);
+    if (newIndex > oldIndex) {
+      newIndex -= 1;
+    }
+    final item = currentNames.removeAt(oldIndex);
+    currentNames.insert(newIndex, item);
+    setState(() {
+      ref.read(customButtonNamesProvider.notifier).setCustomButtonNameList(currentNames);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final buttonNames = ref.watch(customButtonNamesProvider);
@@ -47,23 +59,36 @@ class _ManageButtonNamesScreenState extends ConsumerState<ManageButtonNamesScree
               ),
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              'Drag and drop items to reorder',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
           Expanded(
-            child: ListView.builder(
-              itemCount: buttonNames.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(buttonNames[index]),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () {
-                      setState(() {
-                        buttonNames.removeAt(index);
-                        ref.read(customButtonNamesProvider.notifier).setCustomButtonNameList(buttonNames);
-                      });
-                    },
+            child: ReorderableListView(
+              onReorder: _onReorder,
+              children: [
+                for (int index = 0; index < buttonNames.length; index++)
+                  ListTile(
+                    key: ValueKey(buttonNames[index]),
+                    leading: MouseRegion(
+                      cursor: SystemMouseCursors.grab,
+                      child: Icon(Icons.drag_handle),
+                    ),
+                    title: Text(buttonNames[index]),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () {
+                        setState(() {
+                          buttonNames.removeAt(index);
+                          ref.read(customButtonNamesProvider.notifier).setCustomButtonNameList(buttonNames);
+                        });
+                      },
+                    ),
                   ),
-                );
-              },
+              ],
             ),
           ),
         ],
