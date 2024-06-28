@@ -59,13 +59,6 @@ class _ManageButtonNamesScreenState extends ConsumerState<ManageButtonNamesScree
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              'Drag and drop items to reorder',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-          ),
           Expanded(
             child: ReorderableListView(
               onReorder: _onReorder,
@@ -73,7 +66,7 @@ class _ManageButtonNamesScreenState extends ConsumerState<ManageButtonNamesScree
                 for (int index = 0; index < buttonNames.length; index++)
                   ListTile(
                     key: ValueKey(buttonNames[index]),
-                    leading: MouseRegion(
+                    leading: const MouseRegion(
                       cursor: SystemMouseCursors.grab,
                       child: Icon(Icons.drag_handle),
                     ),
