@@ -10,6 +10,7 @@
 -   **NTP Synchronization**: Ensures high-precision timekeeping by syncing with NTP servers.
 -   **Dynamic Display Modes**: Offers Absolute and Relative time displays, along with organized event grouping.
 -   **Seamless Event Management**: Facilitates easy event editing and deletion through a user-friendly interface.
+-   **Custom Event Buttons**: Specify custom button names to allow multiple buttons which will automatically name the event.
 
 ## Getting Started
 
