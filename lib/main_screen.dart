@@ -518,22 +518,25 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       );
     }
 
-    int buttonsPerRow = (buttonNames.length / numberOfButtonRows).ceil();
+    int totalButtons = buttonNames.length;
+    List<List<String>> rows = [];
+
+    for (int i = 0; i < numberOfButtonRows; i++) {
+      int startIndex = (i * totalButtons / numberOfButtonRows).floor();
+      int endIndex = ((i + 1) * totalButtons / numberOfButtonRows).floor();
+      if (startIndex < totalButtons) {
+        rows.add(buttonNames.sublist(startIndex, endIndex));
+      }
+    }
 
     return Column(
-      children: List.generate(numberOfButtonRows, (rowIndex) {
-        int startIndex = rowIndex * buttonsPerRow;
-        int endIndex = (startIndex + buttonsPerRow).clamp(0, buttonNames.length);
+      children: rows.map((rowButtons) {
         return Row(
-          children: buttonNames
-              .sublist(startIndex, endIndex)
-              .map((name) => _buildRecordEventButton(name))
-              .toList(),
+          children: rowButtons.map((name) => _buildRecordEventButton(name)).toList(),
         );
-      }),
+      }).toList(),
     );
   }
-
   Widget _buildRecordEventButton(String? name) {
     return Expanded(
       child: Padding(
