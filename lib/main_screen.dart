@@ -38,6 +38,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   late NtpService ntpService = ref.watch(ntpServiceProvider);
 
   double buttonPadding = 4.0;
+  int numberOfButtonRows = 4; // This can be changed to control the number of rows
 
   DateTime displayTime = DateTime.now();
   late Timer _timer;
@@ -511,19 +512,37 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   }
 
   Widget _buildRecordEventButtons(List<String> buttonNames) {
-    return Row(
-      children: buttonNames.isEmpty
-          ? [_buildRecordEventButton(null)]
-          : buttonNames.map((name) => _buildRecordEventButton(name)).toList(),
+    if (buttonNames.isEmpty) {
+      return Row(
+        children: [_buildRecordEventButton(null)],
+      );
+    }
+
+    int totalButtons = buttonNames.length;
+    List<List<String>> rows = [];
+
+    for (int i = 0; i < numberOfButtonRows; i++) {
+      int startIndex = (i * totalButtons / numberOfButtonRows).floor();
+      int endIndex = ((i + 1) * totalButtons / numberOfButtonRows).floor();
+      if (startIndex < totalButtons) {
+        rows.add(buttonNames.sublist(startIndex, endIndex));
+      }
+    }
+
+    return Column(
+      children: rows.map((rowButtons) {
+        return Row(
+          children: rowButtons.map((name) => _buildRecordEventButton(name)).toList(),
+        );
+      }).toList(),
     );
   }
-
   Widget _buildRecordEventButton(String? name) {
     return Expanded(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 2.0),
+        padding: const EdgeInsets.all(2.0),
         child: SizedBox(
-          height: 60, // Fixed height for all buttons
+          height: 50, // Reduced height to accommodate multiple rows
           child: ElevatedButton(
             onPressed: () async {
               DateTime now = ntpService.currentTime;
@@ -542,16 +561,16 @@ class _MainScreenState extends ConsumerState<MainScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 4),
             ),
             child: name == null
-                ? const Icon(Icons.arrow_downward, size: 30)
+                ? const Icon(Icons.arrow_downward, size: 24) // Slightly smaller icon
                 : FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      name,
-                      style: const TextStyle(fontSize: 16),
-                      maxLines: 1,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
+              fit: BoxFit.scaleDown,
+              child: Text(
+                name,
+                style: const TextStyle(fontSize: 14), // Slightly smaller font
+                maxLines: 1,
+                textAlign: TextAlign.center,
+              ),
+            ),
           ),
         ),
       ),
