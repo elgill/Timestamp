@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timestamp/enums/button_location.dart';
 import 'package:timestamp/enums/time_format.dart';
 import 'package:timestamp/providers/custom_button_names_provider.dart';
+import 'package:timestamp/providers/max_button_rows_provider.dart';
 import 'package:timestamp/settings_elements/settings_screen.dart';
 import 'package:timestamp/providers/shared_pref_provider.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -38,7 +39,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   late NtpService ntpService = ref.watch(ntpServiceProvider);
 
   double buttonPadding = 4.0;
-  int numberOfButtonRows = 4; // This can be changed to control the number of rows
 
   DateTime displayTime = DateTime.now();
   late Timer _timer;
@@ -512,6 +512,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   }
 
   Widget _buildRecordEventButtons(List<String> buttonNames) {
+    int numberOfButtonRows = ref.watch(maxButtonRowsProvider);
+
     if (buttonNames.isEmpty) {
       return Row(
         children: [_buildRecordEventButton(null)],
@@ -542,7 +544,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       child: Padding(
         padding: const EdgeInsets.all(2.0),
         child: SizedBox(
-          height: 50, // Reduced height to accommodate multiple rows
+          height: 60, // Reduced height to accommodate multiple rows
           child: ElevatedButton(
             onPressed: () async {
               DateTime now = ntpService.currentTime;

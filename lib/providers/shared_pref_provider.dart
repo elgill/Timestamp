@@ -73,4 +73,14 @@ class SharedUtility {
     sharedPreferences.setStringList(customEventNamesKey, value);
   }
 
+  int getMaxButtonRows() {
+    final status = sharedPreferences.getInt(maxButtonRowsKey);
+    if (status == null) return 1;
+    return status;
+  }
+
+  void setMaxButtonRows(int value) {
+    sharedPreferences.setInt(maxButtonRowsKey, value);
+  }
+
 }

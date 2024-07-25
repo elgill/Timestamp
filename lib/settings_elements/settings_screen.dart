@@ -3,12 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:settings_ui/settings_ui.dart';
 import 'package:timestamp/providers/auto_lock_provider.dart';
 import 'package:timestamp/providers/button_location_provider.dart';
+import 'package:timestamp/providers/max_button_rows_provider.dart';
 import 'package:timestamp/providers/time_server_provider.dart';
 import 'package:timestamp/services/event_service.dart';
 import 'package:timestamp/services/share_service.dart';
 import 'package:timestamp/enums/button_location.dart';
 import 'package:timestamp/enums/time_format.dart';
 import 'package:timestamp/enums/time_server.dart';
+import 'package:timestamp/settings_elements/select_max_button_rows.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../providers/time_format_provider.dart';
@@ -90,6 +92,16 @@ class SettingsScreen extends ConsumerWidget {
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) {
                           return const ManageButtonNamesScreen();
+                        }));
+                  }),
+              SettingsTile.navigation(
+                  title: const Text('Max Button Rows'),
+                  leading: const Icon(Icons.table_rows),
+                  value: Text(ref.watch(maxButtonRowsProvider).toString()),
+                  onPressed: (context) {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) {
+                          return const SelectMaxButtonRowsScreen();
                         }));
                   }),
             ],
