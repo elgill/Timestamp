@@ -859,6 +859,10 @@ generated_plugin_registrant.cc
 generated_plugins.cmake
 GeneratedPluginRegistrant.swift
 
+#Utils
+file-condenser.py
+condensed_files.txt
+
 
 ### Flutter Generated Exceptions
 
