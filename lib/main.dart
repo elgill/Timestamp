@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timestamp/providers/shared_pref_provider.dart';
+import 'package:timestamp/providers/theme_mode_provider.dart';
 
 import 'main_screen.dart';
 
@@ -14,18 +15,20 @@ Future<void> main() async {
   ], child: const TimestampApp()));
 }
 
-class TimestampApp extends StatelessWidget {
+class TimestampApp extends ConsumerWidget {
   const TimestampApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+
     return MaterialApp(
       title: 'Timestamp',
       theme: ThemeData(
         primarySwatch: Colors.teal,
-      ), // Light mode
-      darkTheme: ThemeData.dark(), // Dark mode
-      themeMode: ThemeMode.system,
+      ),
+      darkTheme: ThemeData.dark(),
+      themeMode: themeMode,
       home: const MainScreen(),
     );
   }

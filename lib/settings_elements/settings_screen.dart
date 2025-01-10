@@ -11,8 +11,10 @@ import 'package:timestamp/enums/button_location.dart';
 import 'package:timestamp/enums/time_format.dart';
 import 'package:timestamp/enums/time_server.dart';
 import 'package:timestamp/settings_elements/select_max_button_rows.dart';
+import 'package:timestamp/settings_elements/select_theme_mode_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../providers/theme_mode_provider.dart';
 import '../providers/time_format_provider.dart';
 import 'select_time_format_screen.dart';
 import 'select_time_server_screen.dart';
@@ -104,6 +106,19 @@ class SettingsScreen extends ConsumerWidget {
                           return const SelectMaxButtonRowsScreen();
                         }));
                   }),
+              SettingsTile.navigation(
+                title: const Text('Theme'),
+                leading: const Icon(Icons.brightness_6),
+                value: Text(getModeDisplayName(ref.watch(themeModeProvider))),
+                onPressed: (context) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SelectThemeModeScreen(),
+                    ),
+                  );
+                },
+              ),
             ],
           ),
           SettingsSection(
@@ -163,4 +178,16 @@ class SettingsScreen extends ConsumerWidget {
       ),
     );
   }
-}
+
+  String getModeDisplayName(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.system:
+        return 'System';
+      case ThemeMode.light:
+        return 'Light';
+      case ThemeMode.dark:
+        return 'Dark';
+      default:
+        return 'Unknown';
+    }
+  }}
