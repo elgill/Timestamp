@@ -6,6 +6,8 @@ import 'package:timestamp/enums/time_format.dart';
 import 'package:timestamp/constants.dart';
 import 'package:timestamp/enums/time_server.dart';
 
+import '../models/button_config.dart';
+
 
 final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
   // This is overwritten in main.dart
@@ -95,6 +97,24 @@ class SharedUtility {
 
   void setThemeMode(ThemeMode mode) {
     sharedPreferences.setString(themeModeKey, mode.toString());
+  }
+
+  List<ButtonConfig> getButtonConfigs() {
+    final List<String>? jsonList = sharedPreferences.getStringList(buttonConfigsKey);
+    if (jsonList == null) {
+      // Convert existing button names to ButtonConfig objects
+      final List<String> legacyNames = getCustomEventButtonList();
+      return legacyNames.map((name) => ButtonConfig(name: name)).toList();
+    }
+    return jsonList.map((json) => ButtonConfig.fromJson(json)).toList();
+  }
+
+  void setButtonConfigs(List<ButtonConfig> configs) {
+    final List<String> jsonList = configs.map((config) => config.toJson()).toList();
+    sharedPreferences.setStringList(buttonConfigsKey, jsonList);
+
+    // Also update the legacy custom event names for backward compatibility
+    setCustomEventButtonList(configs.map((config) => config.name).toList());
   }
 
 }

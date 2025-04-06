@@ -15,7 +15,7 @@ class SelectMaxButtonRowsScreen extends ConsumerWidget {
       body: SettingsList(
         sections: [
           SettingsSection(
-            tiles: List.generate(3, (index) {
+            tiles: List.generate(5, (index) { // Changed from 3 to 5 rows
               int number = index + 1;
               return SettingsTile(
                 title: Text(number.toString()),

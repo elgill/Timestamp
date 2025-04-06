@@ -10,13 +10,14 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timestamp/enums/button_location.dart';
 import 'package:timestamp/enums/time_format.dart';
-import 'package:timestamp/providers/custom_button_names_provider.dart';
+import 'package:timestamp/providers/button_configs_provider.dart';
 import 'package:timestamp/providers/max_button_rows_provider.dart';
 import 'package:timestamp/settings_elements/settings_screen.dart';
 import 'package:timestamp/providers/shared_pref_provider.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 // Local imports
+import 'models/button_config.dart';
 import 'pages/event_detail.dart';
 import 'services/event_service.dart';
 import 'services/ntp_service.dart';
@@ -478,7 +479,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   }
 
   Widget _buildEventButtonSection(bool topDivider, bool bottomDivider) {
-    final customButtonNames = ref.watch(customButtonNamesProvider);
     final Color color = Theme.of(context).colorScheme.onInverseSurface;
 
     return Container(
@@ -495,7 +495,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                   ),
                 )
               : Container(),
-          _buildRecordEventButtons(customButtonNames),
+          _buildRecordEventButtons(ref.watch(buttonConfigsProvider)),
           bottomDivider
               ? SizedBox(
                   height: 8,
@@ -511,40 +511,42 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     );
   }
 
-  Widget _buildRecordEventButtons(List<String> buttonNames) {
+  Widget _buildRecordEventButtons(List<ButtonConfig> buttonConfigs) {
     int numberOfButtonRows = ref.watch(maxButtonRowsProvider);
 
-    if (buttonNames.isEmpty) {
+    if (buttonConfigs.isEmpty) {
       return Row(
-        children: [_buildRecordEventButton(null)],
+        children: [_buildRecordEventButton(null, Colors.teal)],
       );
     }
 
-    int totalButtons = buttonNames.length;
-    List<List<String>> rows = [];
+    int totalButtons = buttonConfigs.length;
+    List<List<ButtonConfig>> rows = [];
 
     for (int i = 0; i < numberOfButtonRows; i++) {
       int startIndex = (i * totalButtons / numberOfButtonRows).floor();
       int endIndex = ((i + 1) * totalButtons / numberOfButtonRows).floor();
       if (startIndex < totalButtons) {
-        rows.add(buttonNames.sublist(startIndex, endIndex));
+        rows.add(buttonConfigs.sublist(startIndex, endIndex));
       }
     }
 
     return Column(
       children: rows.map((rowButtons) {
         return Row(
-          children: rowButtons.map((name) => _buildRecordEventButton(name)).toList(),
+          children: rowButtons.map((config) => _buildRecordEventButton(config.name, config.color)).toList(),
         );
       }).toList(),
     );
   }
-  Widget _buildRecordEventButton(String? name) {
+
+// Update the _buildRecordEventButton method to accept a color parameter:
+  Widget _buildRecordEventButton(String? name, Color buttonColor) {
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.all(2.0),
         child: SizedBox(
-          height: 60, // Reduced height to accommodate multiple rows
+          height: 60,
           child: ElevatedButton(
             onPressed: () async {
               DateTime now = ntpService.currentTime;
@@ -561,14 +563,15 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             },
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 4),
+              backgroundColor: buttonColor, // Apply the button color
             ),
             child: name == null
-                ? const Icon(Icons.arrow_downward, size: 24) // Slightly smaller icon
+                ? const Icon(Icons.arrow_downward, size: 24)
                 : FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
                 name,
-                style: const TextStyle(fontSize: 14), // Slightly smaller font
+                style: const TextStyle(fontSize: 14),
                 maxLines: 1,
                 textAlign: TextAlign.center,
               ),
