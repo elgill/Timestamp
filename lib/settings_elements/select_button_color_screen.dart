@@ -35,6 +35,8 @@ class SelectButtonColorScreen extends ConsumerWidget {
                 onPressed: (context) {
                   ref.read(customButtonModelsProvider.notifier).updateButtonColor(
                       buttonName, color.getColor(themeMode, context));
+                  // This forces a rebuild of the customButtonModelsProvider
+                  ref.refresh(customButtonModelsProvider);
                   Navigator.of(context).pop();
                 },
               );
