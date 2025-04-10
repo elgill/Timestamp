@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:timestamp/enums/predefined_colors.dart';
 import 'package:timestamp/models/button_model.dart';
 import 'package:timestamp/providers/shared_pref_provider.dart';
+import 'package:timestamp/providers/theme_mode_provider.dart';
 
 final customButtonModelsProvider = StateNotifierProvider<CustomButtonModelsNotifier, List<ButtonModel>>((ref) {
   return CustomButtonModelsNotifier(ref: ref);
@@ -18,26 +20,36 @@ class CustomButtonModelsNotifier extends StateNotifier<List<ButtonModel>> {
     state = models;
   }
 
-  void updateButtonColor(String name, Color color) {
+  void updateButtonColor(String name, PredefinedColor predefinedColor) {
     final updatedModels = [...state];
     final index = updatedModels.indexWhere((model) => model.name == name);
 
     if (index != -1) {
-      updatedModels[index] = ButtonModel(name, color);
+      updatedModels[index] = ButtonModel(name, predefinedColor);
     } else {
-      updatedModels.add(ButtonModel(name, color));
+      updatedModels.add(ButtonModel(name, predefinedColor));
     }
 
     setCustomButtonModels(updatedModels);
   }
 
-  Color getButtonColor(String name) {
+  Color getButtonColor(String name, BuildContext context) {
     final model = state.firstWhere(
           (model) => model.name == name,
-      orElse: () => ButtonModel(name, Colors.teal), // Default color
+      orElse: () => ButtonModel(name, PredefinedColor.defaultColor),
     );
 
-    return model.color;
+    final themeMode = ref.watch(themeModeProvider);
+    return model.predefinedColor.getColor(themeMode, context);
+  }
+
+  PredefinedColor getButtonPredefinedColor(String name) {
+    final model = state.firstWhere(
+          (model) => model.name == name,
+      orElse: () => ButtonModel(name, PredefinedColor.defaultColor),
+    );
+
+    return model.predefinedColor;
   }
 
   void removeButtonModel(String name) {
@@ -57,7 +69,7 @@ class CustomButtonModelsNotifier extends StateNotifier<List<ButtonModel>> {
       // Reuse existing model if available, otherwise create new one with default color
       return modelMap.containsKey(name)
           ? modelMap[name]!
-          : ButtonModel(name, Colors.teal);
+          : ButtonModel(name, PredefinedColor.defaultColor);
     }).toList();
 
     setCustomButtonModels(updatedModels);

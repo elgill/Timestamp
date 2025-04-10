@@ -1,3 +1,4 @@
+// settings_elements/select_button_color_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:settings_ui/settings_ui.dart';
@@ -15,7 +16,8 @@ class SelectButtonColorScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentColor = ref.watch(customButtonModelsProvider.notifier).getButtonColor(buttonName);
+    final currentPredefinedColor = ref.watch(customButtonModelsProvider.notifier)
+        .getButtonPredefinedColor(buttonName);
     final themeMode = ref.watch(themeModeProvider);
 
     return Scaffold(
@@ -24,19 +26,19 @@ class SelectButtonColorScreen extends ConsumerWidget {
         sections: [
           SettingsSection(
             title: const Text('Colors'),
-            tiles: PredefinedColor.values.map((color) {
+            tiles: PredefinedColor.values.map((predefinedColor) {
               return SettingsTile(
-                title: Text(color.displayName),
+                title: Text(predefinedColor.displayName),
                 leading: CircleAvatar(
-                  backgroundColor: color.getColor(themeMode, context),
+                  backgroundColor: predefinedColor.getColor(themeMode, context),
                   radius: 16,
                 ),
-                trailing: _buildTrailingWidget(color.getColor(themeMode, context), currentColor),
+                trailing: _buildTrailingWidget(predefinedColor, currentPredefinedColor),
                 onPressed: (context) {
                   ref.read(customButtonModelsProvider.notifier).updateButtonColor(
-                      buttonName, color.getColor(themeMode, context));
+                      buttonName, predefinedColor);
                   // This forces a rebuild of the customButtonModelsProvider
-                  ref.refresh(customButtonModelsProvider);
+                  ref.invalidate(customButtonModelsProvider);
                   Navigator.of(context).pop();
                 },
               );
@@ -47,8 +49,8 @@ class SelectButtonColorScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildTrailingWidget(Color color, Color currentColor) {
-    if (color.value == currentColor.value) {
+  Widget _buildTrailingWidget(PredefinedColor color, PredefinedColor currentColor) {
+    if (color == currentColor) {
       return const Icon(Icons.check, color: Colors.blue);
     } else {
       return Container();

@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/custom_button_models_provider.dart';
 import '../providers/custom_button_names_provider.dart';
-import '../providers/theme_mode_provider.dart';
 import 'select_button_color_screen.dart';
 
 class ManageButtonNamesScreen extends ConsumerStatefulWidget {
@@ -45,7 +44,6 @@ class _ManageButtonNamesScreenState extends ConsumerState<ManageButtonNamesScree
   @override
   Widget build(BuildContext context) {
     final buttonNames = ref.watch(customButtonNamesProvider);
-    final themeMode = ref.watch(themeModeProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -99,7 +97,7 @@ class _ManageButtonNamesScreenState extends ConsumerState<ManageButtonNamesScree
                           child: CircleAvatar(
                             radius: 14,
                             backgroundColor: ref.watch(customButtonModelsProvider.notifier)
-                                .getButtonColor(buttonNames[index]),
+                                .getButtonColor(buttonNames[index], context),
                           ),
                         ),
                         const SizedBox(width: 8),

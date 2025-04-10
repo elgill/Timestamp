@@ -8,6 +8,8 @@ import 'package:timestamp/constants.dart';
 import 'package:timestamp/enums/time_server.dart';
 import 'package:timestamp/models/button_model.dart';
 
+import '../enums/predefined_colors.dart';
+
 
 final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
   // This is overwritten in main.dart
@@ -81,7 +83,7 @@ class SharedUtility {
     if (modelStrings == null || modelStrings.isEmpty) {
       // Convert existing button names to models with default color if available
       final buttonNames = getCustomEventButtonList();
-      return buttonNames.map((name) => ButtonModel(name, Colors.teal)).toList();
+      return buttonNames.map((name) => ButtonModel(name, PredefinedColor.defaultColor)).toList();
     }
 
     try {
@@ -89,9 +91,28 @@ class SharedUtility {
           .map((str) => ButtonModel.fromJson(jsonDecode(str)))
           .toList();
     } catch (e) {
-      // Fallback to default if there's an error
-      return [];
+      // If there's an error, try to migrate from the old format
+      try {
+        return _migrateFromOldButtonModelFormat(modelStrings);
+      } catch (e) {
+        // Fallback to default if there's an error
+        return [];
+      }
     }
+  }
+
+// Helper method to migrate from old format (with raw Color values) to new format (with PredefinedColor)
+  List<ButtonModel> _migrateFromOldButtonModelFormat(List<String> modelStrings) {
+    return modelStrings.map((str) {
+      final data = jsonDecode(str);
+      final name = data['name'] as String;
+      final colorValue = data['color'] as int;
+      final color = Color(colorValue);
+
+      // Try to map the old color to a predefined color
+      final predefinedColor = PredefinedColorExtension.fromColor(color);
+      return ButtonModel(name, predefinedColor);
+    }).toList();
   }
 
   void setCustomButtonModels(List<ButtonModel> models) {

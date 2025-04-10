@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:timestamp/enums/predefined_colors.dart';
 
 class ButtonModel {
   final String name;
-  final Color color;
+  final PredefinedColor predefinedColor;
 
-  ButtonModel(this.name, this.color);
+  ButtonModel(this.name, this.predefinedColor);
 
-  // Convert ButtonModel object to JSON string
+  // Get the actual color based on current theme
+  Color getColor(ThemeMode themeMode, BuildContext context) {
+    return predefinedColor.getColor(themeMode, context);
+  }
+
+  // Convert ButtonModel object to JSON
   Map<String, dynamic> toJson() {
     return {
       'name': name,
-      'color': color.value,
+      'predefinedColor': predefinedColor.index,
     };
   }
 
@@ -18,7 +24,7 @@ class ButtonModel {
   static ButtonModel fromJson(Map<String, dynamic> json) {
     return ButtonModel(
       json['name'] as String,
-      Color(json['color'] as int),
+      PredefinedColor.values[json['predefinedColor'] as int],
     );
   }
 
@@ -28,8 +34,8 @@ class ButtonModel {
           other is ButtonModel &&
               runtimeType == other.runtimeType &&
               name == other.name &&
-              color.value == other.color.value;
+              predefinedColor == other.predefinedColor;
 
   @override
-  int get hashCode => name.hashCode ^ color.value.hashCode;
+  int get hashCode => name.hashCode ^ predefinedColor.hashCode;
 }

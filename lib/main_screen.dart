@@ -544,8 +544,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     Color buttonColor = Theme.of(context).colorScheme.primary; // Default color
 
     if (name != null) {
-      // Get button color from provider
-      buttonColor = ref.watch(customButtonModelsProvider.notifier).getButtonColor(name);
+      // Get button color from provider, passing the context
+      buttonColor = ref.watch(customButtonModelsProvider.notifier).getButtonColor(name, context);
     }
 
     return Expanded(
