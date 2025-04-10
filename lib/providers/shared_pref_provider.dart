@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -5,8 +6,7 @@ import 'package:timestamp/enums/button_location.dart';
 import 'package:timestamp/enums/time_format.dart';
 import 'package:timestamp/constants.dart';
 import 'package:timestamp/enums/time_server.dart';
-
-import '../models/button_config.dart';
+import 'package:timestamp/models/button_model.dart';
 
 
 final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
@@ -76,6 +76,31 @@ class SharedUtility {
     sharedPreferences.setStringList(customEventNamesKey, value);
   }
 
+  List<ButtonModel> getCustomButtonModels() {
+    final modelStrings = sharedPreferences.getStringList(customButtonModelsKey);
+    if (modelStrings == null || modelStrings.isEmpty) {
+      // Convert existing button names to models with default color if available
+      final buttonNames = getCustomEventButtonList();
+      return buttonNames.map((name) => ButtonModel(name, Colors.teal)).toList();
+    }
+
+    try {
+      return modelStrings
+          .map((str) => ButtonModel.fromJson(jsonDecode(str)))
+          .toList();
+    } catch (e) {
+      // Fallback to default if there's an error
+      return [];
+    }
+  }
+
+  void setCustomButtonModels(List<ButtonModel> models) {
+    final modelStrings = models
+        .map((model) => jsonEncode(model.toJson()))
+        .toList();
+    sharedPreferences.setStringList(customButtonModelsKey, modelStrings);
+  }
+
   int getMaxButtonRows() {
     final status = sharedPreferences.getInt(maxButtonRowsKey);
     if (status == null) return 1;
@@ -98,23 +123,4 @@ class SharedUtility {
   void setThemeMode(ThemeMode mode) {
     sharedPreferences.setString(themeModeKey, mode.toString());
   }
-
-  List<ButtonConfig> getButtonConfigs() {
-    final List<String>? jsonList = sharedPreferences.getStringList(buttonConfigsKey);
-    if (jsonList == null) {
-      // Convert existing button names to ButtonConfig objects
-      final List<String> legacyNames = getCustomEventButtonList();
-      return legacyNames.map((name) => ButtonConfig(name: name)).toList();
-    }
-    return jsonList.map((json) => ButtonConfig.fromJson(json)).toList();
-  }
-
-  void setButtonConfigs(List<ButtonConfig> configs) {
-    final List<String> jsonList = configs.map((config) => config.toJson()).toList();
-    sharedPreferences.setStringList(buttonConfigsKey, jsonList);
-
-    // Also update the legacy custom event names for backward compatibility
-    setCustomEventButtonList(configs.map((config) => config.name).toList());
-  }
-
 }

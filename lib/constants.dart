@@ -4,6 +4,7 @@ const String disableAutoLockKey = 'autoLockEnable';
 const String referenceEventKey = 'referenceEvent';
 const String buttonLocationKey = 'buttonSectionLocation';
 const String customEventNamesKey = 'customEventNames';
+const String customButtonModelsKey = 'customButtonModels';
 const String maxButtonRowsKey = 'maxButtonRows';
 const String themeModeKey = 'themeMode';
 const String buttonConfigsKey = 'buttonConfigs';
