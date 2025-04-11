@@ -295,13 +295,26 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
     return Column(
       children: [
-        ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),
-          title: _buildEventTitle(event),
+        InkWell(
           onTap: () => _onEventTap(event, eventIndex),
-          leading: isInDeleteMode
-              ? _buildEventCheckbox(eventIndex)
-              : _buildColorIndicator(event),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Row(
+              children: [
+                const SizedBox(width: 8), // Left padding
+                // Checkbox or color indicator
+                isInDeleteMode
+                    ? _buildEventCheckbox(eventIndex)
+                    : _buildColorIndicator(event),
+                const SizedBox(width: 12), // Space between indicator and content
+                // Event content
+                Expanded(
+                  child: _buildEventTitle(event),
+                ),
+                const SizedBox(width: 8), // Right padding
+              ],
+            ),
+          ),
         ),
         const Divider(height: 1.0),
       ],
