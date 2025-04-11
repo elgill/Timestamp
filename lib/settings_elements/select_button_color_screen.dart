@@ -8,20 +8,28 @@ import 'package:timestamp/providers/theme_mode_provider.dart';
 
 class SelectButtonColorScreen extends ConsumerWidget {
   final String buttonName;
+  final PredefinedColor? initialColor;
+  final Function(PredefinedColor)? onColorSelected;
 
   const SelectButtonColorScreen({
     Key? key,
     required this.buttonName,
+    this.initialColor,
+    this.onColorSelected,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentPredefinedColor = ref.watch(customButtonModelsProvider.notifier)
-        .getButtonPredefinedColor(buttonName);
+    // If initialColor is provided, use it (for manual events)
+    // Otherwise get from provider (for button configuration)
+    final currentPredefinedColor = initialColor ??
+        ref.watch(customButtonModelsProvider.notifier)
+            .getButtonPredefinedColor(buttonName);
+
     final themeMode = ref.watch(themeModeProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text('Select Color for "$buttonName"')),
+      appBar: AppBar(title: const Text('Select Color')),
       body: SettingsList(
         sections: [
           SettingsSection(
@@ -35,10 +43,17 @@ class SelectButtonColorScreen extends ConsumerWidget {
                 ),
                 trailing: _buildTrailingWidget(predefinedColor, currentPredefinedColor),
                 onPressed: (context) {
-                  ref.read(customButtonModelsProvider.notifier).updateButtonColor(
-                      buttonName, predefinedColor);
-                  // This forces a rebuild of the customButtonModelsProvider
-                  ref.invalidate(customButtonModelsProvider);
+                  // Handle color selection based on context
+                  if (onColorSelected != null) {
+                    // For manual events, directly call the callback
+                    onColorSelected!(predefinedColor);
+                  } else {
+                    // For button configuration, update the provider
+                    ref.read(customButtonModelsProvider.notifier).updateButtonColor(
+                        buttonName, predefinedColor);
+                    // This forces a rebuild of the customButtonModelsProvider
+                    ref.invalidate(customButtonModelsProvider);
+                  }
                   Navigator.of(context).pop();
                 },
               );

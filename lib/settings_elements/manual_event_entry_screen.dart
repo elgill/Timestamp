@@ -2,12 +2,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:settings_ui/settings_ui.dart';
+import 'package:timestamp/enums/predefined_colors.dart';
 import 'package:timestamp/models/event.dart';
 import 'package:timestamp/utils/time_utils.dart';
 import 'dart:io' show Platform;
 import '../enums/time_format.dart';
 import '../services/event_service.dart';
 import 'custom_time_picker_dialog.dart';
+import 'select_button_color_screen.dart'; // For reusing the color selection screen
 
 class ManualEventEntryScreen extends ConsumerStatefulWidget {
   const ManualEventEntryScreen({super.key});
@@ -19,6 +21,8 @@ class ManualEventEntryScreen extends ConsumerStatefulWidget {
 class _ManualEventEntryScreenState
     extends ConsumerState<ManualEventEntryScreen> {
   DateTime selectedDate = DateTime.now();
+  final TextEditingController _descriptionController = TextEditingController();
+  PredefinedColor selectedColor = PredefinedColor.defaultColor;
 
   @override
   Widget build(BuildContext context) {
@@ -33,20 +37,39 @@ class _ManualEventEntryScreenState
         ],
       ),
       body: SettingsList(sections: [
-        SettingsSection(tiles: [
-          SettingsTile(
-              title: const Text('Select Date'),
-              trailing: Text(formatDate(selectedDate, TimeFormat.local24Hour)),
+        SettingsSection(
+          title: const Text('Event Details'),
+          tiles: [
+            SettingsTile(
+                title: const Text('Select Date'),
+                trailing: Text(formatDate(selectedDate, TimeFormat.local24Hour)),
+                onPressed: (context) {
+                  _showPlatformDatePicker();
+                }
+            ),
+            SettingsTile(
+                title: const Text('Select Time'),
+                trailing: Text(formatAbsoluteTime(selectedDate, TimeFormat.local24Hour)),
+                onPressed: (context) {
+                  _showCustomTimePicker();
+                }
+            ),
+            SettingsTile.navigation(
+              title: const Text('Event Description'),
+              value: Text(_descriptionController.text.isEmpty ? 'None' : _descriptionController.text),
               onPressed: (context) {
-                _showPlatformDatePicker();
-              }),
-          SettingsTile(
-              title: const Text('Select Time'),
-              trailing: Text(formatAbsoluteTime(selectedDate, TimeFormat.local24Hour)),
+                _showDescriptionDialog();
+              },
+            ),
+            SettingsTile.navigation(
+              title: const Text('Event Color'),
+              value: Text(selectedColor.displayName),
               onPressed: (context) {
-                _showCustomTimePicker();
-              }),
-        ]),
+                _showColorSelectionScreen();
+              },
+            ),
+          ],
+        ),
       ]),
     );
   }
@@ -109,6 +132,62 @@ class _ManualEventEntryScreenState
     );
   }
 
+  void _showDescriptionDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Event Description'),
+          content: TextField(
+            controller: _descriptionController,
+            decoration: const InputDecoration(
+              hintText: 'Enter event description',
+            ),
+            autofocus: true,
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Save'),
+              onPressed: () {
+                setState(() {
+                  // No need to set anything, as the controller is already updated
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showColorSelectionScreen() {
+    // We'll create a temporary string key for the color selection
+    // This allows us to reuse the existing SelectButtonColorScreen
+    const String tempKey = '_manualEventColor';
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SelectButtonColorScreen(
+          buttonName: tempKey,
+          initialColor: selectedColor,
+          onColorSelected: (PredefinedColor color) {
+            setState(() {
+              selectedColor = color;
+            });
+          },
+        ),
+      ),
+    );
+  }
+
   _addEvent() {
     DateTime finalDate = DateTime(
       selectedDate.year,
@@ -119,15 +198,24 @@ class _ManualEventEntryScreenState
       selectedDate.second,
       selectedDate.millisecond,
     );
-    ref.read(eventServiceProvider).manualAddEvent(Event(finalDate, -1));
+
+    // Create event with description and color
+    Event newEvent = Event(
+      finalDate,
+      -1,
+      description: _descriptionController.text,
+      color: selectedColor,
+    );
+
+    ref.read(eventServiceProvider).manualAddEvent(newEvent);
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text('Event added successfully!'),
         duration: const Duration(seconds: 1),
-        backgroundColor: Colors.green,  // Setting the background to green
-        behavior: SnackBarBehavior.floating,  // Optional: This makes the snackbar appear as a floating box
-        shape: RoundedRectangleBorder(  // Optional: Gives rounded corners
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
         ),
       ),
@@ -138,6 +226,7 @@ class _ManualEventEntryScreenState
 
   @override
   void dispose() {
+    _descriptionController.dispose();
     super.dispose();
   }
 }
