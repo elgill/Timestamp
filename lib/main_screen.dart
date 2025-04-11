@@ -9,10 +9,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timestamp/enums/button_location.dart';
+import 'package:timestamp/enums/predefined_colors.dart';
 import 'package:timestamp/enums/time_format.dart';
 import 'package:timestamp/providers/custom_button_models_provider.dart';
 import 'package:timestamp/providers/custom_button_names_provider.dart';
 import 'package:timestamp/providers/max_button_rows_provider.dart';
+import 'package:timestamp/providers/theme_mode_provider.dart';
 import 'package:timestamp/settings_elements/settings_screen.dart';
 import 'package:timestamp/providers/shared_pref_provider.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -294,16 +296,35 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     return Column(
       children: [
         ListTile(
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),
-          //leading: Icon(Icons.event), // As an example
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),
           title: _buildEventTitle(event),
           onTap: () => _onEventTap(event, eventIndex),
-          leading: isInDeleteMode ? _buildEventCheckbox(eventIndex) : null,
+          leading: isInDeleteMode
+              ? _buildEventCheckbox(eventIndex)
+              : _buildColorIndicator(event),
         ),
         const Divider(height: 1.0),
       ],
     );
+  }
+
+  Widget _buildColorIndicator(Event event) {
+    // Only show color indicator if it's not the default color
+    if (event.color != PredefinedColor.defaultColor) {
+      return Container(
+        width: 4,
+        height: 40,
+        decoration: BoxDecoration(
+          color: event.color.getColor(
+              ref.watch(themeModeProvider),
+              context
+          ),
+          borderRadius: BorderRadius.circular(2),
+        ),
+      );
+    }
+    // Return an invisible spacer if no color is set
+    return const SizedBox(width: 4);
   }
 
   Widget _buildEventTitle(Event event) {
@@ -542,10 +563,12 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   Widget _buildRecordEventButton(String? name) {
     Color buttonColor = Theme.of(context).colorScheme.primary; // Default color
+    PredefinedColor predefinedColor = PredefinedColor.defaultColor;
 
     if (name != null) {
       // Get button color from provider, passing the context
-      buttonColor = ref.watch(customButtonModelsProvider.notifier).getButtonColor(name, context);
+      predefinedColor = ref.watch(customButtonModelsProvider.notifier).getButtonPredefinedColor(name);
+      buttonColor = predefinedColor.getColor(ref.watch(themeModeProvider), context);
     }
 
     return Expanded(
@@ -561,7 +584,14 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 precision = ntpService.roundTripTime ~/ 2;
               }
               setState(() {
-                eventManager.addEvent(Event(now, precision, description: name ?? ''));
+                eventManager.addEvent(
+                    Event(
+                      now,
+                      precision,
+                      description: name ?? '',
+                      color: predefinedColor, // Save the button's color with the event
+                    )
+                );
                 selectedEvents.insert(0, false);
                 SystemSound.play(SystemSoundType.click);
                 HapticFeedback.lightImpact();
