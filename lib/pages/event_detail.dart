@@ -88,16 +88,30 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: color.getColor(themeMode, context),
+                      color: color == PredefinedColor.defaultColor
+                          ? Colors.transparent  // Make default color transparent
+                          : color.getColor(themeMode, context),
                       shape: BoxShape.circle,
-                      border: _selectedColor == color
-                          ? Border.all(color: Colors.white, width: 2)
-                          : null,
+                      border: Border.all(
+                        color: _selectedColor == color
+                            ? Colors.white
+                            : color == PredefinedColor.defaultColor
+                            ? Theme.of(context).colorScheme.primary.withOpacity(0.7)
+                            : Colors.transparent,
+                        width: _selectedColor == color ? 2 : 1,
+                      ),
                       boxShadow: _selectedColor == color
                           ? [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 4)]
                           : null,
                     ),
-                    child: _selectedColor == color
+                    child: color == PredefinedColor.defaultColor
+                    // Show a slash symbol for default/no color
+                        ? Icon(
+                      Icons.do_not_disturb_alt_outlined,
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
+                      size: 30,
+                    )
+                        : _selectedColor == color
                         ? const Icon(Icons.check, color: Colors.white)
                         : null,
                   ),
