@@ -1,8 +1,11 @@
+// pages/event_detail.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timestamp/enums/time_format.dart';
+import 'package:timestamp/enums/predefined_colors.dart';
 import 'package:timestamp/models/event.dart';
 import 'package:timestamp/providers/shared_pref_provider.dart';
+import 'package:timestamp/providers/theme_mode_provider.dart';
 import 'package:timestamp/utils/time_utils.dart';
 
 class EventDetailPage extends ConsumerStatefulWidget {
@@ -22,11 +25,13 @@ class EventDetailPage extends ConsumerStatefulWidget {
 
 class _EventDetailPageState extends ConsumerState<EventDetailPage> {
   late TextEditingController _descriptionController;
+  late PredefinedColor _selectedColor;
 
   @override
   void initState() {
     super.initState();
     _descriptionController = TextEditingController(text: widget.event.description);
+    _selectedColor = widget.event.color;
   }
 
   @override
@@ -34,6 +39,7 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
     Event event = widget.event;
     DateTime dateTime = event.time;
     TimeFormat timeFormat = ref.watch(sharedUtilityProvider).getTimeFormat();
+    final themeMode = ref.watch(themeModeProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -42,33 +48,74 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
             event.description = _descriptionController.text;
+            event.color = _selectedColor;
             Navigator.pop(context, event); // Return the updated event
           },
         ),
       ),
-      body: Column(
-        children: [
-          Text(formatDate(dateTime, timeFormat), style: const TextStyle(fontSize: 20)),
-          Text(formatAbsoluteTime(dateTime, timeFormat), style: const TextStyle(fontSize: 20)),
-          widget.event.precision >= 0 ?
-          Text('Precision: ±${widget.event.precision}ms', style: const TextStyle(fontSize: 15)):
-          const Text('Precision: Unknown', style: TextStyle(fontSize: 15)),
-          TextField(
-            controller: _descriptionController,
-            decoration: const InputDecoration(labelText: 'Event description'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              widget.onSetAsReference(widget.event);
-            },
-            child: const Text('Set as Reference'),
-          )
-        ],
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(formatDate(dateTime, timeFormat),
+                style: const TextStyle(fontSize: 20)),
+            Text(formatAbsoluteTime(dateTime, timeFormat),
+                style: const TextStyle(fontSize: 20)),
+            widget.event.precision >= 0 ?
+            Text('Precision: ±${widget.event.precision}ms',
+                style: const TextStyle(fontSize: 15)):
+            const Text('Precision: Unknown',
+                style: TextStyle(fontSize: 15)),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _descriptionController,
+              decoration: const InputDecoration(labelText: 'Event description'),
+            ),
+            const SizedBox(height: 16),
+            const Text('Event Color', style: TextStyle(fontSize: 16)),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: PredefinedColor.values.map((color) {
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _selectedColor = color;
+                    });
+                  },
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: color.getColor(themeMode, context),
+                      shape: BoxShape.circle,
+                      border: _selectedColor == color
+                          ? Border.all(color: Colors.white, width: 2)
+                          : null,
+                      boxShadow: _selectedColor == color
+                          ? [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 4)]
+                          : null,
+                    ),
+                    child: _selectedColor == color
+                        ? const Icon(Icons.check, color: Colors.white)
+                        : null,
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 24),
+            Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  widget.onSetAsReference(widget.event);
+                },
+                child: const Text('Set as Reference'),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
-
 }
-
-
-
