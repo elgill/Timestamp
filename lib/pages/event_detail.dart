@@ -48,12 +48,14 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
     TimeFormat timeFormat = ref.watch(sharedUtilityProvider).getTimeFormat();
     final themeMode = ref.watch(themeModeProvider);
 
-    // Wrap the scaffold with WillPopScope to catch back navigation
-    return WillPopScope(
-      onWillPop: () async {
-        // Save and return the event when popping (back button or swipe)
-        Navigator.pop(context, _saveChanges());
-        return false; // Return false to prevent default back behavior
+    // Use PopScope instead of WillPopScope (which is deprecated)
+    return PopScope(
+      canPop: false, // Prevent automatic pop to handle the result
+      onPopInvoked: (didPop) {
+        if (!didPop) {
+          // If not popped yet, pop with result
+          Navigator.of(context).pop(_saveChanges());
+        }
       },
       child: Scaffold(
         appBar: AppBar(

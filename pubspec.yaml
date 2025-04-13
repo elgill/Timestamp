@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.1.0+27
+version: 1.1.0+28
 
 environment:
   sdk: '>=3.0.6 <4.0.0'
@@ -33,7 +33,7 @@ dependencies:
 
   shared_preferences: ^2.0.5
   collection: ^1.15.0
-  intl: ^0.18.1
+  intl: ^0.20.2
   url_launcher: ^6.0.12
 
   advanced_ntp:
@@ -46,9 +46,9 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   flutter_riverpod: ^2.3.10
-  package_info_plus: ^4.1.0
+  package_info_plus: ^8.3.0
   wakelock_plus: ^1.1.1
-  flutter_platform_widgets: ^3.3.5
+  flutter_platform_widgets: ^8.0.0
   settings_ui: ^2.0.2
   path_provider: ^2.1.1
   share: ^2.0.4
@@ -57,14 +57,14 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_launcher_icons: ^0.13.1
+  flutter_launcher_icons: ^0.14.3
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^2.0.0
+  flutter_lints: ^5.0.0
 
 flutter_launcher_icons:
   android: "launcher_icon"

@@ -5,7 +5,7 @@ class CustomTimePickerDialog extends StatefulWidget {
   final DateTime initialDateTime;
   final ValueChanged<DateTime> onDateTimeChanged;
 
-  const CustomTimePickerDialog({
+  const CustomTimePickerDialog({super.key, 
     required this.initialDateTime,
     required this.onDateTimeChanged,
   });
@@ -87,7 +87,7 @@ class _CustomTimePickerDialogState extends State<CustomTimePickerDialog> {
 
   Widget _buildPicker(int initialItem, int numItems, int numDigits,
       ValueChanged<int> onChanged) {
-    return Container(
+    return SizedBox(
       width: 50,
       child: CupertinoPicker(
         looping: true,

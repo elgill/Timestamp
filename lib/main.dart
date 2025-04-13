@@ -25,9 +25,12 @@ class TimestampApp extends ConsumerWidget {
     return MaterialApp(
       title: 'Timestamp',
       theme: ThemeData(
+        useMaterial3: false,
         primarySwatch: Colors.teal,
       ),
-      darkTheme: ThemeData.dark(),
+      darkTheme: ThemeData.dark(
+        useMaterial3: false,
+      ),
       themeMode: themeMode,
       home: const MainScreen(),
     );

@@ -64,7 +64,7 @@ String formatRelativeTime(DateTime time, DateTime timeToCompare){
   if (days > 0) {
     timeComponents.add("${days}d");
   }
-  timeComponents.add("${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}.${tenthsOfSeconds}");
+  timeComponents.add("${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}.$tenthsOfSeconds");
 
   return "$sign${timeComponents.join(' ')}";
 }
