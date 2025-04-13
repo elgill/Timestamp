@@ -9,7 +9,7 @@ import 'dart:io' show Platform;
 import '../enums/time_format.dart';
 import '../services/event_service.dart';
 import 'custom_time_picker_dialog.dart';
-import 'select_button_color_screen.dart'; // For reusing the color selection screen
+import 'select_button_color_screen.dart';
 
 class ManualEventEntryScreen extends ConsumerStatefulWidget {
   const ManualEventEntryScreen({super.key});

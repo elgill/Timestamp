@@ -1,4 +1,3 @@
-// pages/event_detail.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timestamp/enums/time_format.dart';

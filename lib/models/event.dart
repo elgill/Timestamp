@@ -1,4 +1,3 @@
-// models/event.dart
 import 'dart:convert';
 import 'package:timestamp/enums/predefined_colors.dart';
 
