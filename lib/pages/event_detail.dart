@@ -33,6 +33,14 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
     _selectedColor = widget.event.color;
   }
 
+  // Save changes and return updated event
+  Event _saveChanges() {
+    Event updatedEvent = widget.event;
+    updatedEvent.description = _descriptionController.text;
+    updatedEvent.color = _selectedColor;
+    return updatedEvent;
+  }
+
   @override
   Widget build(BuildContext context) {
     Event event = widget.event;
@@ -40,93 +48,100 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
     TimeFormat timeFormat = ref.watch(sharedUtilityProvider).getTimeFormat();
     final themeMode = ref.watch(themeModeProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Event Details'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            event.description = _descriptionController.text;
-            event.color = _selectedColor;
-            Navigator.pop(context, event); // Return the updated event
-          },
+    // Wrap the scaffold with WillPopScope to catch back navigation
+    return WillPopScope(
+      onWillPop: () async {
+        // Save and return the event when popping (back button or swipe)
+        Navigator.pop(context, _saveChanges());
+        return false; // Return false to prevent default back behavior
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Event Details'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              // Use the same save function for consistency
+              Navigator.pop(context, _saveChanges());
+            },
+          ),
         ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(formatDate(dateTime, timeFormat),
-                style: const TextStyle(fontSize: 20)),
-            Text(formatAbsoluteTime(dateTime, timeFormat),
-                style: const TextStyle(fontSize: 20)),
-            widget.event.precision >= 0 ?
-            Text('Precision: ±${widget.event.precision}ms',
-                style: const TextStyle(fontSize: 15)):
-            const Text('Precision: Unknown',
-                style: TextStyle(fontSize: 15)),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _descriptionController,
-              decoration: const InputDecoration(labelText: 'Event description'),
-            ),
-            const SizedBox(height: 16),
-            const Text('Event Color', style: TextStyle(fontSize: 16)),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: PredefinedColor.values.map((color) {
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedColor = color;
-                    });
-                  },
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: color == PredefinedColor.defaultColor
-                          ? Colors.transparent  // Make default color transparent
-                          : color.getColor(themeMode, context),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: _selectedColor == color
-                            ? Colors.white
-                            : color == PredefinedColor.defaultColor
-                            ? Theme.of(context).colorScheme.primary.withOpacity(0.7)
-                            : Colors.transparent,
-                        width: _selectedColor == color ? 2 : 1,
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(formatDate(dateTime, timeFormat),
+                  style: const TextStyle(fontSize: 20)),
+              Text(formatAbsoluteTime(dateTime, timeFormat),
+                  style: const TextStyle(fontSize: 20)),
+              widget.event.precision >= 0 ?
+              Text('Precision: ±${widget.event.precision}ms',
+                  style: const TextStyle(fontSize: 15)):
+              const Text('Precision: Unknown',
+                  style: TextStyle(fontSize: 15)),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _descriptionController,
+                decoration: const InputDecoration(labelText: 'Event description'),
+              ),
+              const SizedBox(height: 16),
+              const Text('Event Color', style: TextStyle(fontSize: 16)),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: PredefinedColor.values.map((color) {
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedColor = color;
+                      });
+                    },
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: color == PredefinedColor.defaultColor
+                            ? Colors.transparent  // Make default color transparent
+                            : color.getColor(themeMode, context),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: _selectedColor == color
+                              ? Colors.white
+                              : color == PredefinedColor.defaultColor
+                              ? Theme.of(context).colorScheme.primary.withOpacity(0.7)
+                              : Colors.transparent,
+                          width: _selectedColor == color ? 2 : 1,
+                        ),
+                        boxShadow: _selectedColor == color
+                            ? [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 4)]
+                            : null,
                       ),
-                      boxShadow: _selectedColor == color
-                          ? [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 4)]
+                      child: color == PredefinedColor.defaultColor
+                      // Show a slash symbol for default/no color
+                          ? Icon(
+                        Icons.do_not_disturb_alt_outlined,
+                        color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
+                        size: 30,
+                      )
+                          : _selectedColor == color
+                          ? const Icon(Icons.check, color: Colors.white)
                           : null,
                     ),
-                    child: color == PredefinedColor.defaultColor
-                    // Show a slash symbol for default/no color
-                        ? Icon(
-                      Icons.do_not_disturb_alt_outlined,
-                      color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
-                      size: 30,
-                    )
-                        : _selectedColor == color
-                        ? const Icon(Icons.check, color: Colors.white)
-                        : null,
-                  ),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 24),
-            Center(
-              child: ElevatedButton(
-                onPressed: () {
-                  widget.onSetAsReference(widget.event);
-                },
-                child: const Text('Set as Reference'),
+                  );
+                }).toList(),
               ),
-            )
-          ],
+              const SizedBox(height: 24),
+              Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    widget.onSetAsReference(widget.event);
+                  },
+                  child: const Text('Set as Reference'),
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
