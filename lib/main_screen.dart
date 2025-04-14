@@ -386,7 +386,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   _onEventTap(Event event, int eventIndex) async {
     if (!isInDeleteMode) {
-      Event updatedEvent = await Navigator.push(
+      Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => EventDetailPage(
@@ -408,13 +408,16 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 ),
               );
             },
+            onEventUpdated: (updatedEvent) {
+              // Update the event in the events list immediately
+              setState(() {
+                eventManager.events[eventIndex] = updatedEvent;
+                eventManager.saveData();
+              });
+            },
           ),
         ),
-      ) as Event;
-      setState(() {
-        eventManager.events[eventIndex] = updatedEvent;
-        eventManager.saveData();
-      });
+      );
     } else {
       setState(() {
         // Toggle the selection state for the corresponding event
