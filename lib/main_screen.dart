@@ -190,21 +190,21 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       builder: (BuildContext context) {
         return PlatformAlertDialog(
           title: const Text('NTP Details'),
-          content: SingleChildScrollView(
-            child: ntpService.isInfoRecieved
-                ? ListBody(
-                    children: <Widget>[
-                      Text('Time Server: ${ntpService.timeServer}'),
-                      Text('NTP Stratum: ${ntpService.ntpStratum}'),
-                      Text(
-                          'Last Sync Time: ${formatAbsoluteTime(ntpService.lastSyncTime.toLocal(), TimeFormat.local24Hour)}'),
-                      Text('Offset: ${ntpService.ntpOffset}ms'),
-                      Text(
-                          'Round Trip Time(RTT): ${ntpService.roundTripTime}ms'),
-                    ],
-                  )
-                : const Text('No Time Data Received'),
-          ),
+          content: ntpService.isInfoRecieved
+              ? Column(
+            mainAxisSize: MainAxisSize.min, // Make it fit content
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Text('Time Server: ${ntpService.timeServer}'),
+              Text('NTP Stratum: ${ntpService.ntpStratum}'),
+              Text(
+                  'Last Sync Time: ${formatAbsoluteTime(ntpService.lastSyncTime.toLocal(), TimeFormat.local24Hour)}'),
+              Text('Offset: ${ntpService.ntpOffset}ms'),
+              Text(
+                  'Round Trip Time(RTT): ${ntpService.roundTripTime}ms'),
+            ],
+          )
+              : const Text('No Time Data Received'),
           actions: <Widget>[
             TextButton(
               child: const Text('Close'),
