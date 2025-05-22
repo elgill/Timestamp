@@ -154,4 +154,14 @@ class SharedUtility {
   void setHideRunningTimer(bool value) {
     sharedPreferences.setBool(hideRunningTimerKey, value);
   }
+
+  String getDisplayMode() {
+    final mode = sharedPreferences.getString(displayModeKey);
+    if (mode == null) return 'DisplayMode.absolute'; // Default to absolute
+    return mode;
+  }
+
+  void setDisplayMode(String mode) {
+    sharedPreferences.setString(displayModeKey, mode);
+  }
 }

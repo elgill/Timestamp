@@ -13,6 +13,7 @@ import 'package:timestamp/enums/predefined_colors.dart';
 import 'package:timestamp/enums/time_format.dart';
 import 'package:timestamp/providers/custom_button_models_provider.dart';
 import 'package:timestamp/providers/custom_button_names_provider.dart';
+import 'package:timestamp/providers/display_mode_provider.dart';
 import 'package:timestamp/providers/max_button_rows_provider.dart';
 import 'package:timestamp/providers/theme_mode_provider.dart';
 import 'package:timestamp/settings_elements/settings_screen.dart';
@@ -36,8 +37,6 @@ class MainScreen extends ConsumerStatefulWidget {
   _MainScreenState createState() => _MainScreenState();
 }
 
-enum DisplayMode { absolute, relative }
-
 class _MainScreenState extends ConsumerState<MainScreen> {
   late EventService eventManager = EventService();
   late NtpService ntpService = ref.watch(ntpServiceProvider);
@@ -46,8 +45,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   DateTime displayTime = DateTime.now();
   late Timer _timer;
-
-  DisplayMode _displayMode = DisplayMode.absolute;
 
   bool isInDeleteMode = false; // To track the delete mode
   List<bool> selectedEvents = []; // To track selected events for deletion
@@ -118,7 +115,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   }
 
   String formatTime(DateTime dateTime) {
-    if (_displayMode == DisplayMode.absolute) {
+    final displayMode = ref.watch(displayModeProvider);
+    if (displayMode == DisplayMode.absolute) {
       return formatAbsoluteTime(
           dateTime, ref.watch(sharedUtilityProvider).getTimeFormat());
     } else {
@@ -130,15 +128,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   }
 
   void toggleDisplayMode() {
-    if (_displayMode == DisplayMode.absolute) {
-      setState(() {
-        _displayMode = DisplayMode.relative;
-      });
-    } else {
-      setState(() {
-        _displayMode = DisplayMode.absolute;
-      });
-    }
+    ref.read(displayModeProvider.notifier).toggleDisplayMode();
   }
 
   @override
@@ -458,7 +448,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   }
 
   Widget _buildBody() {
-    final showTimer = !ref.watch(hideTimerProvider); // Watch the hide timer setting
+    final showTimer = !ref.watch(hideTimerProvider);
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,

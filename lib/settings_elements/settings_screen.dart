@@ -15,6 +15,7 @@ import 'package:timestamp/settings_elements/select_theme_mode_screen.dart';
 import 'package:timestamp/providers/hide_timer_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../providers/display_mode_provider.dart';
 import '../providers/theme_mode_provider.dart';
 import '../providers/time_format_provider.dart';
 import 'select_time_format_screen.dart';
@@ -84,6 +85,14 @@ class SettingsScreen extends ConsumerWidget {
                   initialValue: ref.watch(hideTimerProvider),
                   onToggle: (bool value) {
                     ref.read(hideTimerProvider.notifier).setHideTimer(value);
+                  }
+              ),
+              SettingsTile.navigation(
+                  title: const Text('Time Display Mode'),
+                  leading: const Icon(Icons.schedule),
+                  value: Text(ref.watch(displayModeProvider) == DisplayMode.absolute ? 'Absolute Time' : 'Relative Time'),
+                  onPressed: (context) {
+                    ref.read(displayModeProvider.notifier).toggleDisplayMode();
                   }
               ),
               SettingsTile.navigation(
@@ -196,7 +205,5 @@ class SettingsScreen extends ConsumerWidget {
         return 'Light';
       case ThemeMode.dark:
         return 'Dark';
-      default:
-        return 'Unknown';
-    }
+      }
   }}
