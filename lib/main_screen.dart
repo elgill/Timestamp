@@ -17,6 +17,7 @@ import 'package:timestamp/providers/max_button_rows_provider.dart';
 import 'package:timestamp/providers/theme_mode_provider.dart';
 import 'package:timestamp/settings_elements/settings_screen.dart';
 import 'package:timestamp/providers/shared_pref_provider.dart';
+import 'package:timestamp/providers/hide_timer_provider.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 // Local imports
@@ -457,28 +458,33 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   }
 
   Widget _buildBody() {
+    final showTimer = !ref.watch(hideTimerProvider); // Watch the hide timer setting
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Center(
+        // Conditionally show the timer
+        if (showTimer)
+          Center(
             child: GestureDetector(
-          // Wrap with GestureDetector to toggle on tap
-          onTap: () {
-            toggleDisplayMode();
-          },
-          child: Text(
-            formatTime(ntpService.currentTime),
-            style: const TextStyle(
-              fontSize: 35,
-              fontFamily: 'Courier New',
+              onTap: () {
+                toggleDisplayMode();
+              },
+              child: Text(
+                formatTime(ntpService.currentTime),
+                style: const TextStyle(
+                  fontSize: 35,
+                  fontFamily: 'Courier New',
+                ),
+              ),
             ),
           ),
-        )),
-        ref.watch(sharedUtilityProvider).getButtonLocation() ==
-                ButtonLocation.top
+
+        ref.watch(sharedUtilityProvider).getButtonLocation() == ButtonLocation.top
             ? _buildEventButtonSection(true, true)
             : const Divider(thickness: 0),
+
         Expanded(
           child: ListView.builder(
             itemCount: _groupedEvents.entries.length,
@@ -507,8 +513,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             },
           ),
         ),
-        ref.watch(sharedUtilityProvider).getButtonLocation() ==
-                ButtonLocation.bottom
+
+        ref.watch(sharedUtilityProvider).getButtonLocation() == ButtonLocation.bottom
             ? _buildEventButtonSection(true, true)
             : Container(),
       ],

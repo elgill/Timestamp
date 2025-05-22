@@ -144,4 +144,14 @@ class SharedUtility {
   void setThemeMode(ThemeMode mode) {
     sharedPreferences.setString(themeModeKey, mode.toString());
   }
+
+  bool getHideRunningTimer() {
+    final status = sharedPreferences.getBool(hideRunningTimerKey);
+    if (status == null) return false; // Default to showing timer
+    return status;
+  }
+
+  void setHideRunningTimer(bool value) {
+    sharedPreferences.setBool(hideRunningTimerKey, value);
+  }
 }

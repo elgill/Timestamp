@@ -12,6 +12,7 @@ import 'package:timestamp/enums/time_format.dart';
 import 'package:timestamp/enums/time_server.dart';
 import 'package:timestamp/settings_elements/select_max_button_rows.dart';
 import 'package:timestamp/settings_elements/select_theme_mode_screen.dart';
+import 'package:timestamp/providers/hide_timer_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../providers/theme_mode_provider.dart';
@@ -77,6 +78,14 @@ class SettingsScreen extends ConsumerWidget {
                           return const SelectTimeFormatScreen();
                         }));
                   }),
+              SettingsTile.switchTile(
+                  title: const Text('Hide Running Timer'),
+                  leading: const Icon(Icons.timer_off),
+                  initialValue: ref.watch(hideTimerProvider),
+                  onToggle: (bool value) {
+                    ref.read(hideTimerProvider.notifier).setHideTimer(value);
+                  }
+              ),
               SettingsTile.navigation(
                   title: const Text('Button Location'),
                   leading: const Icon(Icons.place),

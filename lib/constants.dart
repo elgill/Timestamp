@@ -8,3 +8,4 @@ const String customButtonModelsKey = 'customButtonModels';
 const String maxButtonRowsKey = 'maxButtonRows';
 const String themeModeKey = 'themeMode';
 const String buttonConfigsKey = 'buttonConfigs';
+const String hideRunningTimerKey = 'hideRunningTimer';
