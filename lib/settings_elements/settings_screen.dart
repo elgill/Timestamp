@@ -13,6 +13,7 @@ import 'package:timestamp/enums/time_server.dart';
 import 'package:timestamp/settings_elements/select_max_button_rows.dart';
 import 'package:timestamp/settings_elements/select_theme_mode_screen.dart';
 import 'package:timestamp/providers/hide_timer_provider.dart';
+import 'package:timestamp/settings_elements/select_time_display_mode_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../providers/display_mode_provider.dart';
@@ -92,7 +93,10 @@ class SettingsScreen extends ConsumerWidget {
                   leading: const Icon(Icons.schedule),
                   value: Text(ref.watch(displayModeProvider) == DisplayMode.absolute ? 'Absolute Time' : 'Relative Time'),
                   onPressed: (context) {
-                    ref.read(displayModeProvider.notifier).toggleDisplayMode();
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) {
+                          return const SelectTimeDisplayModeScreen();
+                        }));
                   }
               ),
               SettingsTile.navigation(
