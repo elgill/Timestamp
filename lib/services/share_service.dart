@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:share_plus/share_plus.dart';
 import 'package:timestamp/services/export_service.dart';
 import 'package:timestamp/models/event.dart';
@@ -9,5 +11,11 @@ Future<void> exportAndShareEventsPlainText(List<Event> events, TimeFormat timeFo
 }
 
 void shareRawText(String text, String subject) {
-  Share.share(text, subject: subject);
+  SharePlus.instance.share(
+      ShareParams(
+          text: text,
+          subject: subject,
+          sharePositionOrigin: Rect.fromLTWH(0, 0, 1, 1),
+      )
+  );
 }
