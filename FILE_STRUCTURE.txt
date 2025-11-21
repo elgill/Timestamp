@@ -1,0 +1,133 @@
+TIMESTAMP APP - FILE STRUCTURE & KEY FILES
+
+/home/user/Timestamp/
+├── pubspec.yaml                          # App configuration & dependencies
+├── README.md                             # Project documentation
+├── analysis_options.yaml                 # Dart linter rules
+│
+├── ios/                                  # iOS platform files
+│   └── Runner/
+│       ├── AppDelegate.swift            # iOS app entry point (MINIMAL - NO CUSTOM CODE)
+│       └── Info.plist                   # iOS configuration
+│
+├── android/                              # Android platform files
+│
+├── lib/                                  # Main Flutter/Dart code
+│   ├── main.dart                        # ✓ App entry point - initializes Riverpod & SharedPreferences
+│   ├── main_screen.dart                 # ✓ MAIN UI FILE (632 lines)
+│   │                                    #   - Event capture on button press (lines 592-610)
+│   │                                    #   - Running timer display (lines 451-471)
+│   │                                    #   - Button layout system (lines 547-574)
+│   │                                    #   - Event list display & grouping
+│   │
+│   ├── app_providers.dart               # App-level provider setup
+│   ├── constants.dart                   # ✓ App constants (SharedPreferences keys)
+│   │
+│   ├── models/                          # Data models
+│   │   ├── event.dart                  # ✓ Event model (time, precision, description, color)
+│   │   └── button_model.dart           # ✓ ButtonModel (name, color)
+│   │
+│   ├── services/                        # Business logic services
+│   │   ├── event_service.dart          # ✓ Event CRUD operations & persistence
+│   │   ├── ntp_service.dart            # ✓ NTP time synchronization (NtpService)
+│   │   ├── share_service.dart          # Event sharing functionality
+│   │   └── export_service.dart         # Event export
+│   │
+│   ├── providers/                       # Riverpod state management
+│   │   ├── shared_pref_provider.dart   # ✓ SharedPreferences wrapper (stores all settings)
+│   │   ├── display_mode_provider.dart  # ✓ Time display mode (Absolute/Relative)
+│   │   ├── hide_timer_provider.dart    # ✓ Show/hide running timer setting
+│   │   ├── custom_button_names_provider.dart     # Custom button names
+│   │   ├── custom_button_models_provider.dart    # Button models with colors
+│   │   ├── theme_mode_provider.dart    # Light/Dark/System theme
+│   │   ├── time_format_provider.dart   # Time format selection
+│   │   ├── button_location_provider.dart        # Button top/bottom
+│   │   ├── max_button_rows_provider.dart        # Number of button rows
+│   │   ├── time_server_provider.dart   # NTP server selection
+│   │   └── auto_lock_provider.dart     # Screen auto-lock setting
+│   │
+│   ├── pages/                           # Page/screen widgets
+│   │   └── event_detail.dart           # Event edit/view detail page
+│   │
+│   ├── settings_elements/               # Settings UI screens
+│   │   ├── settings_screen.dart        # ✓ Main settings page
+│   │   ├── select_time_format_screen.dart
+│   │   ├── select_time_display_mode_screen.dart   # ✓ Absolute vs Relative time
+│   │   ├── select_button_location_screen.dart
+│   │   ├── manage_button_names_screen.dart        # ✓ Custom button names UI
+│   │   ├── select_max_button_rows.dart
+│   │   ├── select_theme_mode_screen.dart
+│   │   ├── select_time_server_screen.dart
+│   │   ├── manual_event_entry_screen.dart
+│   │   ├── select_button_color_screen.dart
+│   │   └── custom_time_picker_dialog.dart
+│   │
+│   ├── utils/
+│   │   └── time_utils.dart             # Time formatting utilities
+│   │
+│   └── enums/                           # Enumeration definitions
+│       ├── time_format.dart            # TimeFormat (local12Hour, local24Hour, utc24Hour)
+│       ├── time_server.dart            # TimeServer (pool.ntp.org, etc.)
+│       ├── button_location.dart        # ButtonLocation (top, bottom)
+│       └── predefined_colors.dart      # PredefinedColor (5 colors)
+│
+├── test/                                # Unit tests directory
+├── assets/                              # App assets (icons, images)
+└── macos, windows, linux, web/         # Other platform implementations
+
+
+KEY ENTRY POINTS FOR WATCH APP INTEGRATION:
+═════════════════════════════════════════
+
+1. EVENT CAPTURE:
+   - Location: lib/main_screen.dart, line 592-610
+   - Function: _buildRecordEventButton() → onPressed handler
+   - Captures: DateTime (from NtpService), precision, description, color
+   
+2. EVENT STORAGE:
+   - Location: lib/services/event_service.dart
+   - Storage: SharedPreferences + JSON serialization
+   - Key: 'events' (String array)
+   
+3. TIME SYNCHRONIZATION:
+   - Location: lib/services/ntp_service.dart
+   - Method: updateNtpOffset()
+   - Uses: advanced_ntp library
+   
+4. RUNNING TIMER DISPLAY:
+   - Location: lib/main_screen.dart, line 451-471
+   - Display: ntpService.currentTime
+   - Toggle: hideTimerProvider, displayModeProvider
+   
+5. BUTTON CONFIGURATION:
+   - Location: lib/providers/custom_button_*_provider.dart
+   - Storage: SharedPreferences
+   - Models: ButtonModel with name & color
+   
+6. SETTINGS:
+   - Location: lib/settings_elements/settings_screen.dart
+   - State: Riverpod providers in lib/providers/
+   - Persistence: SharedPreferences via shared_pref_provider.dart
+
+
+DATA MODEL QUICK REFERENCE:
+══════════════════════════
+
+Event:
+  - time: DateTime
+  - precision: int (milliseconds)
+  - description: String (button name or custom)
+  - color: PredefinedColor (5 options)
+
+ButtonModel:
+  - name: String
+  - predefinedColor: PredefinedColor
+
+TimeFormat:
+  - local12Hour, local24Hour, utc24Hour
+
+DisplayMode:
+  - absolute (TOD), relative
+
+ButtonLocation:
+  - top, bottom
