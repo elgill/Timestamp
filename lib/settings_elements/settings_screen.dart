@@ -13,6 +13,7 @@ import 'package:timestamp/enums/time_server.dart';
 import 'package:timestamp/settings_elements/select_max_button_rows.dart';
 import 'package:timestamp/settings_elements/select_theme_mode_screen.dart';
 import 'package:timestamp/providers/hide_timer_provider.dart';
+import 'package:timestamp/providers/export_accuracy_provider.dart';
 import 'package:timestamp/settings_elements/select_time_display_mode_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -155,11 +156,22 @@ class SettingsScreen extends ConsumerWidget {
                           return const ManualEventEntryScreen();
                         }));
                   }),
+              SettingsTile.switchTile(
+                  title: const Text('Include Accuracy in Export'),
+                  leading: const Icon(Icons.gps_fixed),
+                  initialValue: ref.watch(exportAccuracyProvider),
+                  onToggle: (bool value) {
+                    ref.read(exportAccuracyProvider.notifier).setExportAccuracy(value);
+                  }),
               SettingsTile(
                   title: const Text('Share Event Log'),
                   leading: const Icon(Icons.share),
                   onPressed: (context) {
-                    exportAndShareEventsPlainText(ref.watch(eventServiceProvider).events, ref.watch(is24HourTimeProvider));
+                    exportAndShareEventsPlainText(
+                      ref.watch(eventServiceProvider).events,
+                      ref.watch(is24HourTimeProvider),
+                      includeAccuracy: ref.watch(exportAccuracyProvider),
+                    );
                   }),
             ],
           ),

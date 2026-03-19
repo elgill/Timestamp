@@ -5,8 +5,8 @@ import 'package:timestamp/services/export_service.dart';
 import 'package:timestamp/models/event.dart';
 import 'package:timestamp/enums/time_format.dart';
 
-Future<void> exportAndShareEventsPlainText(List<Event> events, TimeFormat timeFormat) async {
-  String plainText = convertEventsToPlainText(events, timeFormat);
+Future<void> exportAndShareEventsPlainText(List<Event> events, TimeFormat timeFormat, {bool includeAccuracy = false}) async {
+  String plainText = convertEventsToPlainText(events, timeFormat, includeAccuracy: includeAccuracy);
   shareRawText(plainText, "Timestamp Event Log");
 }
 

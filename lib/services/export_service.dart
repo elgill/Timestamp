@@ -12,7 +12,7 @@ String convertEventsToCsv(List<Event> events) {
   return buffer.toString();
 }
 
-String convertEventsToPlainText(List<Event> events, TimeFormat timeFormat) {
+String convertEventsToPlainText(List<Event> events, TimeFormat timeFormat, {bool includeAccuracy = false}) {
   // Group events by day
   Map<DateTime, List<Event>> groupedEvents = {};
 
@@ -47,6 +47,13 @@ String convertEventsToPlainText(List<Event> events, TimeFormat timeFormat) {
       }
       String time = formatAbsoluteTime(event.time, timeFormat);
       buffer.writeln(time);
+      if (includeAccuracy) {
+        if (event.precision >= 0) {
+          buffer.writeln('±${event.precision}ms');
+        } else {
+          buffer.writeln('Accuracy: Unknown');
+        }
+      }
     }
   }
 

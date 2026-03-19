@@ -164,4 +164,14 @@ class SharedUtility {
   void setDisplayMode(String mode) {
     sharedPreferences.setString(displayModeKey, mode);
   }
+
+  bool getExportAccuracy() {
+    final status = sharedPreferences.getBool(exportAccuracyKey);
+    if (status == null) return false; // Default to not including accuracy
+    return status;
+  }
+
+  void setExportAccuracy(bool value) {
+    sharedPreferences.setBool(exportAccuracyKey, value);
+  }
 }
