@@ -612,8 +612,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         padding: const EdgeInsets.all(2.0),
         child: SizedBox(
           height: 60, // Reduced height to accommodate multiple rows
-          child: GestureDetector(
-            onTapDown: recordOnTouchDown ? (_) => recordEvent() : null,
+          child: Listener(
+            behavior: HitTestBehavior.opaque,
+            onPointerDown: recordOnTouchDown ? (_) => recordEvent() : null,
             child: ElevatedButton(
               onPressed: recordOnTouchDown ? () {} : recordEvent,
               style: ElevatedButton.styleFrom(
