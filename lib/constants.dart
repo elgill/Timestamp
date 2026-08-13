@@ -11,3 +11,4 @@ const String buttonConfigsKey = 'buttonConfigs';
 const String hideRunningTimerKey = 'hideRunningTimer';
 const String displayModeKey = 'displayMode';
 const String exportAccuracyKey = 'exportAccuracy';
+const String recordOnTouchDownKey = 'recordOnTouchDown';

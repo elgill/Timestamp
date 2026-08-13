@@ -13,6 +13,7 @@ import 'package:timestamp/enums/time_server.dart';
 import 'package:timestamp/settings_elements/select_max_button_rows.dart';
 import 'package:timestamp/settings_elements/select_theme_mode_screen.dart';
 import 'package:timestamp/providers/hide_timer_provider.dart';
+import 'package:timestamp/providers/record_on_touch_down_provider.dart';
 import 'package:timestamp/providers/export_accuracy_provider.dart';
 import 'package:timestamp/settings_elements/select_time_display_mode_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -98,6 +99,14 @@ class SettingsScreen extends ConsumerWidget {
                         MaterialPageRoute(builder: (context) {
                           return const SelectTimeDisplayModeScreen();
                         }));
+                  }
+              ),
+              SettingsTile.switchTile(
+                  title: const Text('Record on Touch Down'),
+                  leading: const Icon(Icons.touch_app),
+                  initialValue: ref.watch(recordOnTouchDownProvider),
+                  onToggle: (bool value) {
+                    ref.read(recordOnTouchDownProvider.notifier).setRecordOnTouchDown(value);
                   }
               ),
               SettingsTile.navigation(

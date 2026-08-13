@@ -19,6 +19,7 @@ import 'package:timestamp/providers/theme_mode_provider.dart';
 import 'package:timestamp/settings_elements/settings_screen.dart';
 import 'package:timestamp/providers/shared_pref_provider.dart';
 import 'package:timestamp/providers/hide_timer_provider.dart';
+import 'package:timestamp/providers/record_on_touch_down_provider.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 // Local imports
@@ -583,45 +584,52 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       buttonColor = predefinedColor.getColor(ref.watch(themeModeProvider), context);
     }
 
+    void recordEvent() {
+      DateTime now = ntpService.currentTime;
+      int precision = -1;
+      if (ntpService.isInfoRecieved) {
+        precision = ntpService.roundTripTime ~/ 2;
+      }
+      setState(() {
+        eventManager.addEvent(
+            Event(
+              now,
+              precision,
+              description: name ?? '',
+              color: predefinedColor, // Save the button's color with the event
+            )
+        );
+        selectedEvents.insert(0, false);
+        SystemSound.play(SystemSoundType.click);
+        HapticFeedback.lightImpact();
+      });
+    }
+
+    final recordOnTouchDown = ref.watch(recordOnTouchDownProvider);
+
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.all(2.0),
         child: SizedBox(
           height: 60, // Reduced height to accommodate multiple rows
-          child: ElevatedButton(
-            onPressed: () async {
-              DateTime now = ntpService.currentTime;
-              int precision = -1;
-              if (ntpService.isInfoRecieved) {
-                precision = ntpService.roundTripTime ~/ 2;
-              }
-              setState(() {
-                eventManager.addEvent(
-                    Event(
-                      now,
-                      precision,
-                      description: name ?? '',
-                      color: predefinedColor, // Save the button's color with the event
-                    )
-                );
-                selectedEvents.insert(0, false);
-                SystemSound.play(SystemSoundType.click);
-                HapticFeedback.lightImpact();
-              });
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: buttonColor,
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-            ),
-            child: name == null
-                ? const Icon(Icons.arrow_downward, size: 24) // Slightly smaller icon
-                : FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                name,
-                style: const TextStyle(fontSize: 14), // Slightly smaller font
-                maxLines: 1,
-                textAlign: TextAlign.center,
+          child: GestureDetector(
+            onTapDown: recordOnTouchDown ? (_) => recordEvent() : null,
+            child: ElevatedButton(
+              onPressed: recordOnTouchDown ? () {} : recordEvent,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: buttonColor,
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+              ),
+              child: name == null
+                  ? const Icon(Icons.arrow_downward, size: 24) // Slightly smaller icon
+                  : FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  name,
+                  style: const TextStyle(fontSize: 14), // Slightly smaller font
+                  maxLines: 1,
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
           ),

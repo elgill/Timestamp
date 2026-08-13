@@ -174,4 +174,14 @@ class SharedUtility {
   void setExportAccuracy(bool value) {
     sharedPreferences.setBool(exportAccuracyKey, value);
   }
+
+  bool getRecordOnTouchDown() {
+    final status = sharedPreferences.getBool(recordOnTouchDownKey);
+    if (status == null) return false; // Default to recording on touch up (current behavior)
+    return status;
+  }
+
+  void setRecordOnTouchDown(bool value) {
+    sharedPreferences.setBool(recordOnTouchDownKey, value);
+  }
 }
