@@ -3,7 +3,10 @@
 //
 //   flutter test test/screenshot_test.dart --dart-define=SCREENSHOTS=true
 //
-// Output goes to build/screenshots/. Skipped during a normal `flutter test`.
+// Output goes to build/screenshots/, plus report.json with per-device
+// metrics (visible buttons, rendered label sizes, overflow). Skipped during a
+// normal `flutter test`.
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -15,39 +18,98 @@ import 'helpers/test_app.dart';
 
 const _enabled = bool.fromEnvironment('SCREENSHOTS');
 
-/// Approximate Dynamic Island rect (points) for iPhone 15 Pro devices.
-Rect? _dynamicIsland(DeviceSpec device) {
-  if (!device.name.startsWith('iPhone 15')) return null;
-  const long = 126.0, short = 37.0, inset = 11.0;
-  return device.isLandscape
-      ? Rect.fromLTWH(inset, (device.size.height - long) / 2, short, long)
-      : Rect.fromLTWH((device.size.width - long) / 2, inset, long, short);
+final _report = <Map<String, Object?>>[];
+
+/// Measures what the user would actually see, independent of how the app
+/// implements its layout (so it works on old and new code alike).
+Map<String, Object?> _measure(
+    WidgetTester tester, DeviceSpec device, Object? exception) {
+  final safeArea =
+      device.padding.deflateRect(Offset.zero & device.size).inflate(0.5);
+  final cutout = device.cutoutRect;
+  final screen = (Offset.zero & device.size).inflate(0.5);
+  var onScreen = 0, inSafeArea = 0, underCutout = 0;
+  final fontSizes = <double>[];
+
+  for (final label in migraineButtons) {
+    final button = find.widgetWithText(ElevatedButton, label);
+    if (button.evaluate().isEmpty) continue;
+    final rect = tester.getRect(button);
+    final tappable = button.hitTestable().evaluate().isNotEmpty;
+    bool inside(Rect r) => r.contains(rect.topLeft) && r.contains(rect.bottomRight);
+    if (tappable && inside(screen)) onScreen++;
+    if (tappable && inside(safeArea)) inSafeArea++;
+    if (cutout != null && cutout.overlaps(rect)) underCutout++;
+
+    // Rendered size = style size x system text scale x any FittedBox scale.
+    final text = find.descendant(of: button, matching: find.text(label));
+    final paragraph = tester.renderObject<RenderParagraph>(text);
+    final styleSize = paragraph.text.style?.fontSize ?? 14;
+    final scale = tester.getRect(text).width / paragraph.size.width;
+    fontSizes.add(styleSize * device.textScale * scale);
+  }
+  fontSizes.sort();
+
+  final overflow = RegExp(r'overflowed by ([0-9.]+) pixels')
+      .firstMatch(exception?.toString() ?? '')
+      ?.group(1);
+
+  double round(double v) => (v * 10).round() / 10;
+  return {
+    'device': device.name,
+    'width': device.size.width,
+    'height': device.size.height,
+    'landscape': device.isLandscape,
+    'textScale': device.textScale,
+    'total': migraineButtons.length,
+    'onScreen': onScreen,
+    'inSafeArea': inSafeArea,
+    'underCutout': underCutout,
+    'minFont': fontSizes.isEmpty ? null : round(fontSizes.first),
+    'medianFont':
+        fontSizes.isEmpty ? null : round(fontSizes[fontSizes.length ~/ 2]),
+    'overflowPx': overflow == null ? 0 : double.parse(overflow),
+    'image': '${_fileName(device)}.png',
+  };
 }
 
+String _fileName(DeviceSpec device) =>
+    device.name.replaceAll(RegExp(r'[^A-Za-z0-9]+'), '_');
+
 void main() {
-  for (final device in allDevices) {
+  tearDownAll(() {
+    if (!_enabled) return;
+    File('build/screenshots/report.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(
+          const JsonEncoder.withIndent('  ').convert(_report));
+  });
+
+  for (final device in [...allDevices, ...largeTextDevices]) {
     testWidgets('screenshot $device', skip: !_enabled, (tester) async {
       await tester.runAsync(loadRealFonts);
       // Tests draw shadows as solid outlines by default; draw real ones.
       debugDisableShadows = false;
       setDevice(tester, device);
       await pumpApp(tester, buttons: migraineButtons, rows: 5);
-      tester.takeException(); // Capture even if the layout overflows.
+      // Capture even if the layout overflows, but record it.
+      final exception = tester.takeException();
+      _report.add(_measure(tester, device, exception));
 
-      final name = device.name.replaceAll(' ', '_');
+      final name = _fileName(device);
       await tester.runAsync(() async {
         final frame =
             await captureImage(tester.element(find.byType(MaterialApp)));
         final recorder = ui.PictureRecorder();
         final canvas = Canvas(recorder)..drawImage(frame, Offset.zero, Paint());
-        final island = _dynamicIsland(device);
-        if (island != null) {
+        // Paint the camera cutout so it's visible what it would hide.
+        final cutout = device.cutoutRect;
+        if (cutout != null) {
           final dpr = device.devicePixelRatio;
+          final r = Rect.fromLTRB(cutout.left * dpr, cutout.top * dpr,
+              cutout.right * dpr, cutout.bottom * dpr);
           canvas.drawRRect(
-            RRect.fromRectAndRadius(
-                Rect.fromLTRB(island.left * dpr, island.top * dpr,
-                    island.right * dpr, island.bottom * dpr),
-                Radius.circular(20 * dpr)),
+            RRect.fromRectAndRadius(r, Radius.circular(r.shortestSide / 2)),
             Paint()..color = Colors.black,
           );
         }
