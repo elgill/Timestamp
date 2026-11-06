@@ -1,0 +1,31 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      - name: Run tests
+        run: flutter test
+
+      # Renders the main screen on simulated iPhone/iPad sizes (portrait and
+      # landscape) so layout changes can be checked visually on each PR.
+      - name: Render device screenshots
+        run: flutter test test/screenshot_test.dart --dart-define=SCREENSHOTS=true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: device-screenshots
+          path: build/screenshots/

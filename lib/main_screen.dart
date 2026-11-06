@@ -28,8 +28,15 @@ import 'services/event_service.dart';
 import 'services/ntp_service.dart';
 import 'package:timestamp/utils/time_utils.dart';
 import 'package:timestamp/models/event.dart';
+import 'package:timestamp/utils/button_layout.dart';
+import 'package:timestamp/widgets/auto_size_label.dart';
 
 bool isIOS = Platform.isIOS;
+
+/// Short screens (phones in landscape) get compact chrome so there is more
+/// room for the record buttons.
+bool isCompactHeight(BuildContext context) =>
+    MediaQuery.sizeOf(context).height < 500;
 
 class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
@@ -43,6 +50,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   late NtpService ntpService = ref.watch(ntpServiceProvider);
 
   double buttonPadding = 4.0;
+  final ScrollController _buttonScrollController = ScrollController();
 
   DateTime displayTime = DateTime.now();
   late Timer _timer;
@@ -151,6 +159,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   @override
   void dispose() {
     _timer.cancel();
+    _buttonScrollController.dispose();
     super.dispose();
 
     WakelockPlus.disable();
@@ -232,7 +241,13 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: TextButton(
                         onPressed: _showNtpDetailsDialog,
-                        child: ntpService.isInfoRecieved
+                        child: ntpService.isInfoRecieved &&
+                                isCompactHeight(context)
+                            ? Text(
+                                'Last Sync: ${formatAbsoluteTime(ntpService.lastSyncTime.toLocal(), TimeFormat.local24Hour)}'
+                                '  ·  Offset: ${ntpService.ntpOffset}ms'
+                                '  ·  Accuracy: ±${(ntpService.roundTripTime ~/ 2)}ms')
+                            : ntpService.isInfoRecieved
                             ? Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisSize: MainAxisSize.min,
@@ -424,9 +439,16 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       WakelockPlus.enable();
     }
 
+    // On short screens the clock moves into the app bar to free up room
+    // for the record buttons.
+    final clockInAppBar =
+        isCompactHeight(context) && !ref.watch(hideTimerProvider);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Timestamp'),
+        toolbarHeight: isCompactHeight(context) ? 44 : null,
+        centerTitle: clockInAppBar ? true : null,
+        title: clockInAppBar ? _buildClock(28) : const Text('Timestamp'),
         actions: [
           IconButton(
             icon: isIOS
@@ -448,133 +470,141 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     );
   }
 
+  Widget _buildClock(double fontSize) {
+    return GestureDetector(
+      onTap: () {
+        toggleDisplayMode();
+      },
+      child: Text(
+        formatTime(ntpService.currentTime),
+        style: TextStyle(
+          fontSize: fontSize,
+          fontFamily: 'Courier New',
+        ),
+      ),
+    );
+  }
+
   Widget _buildBody() {
-    final showTimer = !ref.watch(hideTimerProvider);
+    final compact = isCompactHeight(context);
+    // In compact mode the clock is shown in the app bar instead.
+    final showTimer = !ref.watch(hideTimerProvider) && !compact;
+    final buttonsOnTop = ref.watch(sharedUtilityProvider).getButtonLocation() ==
+        ButtonLocation.top;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         // Conditionally show the timer
-        if (showTimer)
-          Center(
-            child: GestureDetector(
-              onTap: () {
-                toggleDisplayMode();
-              },
-              child: Text(
-                formatTime(ntpService.currentTime),
-                style: const TextStyle(
-                  fontSize: 35,
-                  fontFamily: 'Courier New',
-                ),
-              ),
-            ),
-          ),
+        if (showTimer) Center(child: _buildClock(35)),
 
-        ref.watch(sharedUtilityProvider).getButtonLocation() == ButtonLocation.top
-            ? _buildEventButtonSection(true, true)
-            : const Divider(thickness: 0),
-
+        // The buttons and the event list share whatever height is left, and
+        // the buttons shrink if needed so every row stays visible.
         Expanded(
-          child: ListView.builder(
-            itemCount: _groupedEvents.entries.length,
-            itemBuilder: (context, sectionIndex) {
-              final sectionDate = _groupedEvents.keys.toList()[sectionIndex];
-              final eventsOfThisDate = _groupedEvents[sectionDate]!;
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(1.0),
-                    child: Text(
-                      formatDate(sectionDate,
-                          ref.watch(sharedUtilityProvider).getTimeFormat()),
-                      style: const TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  Column(
-                    children: eventsOfThisDate.map((event) {
-                      return _buildEventTile(event);
-                    }).toList(),
-                  )
-                ],
-              );
-            },
-          ),
-        ),
+          child: LayoutBuilder(builder: (context, constraints) {
+            // Spacer between the clock and the list when buttons are at the
+            // bottom; not needed in compact mode, where there is no clock.
+            final topSpacer =
+                compact ? const SizedBox.shrink() : const Divider(thickness: 0);
+            final rows = _buttonRows(ref.watch(customButtonNamesProvider));
+            final layout = ButtonSectionLayout.fit(
+              rows: rows.length,
+              availableHeight: constraints.maxHeight -
+                  (buttonsOnTop || compact ? 0 : 16),
+              sectionPadding: compact
+                  ? 8
+                  : ButtonSectionLayout.defaultSectionPadding,
+            );
+            final buttons = _buildEventButtonSection(rows, layout);
+            final list = Expanded(child: _buildEventList());
 
-        ref.watch(sharedUtilityProvider).getButtonLocation() == ButtonLocation.bottom
-            ? _buildEventButtonSection(true, true)
-            : Container(),
+            return Column(
+              children:
+                  buttonsOnTop ? [buttons, list] : [topSpacer, list, buttons],
+            );
+          }),
+        ),
       ],
     );
   }
 
-  Widget _buildEventButtonSection(bool topDivider, bool bottomDivider) {
-    final Color color = Theme.of(context).colorScheme.onInverseSurface;
-
-    return Container(
-      color: color,
-      child: Column(
-        children: [
-          topDivider
-              ? SizedBox(
-                  height: 8,
-                  child: Center(
-                    child: Container(
-                      height: 0,
-                    ),
-                  ),
-                )
-              : Container(),
-          _buildRecordEventButtons(ref.watch(customButtonNamesProvider)),
-          bottomDivider
-              ? SizedBox(
-                  height: 8,
-                  child: Center(
-                    child: Container(
-                      height: 0,
-                    ),
-                  ),
-                )
-              : Container(),
-        ],
+  Widget _buildEventList() {
+    return SafeArea(
+      top: false,
+      bottom: false,
+      child: ListView.builder(
+        itemCount: _groupedEvents.entries.length,
+        itemBuilder: (context, sectionIndex) {
+          final sectionDate = _groupedEvents.keys.toList()[sectionIndex];
+          final eventsOfThisDate = _groupedEvents[sectionDate]!;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(1.0),
+                child: Text(
+                  formatDate(sectionDate,
+                      ref.watch(sharedUtilityProvider).getTimeFormat()),
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              ),
+              Column(
+                children: eventsOfThisDate.map((event) {
+                  return _buildEventTile(event);
+                }).toList(),
+              )
+            ],
+          );
+        },
       ),
     );
   }
 
-  Widget _buildRecordEventButtons(List<String> buttonNames) {
-    int numberOfButtonRows = ref.watch(maxButtonRowsProvider);
-
+  /// Rows of button names; a single unnamed button if none are configured.
+  List<List<String?>> _buttonRows(List<String> buttonNames) {
     if (buttonNames.isEmpty) {
-      return Row(
-        children: [_buildRecordEventButton(null)],
-      );
+      return [
+        [null]
+      ];
     }
+    return splitIntoRows(buttonNames, ref.watch(maxButtonRowsProvider));
+  }
 
-    int totalButtons = buttonNames.length;
-    List<List<String>> rows = [];
+  Widget _buildEventButtonSection(
+      List<List<String?>> rows, ButtonSectionLayout layout) {
+    final Color color = Theme.of(context).colorScheme.onInverseSurface;
+    final halfPadding = layout.sectionPadding / 2;
 
-    for (int i = 0; i < numberOfButtonRows; i++) {
-      int startIndex = (i * totalButtons / numberOfButtonRows).floor();
-      int endIndex = ((i + 1) * totalButtons / numberOfButtonRows).floor();
-      if (startIndex < totalButtons) {
-        rows.add(buttonNames.sublist(startIndex, endIndex));
-      }
-    }
-
-    return Column(
+    Widget buttons = Column(
       children: rows.map((rowButtons) {
         return Row(
-          children: rowButtons.map((name) => _buildRecordEventButton(name)).toList(),
+          children: rowButtons
+              .map((name) => _buildRecordEventButton(name, layout.buttonHeight))
+              .toList(),
         );
       }).toList(),
     );
+    if (layout.scrollable) {
+      buttons = Scrollbar(
+        controller: _buttonScrollController,
+        thumbVisibility: true,
+        child: SingleChildScrollView(
+            controller: _buttonScrollController, primary: false, child: buttons),
+      );
+    }
+
+    return Container(
+      color: color,
+      height: layout.sectionHeight,
+      padding: EdgeInsets.symmetric(vertical: halfPadding),
+      // Keep buttons out from under the notch / Dynamic Island in landscape.
+      child: SafeArea(top: false, bottom: false, child: buttons),
+    );
   }
 
-  Widget _buildRecordEventButton(String? name) {
+  Widget _buildRecordEventButton(String? name, double height) {
     Color buttonColor = Theme.of(context).colorScheme.primary; // Default color
     PredefinedColor predefinedColor = PredefinedColor.defaultColor;
 
@@ -611,7 +641,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       child: Padding(
         padding: const EdgeInsets.all(2.0),
         child: SizedBox(
-          height: 60, // Reduced height to accommodate multiple rows
+          height: height,
           child: Listener(
             behavior: HitTestBehavior.opaque,
             onPointerDown: recordOnTouchDown ? (_) => recordEvent() : null,
@@ -623,15 +653,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
               ),
               child: name == null
                   ? const Icon(Icons.arrow_downward, size: 24) // Slightly smaller icon
-                  : FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  name,
-                  style: const TextStyle(fontSize: 14), // Slightly smaller font
-                  maxLines: 1,
-                  textAlign: TextAlign.center,
-                ),
-              ),
+                  : AutoSizeLabel(name),
             ),
           ),
         ),

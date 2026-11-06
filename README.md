@@ -45,6 +45,21 @@
 -   **Android**
     `flutter run` 
     
+## Testing
+
+-   **Run the test suite**
+    `flutter test`
+
+    Includes layout tests that render the main screen on simulated devices
+    (iPhone 15 Pro portrait/landscape, iPhone SE landscape, iPad) and check
+    that every record button is on screen, inside the safe area and tappable.
+
+-   **Render device screenshots**
+    `flutter test test/screenshot_test.dart --dart-define=SCREENSHOTS=true`
+
+    Writes PNGs to `build/screenshots/`. CI uploads these as the
+    `device-screenshots` artifact on every push.
+
 ## Support
 
 For bugs, feature requests, or further assistance, please open an issue in this repository.
