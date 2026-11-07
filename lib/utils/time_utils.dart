@@ -69,6 +69,13 @@ String formatRelativeTime(DateTime time, DateTime timeToCompare){
   return "$sign${timeComponents.join(' ')}";
 }
 
+/// The calendar day [time] falls on in [timeFormat]. Returned as UTC midnight
+/// so [formatDate] shows that same day for any time format.
+DateTime calendarDay(DateTime time, TimeFormat timeFormat) {
+  final inFormat = timeFormat == TimeFormat.utc24Hour ? time.toUtc() : time;
+  return DateTime.utc(inFormat.year, inFormat.month, inFormat.day);
+}
+
 String formatDate(DateTime dateTime, TimeFormat timeFormat){
   if(timeFormat == TimeFormat.utc24Hour){
     dateTime = dateTime.toUtc();

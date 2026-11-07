@@ -286,8 +286,8 @@ void main() {
       });
       await tester.pump();
 
-      // Only tells correct from a day early when run east of UTC, e.g.
-      // TZ=Asia/Kolkata flutter test test/main_screen_test.dart
+      // Only tells correct from a day early when run east of UTC, which CI
+      // does. calendarDay's own tests catch that in any time zone.
       expect(inList(find.text('Mon Mar 02, 2026')), findsOneWidget);
       expect(inList(find.text('Tue Mar 03, 2026')), findsOneWidget);
       await unmountApp(tester);

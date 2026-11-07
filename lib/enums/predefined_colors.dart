@@ -49,6 +49,15 @@ extension PredefinedColorExtension on PredefinedColor {
     }
   }
 
+  /// The color stored as [index]. One this version doesn't know becomes the
+  /// default, since it must not cost the user what it's attached to.
+  static PredefinedColor fromIndex(Object? index) {
+    const colors = PredefinedColor.values;
+    return index is int && index >= 0 && index < colors.length
+        ? colors[index]
+        : PredefinedColor.defaultColor;
+  }
+
   static PredefinedColor fromColor(Color color) {
     // Compare values: a plain Color never equals a MaterialColor like
     // Colors.red, even with the same value.
