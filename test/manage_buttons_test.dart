@@ -63,6 +63,58 @@ void main() {
     await unmountApp(tester);
   });
 
+  testWidgets('a blank name is ignored', (tester) async {
+    await openManageScreen(tester, ['Aura']);
+
+    await addButton(tester, '   ');
+
+    expect(names(tester), ['Aura']);
+    await unmountApp(tester);
+  });
+
+  testWidgets('surrounding spaces are removed from a name', (tester) async {
+    await openManageScreen(tester, []);
+
+    await addButton(tester, '  Aura ');
+
+    expect(names(tester), ['Aura']);
+    await unmountApp(tester);
+  });
+
+  testWidgets('a duplicate name is refused with an explanation',
+      (tester) async {
+    await openManageScreen(tester, ['Aura']);
+
+    await addButton(tester, 'Aura');
+    await tester.pump(const Duration(milliseconds: 750));
+
+    expect(tester.takeException(), isNull);
+    expect(names(tester), ['Aura']);
+    expect(find.text('"Aura" already exists'), findsOneWidget);
+    expect(tester.widget<TextField>(find.byType(TextField)).controller!.text,
+        'Aura',
+        reason: 'keeps the text so it can be corrected');
+    await unmountApp(tester);
+  });
+
+  testWidgets('a name differing only by spaces is a duplicate', (tester) async {
+    await openManageScreen(tester, ['Aura']);
+
+    await addButton(tester, 'Aura ');
+
+    expect(names(tester), ['Aura']);
+    await unmountApp(tester);
+  });
+
+  testWidgets('duplicates saved by older versions no longer crash the screen',
+      (tester) async {
+    await openManageScreen(tester, ['Aura', 'Nausea', 'Aura']);
+
+    expect(tester.takeException(), isNull);
+    expect(names(tester), ['Aura', 'Nausea']);
+    await unmountApp(tester);
+  });
+
   testWidgets('a new button appears on the main screen', (tester) async {
     await openManageScreen(tester, ['Aura']);
 
