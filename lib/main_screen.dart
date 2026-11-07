@@ -25,6 +25,7 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 
 // Local imports
 import 'pages/event_detail.dart';
+import 'pages/help_page.dart';
 import 'services/event_service.dart';
 import 'services/ntp_service.dart';
 import 'package:timestamp/utils/time_utils.dart';
@@ -456,6 +457,19 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         toolbarHeight: isCompactHeight(context) ? 44 : null,
         centerTitle: clockInAppBar ? true : null,
         title: clockInAppBar ? _buildClock(28) : const Text('Timestamp'),
+        leading: IconButton(
+          icon: isIOS
+              ? const Icon(CupertinoIcons.question_circle)
+              : const Icon(Icons.help_outline),
+          tooltip: 'Help',
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const HelpPage(),
+              ),
+            );
+          },
+        ),
         actions: [
           IconButton(
             icon: isIOS
