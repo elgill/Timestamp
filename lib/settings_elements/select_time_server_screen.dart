@@ -12,21 +12,25 @@ class SelectTimeServerScreen extends ConsumerWidget {
     TimeServer currentServer = ref.watch(timeServerProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('Select Time Server')),
-      body: SettingsList(
-        sections: [
-          SettingsSection(
-            tiles: TimeServer.values.map((server) {
-              return SettingsTile(
-                title: Text(server.displayName),
-                trailing: trailingWidgetFor(server, currentServer),
-                onPressed: (context) {
-                  ref.read(timeServerProvider.notifier).setTimeServer(server);
-                  Navigator.of(context).pop();
-                },
-              );
-            }).toList(),
-          ),
-        ],
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: SettingsList(
+          sections: [
+            SettingsSection(
+              tiles: TimeServer.values.map((server) {
+                return SettingsTile(
+                  title: Text(server.displayName),
+                  trailing: trailingWidgetFor(server, currentServer),
+                  onPressed: (context) {
+                    ref.read(timeServerProvider.notifier).setTimeServer(server);
+                    Navigator.of(context).pop();
+                  },
+                );
+              }).toList(),
+            ),
+          ],
+        ),
       ),
     );
   }

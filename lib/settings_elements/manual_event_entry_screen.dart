@@ -36,41 +36,45 @@ class _ManualEventEntryScreenState
           ),
         ],
       ),
-      body: SettingsList(sections: [
-        SettingsSection(
-          title: const Text('Event Details'),
-          tiles: [
-            SettingsTile(
-                title: const Text('Select Date'),
-                trailing: Text(formatDate(selectedDate, TimeFormat.local24Hour)),
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: SettingsList(sections: [
+          SettingsSection(
+            title: const Text('Event Details'),
+            tiles: [
+              SettingsTile(
+                  title: const Text('Select Date'),
+                  trailing: Text(formatDate(selectedDate, TimeFormat.local24Hour)),
+                  onPressed: (context) {
+                    _showPlatformDatePicker();
+                  }
+              ),
+              SettingsTile(
+                  title: const Text('Select Time'),
+                  trailing: Text(formatAbsoluteTime(selectedDate, TimeFormat.local24Hour)),
+                  onPressed: (context) {
+                    _showCustomTimePicker();
+                  }
+              ),
+              SettingsTile.navigation(
+                title: const Text('Event Description'),
+                value: Text(description.isEmpty ? 'None' : description),
                 onPressed: (context) {
-                  _showPlatformDatePicker();
-                }
-            ),
-            SettingsTile(
-                title: const Text('Select Time'),
-                trailing: Text(formatAbsoluteTime(selectedDate, TimeFormat.local24Hour)),
+                  _showDescriptionDialog();
+                },
+              ),
+              SettingsTile.navigation(
+                title: const Text('Event Color'),
+                value: Text(selectedColor.displayName),
                 onPressed: (context) {
-                  _showCustomTimePicker();
-                }
-            ),
-            SettingsTile.navigation(
-              title: const Text('Event Description'),
-              value: Text(description.isEmpty ? 'None' : description),
-              onPressed: (context) {
-                _showDescriptionDialog();
-              },
-            ),
-            SettingsTile.navigation(
-              title: const Text('Event Color'),
-              value: Text(selectedColor.displayName),
-              onPressed: (context) {
-                _showColorSelectionScreen();
-              },
-            ),
-          ],
-        ),
-      ]),
+                  _showColorSelectionScreen();
+                },
+              ),
+            ],
+          ),
+        ]),
+      ),
     );
   }
 

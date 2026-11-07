@@ -12,21 +12,25 @@ class SelectTimeFormatScreen extends ConsumerWidget {
     TimeFormat currentFormat = ref.watch(is24HourTimeProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('Select Time Format')),
-      body: SettingsList(
-        sections: [
-          SettingsSection(
-            tiles: TimeFormat.values.map((format) {
-              return SettingsTile(
-                title: Text(format.displayName),
-                trailing: trailingWidgetFor(format, currentFormat),
-                onPressed: (context) {
-                  ref.read(is24HourTimeProvider.notifier).setTimeFormat(format);
-                  Navigator.of(context).pop();
-                },
-              );
-            }).toList(),
-          ),
-        ],
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: SettingsList(
+          sections: [
+            SettingsSection(
+              tiles: TimeFormat.values.map((format) {
+                return SettingsTile(
+                  title: Text(format.displayName),
+                  trailing: trailingWidgetFor(format, currentFormat),
+                  onPressed: (context) {
+                    ref.read(is24HourTimeProvider.notifier).setTimeFormat(format);
+                    Navigator.of(context).pop();
+                  },
+                );
+              }).toList(),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -108,12 +108,16 @@ class HelpPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Help')),
-      body: ListView(
-        children: [
-          _buildTopic(_topics.first),
-          _buildTopic(_relativeTime, example: _buildRelativeTimeExample()),
-          ..._topics.skip(1).map(_buildTopic),
-        ],
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: ListView(
+          children: [
+            _buildTopic(_topics.first),
+            _buildTopic(_relativeTime, example: _buildRelativeTimeExample()),
+            ..._topics.skip(1).map(_buildTopic),
+          ],
+        ),
       ),
     );
   }

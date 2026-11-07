@@ -30,36 +30,40 @@ class SelectButtonColorScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Select Color')),
-      body: SettingsList(
-        sections: [
-          SettingsSection(
-            title: const Text('Colors'),
-            tiles: PredefinedColor.values.map((predefinedColor) {
-              return SettingsTile(
-                title: Text(predefinedColor.displayName),
-                leading: CircleAvatar(
-                  backgroundColor: predefinedColor.getColor(themeMode, context),
-                  radius: 16,
-                ),
-                trailing: _buildTrailingWidget(predefinedColor, currentPredefinedColor),
-                onPressed: (context) {
-                  // Handle color selection based on context
-                  if (onColorSelected != null) {
-                    // For manual events, directly call the callback
-                    onColorSelected!(predefinedColor);
-                  } else {
-                    // For button configuration, update the provider
-                    ref.read(customButtonModelsProvider.notifier).updateButtonColor(
-                        buttonName, predefinedColor);
-                    // This forces a rebuild of the customButtonModelsProvider
-                    ref.invalidate(customButtonModelsProvider);
-                  }
-                  Navigator.of(context).pop();
-                },
-              );
-            }).toList(),
-          ),
-        ],
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: SettingsList(
+          sections: [
+            SettingsSection(
+              title: const Text('Colors'),
+              tiles: PredefinedColor.values.map((predefinedColor) {
+                return SettingsTile(
+                  title: Text(predefinedColor.displayName),
+                  leading: CircleAvatar(
+                    backgroundColor: predefinedColor.getColor(themeMode, context),
+                    radius: 16,
+                  ),
+                  trailing: _buildTrailingWidget(predefinedColor, currentPredefinedColor),
+                  onPressed: (context) {
+                    // Handle color selection based on context
+                    if (onColorSelected != null) {
+                      // For manual events, directly call the callback
+                      onColorSelected!(predefinedColor);
+                    } else {
+                      // For button configuration, update the provider
+                      ref.read(customButtonModelsProvider.notifier).updateButtonColor(
+                          buttonName, predefinedColor);
+                      // This forces a rebuild of the customButtonModelsProvider
+                      ref.invalidate(customButtonModelsProvider);
+                    }
+                    Navigator.of(context).pop();
+                  },
+                );
+              }).toList(),
+            ),
+          ],
+        ),
       ),
     );
   }

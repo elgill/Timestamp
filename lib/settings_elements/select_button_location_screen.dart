@@ -12,21 +12,25 @@ class SelectButtonLocationScreen extends ConsumerWidget {
     ButtonLocation currentLocation = ref.watch(buttonLocationProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('Select Button Location')),
-      body: SettingsList(
-        sections: [
-          SettingsSection(
-            tiles: ButtonLocation.values.map((location) {
-              return SettingsTile(
-                title: Text(location.displayName),
-                trailing: trailingWidgetFor(location, currentLocation),
-                onPressed: (context) {
-                  ref.read(buttonLocationProvider.notifier).setButtonLocation(location);
-                  Navigator.of(context).pop();
-                },
-              );
-            }).toList(),
-          ),
-        ],
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: SettingsList(
+          sections: [
+            SettingsSection(
+              tiles: ButtonLocation.values.map((location) {
+                return SettingsTile(
+                  title: Text(location.displayName),
+                  trailing: trailingWidgetFor(location, currentLocation),
+                  onPressed: (context) {
+                    ref.read(buttonLocationProvider.notifier).setButtonLocation(location);
+                    Navigator.of(context).pop();
+                  },
+                );
+              }).toList(),
+            ),
+          ],
+        ),
       ),
     );
   }

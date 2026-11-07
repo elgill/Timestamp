@@ -66,80 +66,84 @@ class _ManageButtonNamesScreenState extends ConsumerState<ManageButtonNamesScree
       appBar: AppBar(
         title: const Text('Manage Button Names'),
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: _controller,
-              decoration: InputDecoration(
-                labelText: 'Button Name',
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.add),
-                  onPressed: _addButtonName,
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: TextField(
+                controller: _controller,
+                decoration: InputDecoration(
+                  labelText: 'Button Name',
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.add),
+                    onPressed: _addButtonName,
+                  ),
                 ),
               ),
             ),
-          ),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
-            child: Text('Drag to reorder buttons, tap color circle to change button color.'),
-          ),
-          Expanded(
-            child: ReorderableListView(
-              onReorder: _onReorder,
-              children: [
-                for (int index = 0; index < buttonNames.length; index++)
-                  ListTile(
-                    key: ValueKey(buttonNames[index]),
-                    leading: const MouseRegion(
-                      cursor: SystemMouseCursors.grab,
-                      child: Icon(Icons.drag_handle),
-                    ),
-                    title: Text(buttonNames[index]),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => SelectButtonColorScreen(
-                                  buttonName: buttonNames[index],
-                                ),
-                              ),
-                            );
-                          },
-                          child: CircleAvatar(
-                            radius: 14,
-                            backgroundColor: ref.watch(customButtonModelsProvider.notifier)
-                                .getButtonColor(buttonNames[index], context),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        IconButton(
-                          icon: const Icon(Icons.delete),
-                          onPressed: () {
-                            setState(() {
-                              // Remove from button names list
-                              buttonNames.removeAt(index);
-                              ref.read(customButtonNamesProvider.notifier)
-                                  .setCustomButtonNameList(buttonNames);
-
-                              // Also remove from button models
-                              ref.read(customButtonModelsProvider.notifier)
-                                  .syncWithButtonNames(buttonNames);
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-              ],
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Text('Drag to reorder buttons, tap color circle to change button color.'),
             ),
-          ),
-        ],
+            Expanded(
+              child: ReorderableListView(
+                onReorder: _onReorder,
+                children: [
+                  for (int index = 0; index < buttonNames.length; index++)
+                    ListTile(
+                      key: ValueKey(buttonNames[index]),
+                      leading: const MouseRegion(
+                        cursor: SystemMouseCursors.grab,
+                        child: Icon(Icons.drag_handle),
+                      ),
+                      title: Text(buttonNames[index]),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => SelectButtonColorScreen(
+                                    buttonName: buttonNames[index],
+                                  ),
+                                ),
+                              );
+                            },
+                            child: CircleAvatar(
+                              radius: 14,
+                              backgroundColor: ref.watch(customButtonModelsProvider.notifier)
+                                  .getButtonColor(buttonNames[index], context),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            icon: const Icon(Icons.delete),
+                            onPressed: () {
+                              setState(() {
+                                // Remove from button names list
+                                buttonNames.removeAt(index);
+                                ref.read(customButtonNamesProvider.notifier)
+                                    .setCustomButtonNameList(buttonNames);
+
+                                // Also remove from button models
+                                ref.read(customButtonModelsProvider.notifier)
+                                    .syncWithButtonNames(buttonNames);
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

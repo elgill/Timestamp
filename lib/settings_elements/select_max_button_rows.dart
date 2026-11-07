@@ -12,22 +12,26 @@ class SelectMaxButtonRowsScreen extends ConsumerWidget {
     int currentNumber = ref.watch(maxButtonRowsProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('Select Max Button Rows')),
-      body: SettingsList(
-        sections: [
-          SettingsSection(
-            tiles: List.generate(5, (index) {
-              int number = index + 1;
-              return SettingsTile(
-                title: Text(number.toString()),
-                trailing: trailingWidgetFor(number, currentNumber),
-                onPressed: (context) {
-                  ref.read(maxButtonRowsProvider.notifier).setMaxButtonRows(number);
-                  Navigator.of(context).pop();
-                },
-              );
-            }),
-          ),
-        ],
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: SettingsList(
+          sections: [
+            SettingsSection(
+              tiles: List.generate(5, (index) {
+                int number = index + 1;
+                return SettingsTile(
+                  title: Text(number.toString()),
+                  trailing: trailingWidgetFor(number, currentNumber),
+                  onPressed: (context) {
+                    ref.read(maxButtonRowsProvider.notifier).setMaxButtonRows(number);
+                    Navigator.of(context).pop();
+                  },
+                );
+              }),
+            ),
+          ],
+        ),
       ),
     );
   }

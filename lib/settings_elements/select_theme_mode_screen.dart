@@ -24,21 +24,25 @@ class SelectThemeModeScreen extends ConsumerWidget {
     ThemeMode currentMode = ref.watch(themeModeProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('Select Theme')),
-      body: SettingsList(
-        sections: [
-          SettingsSection(
-            tiles: ThemeMode.values.map((mode) {
-              return SettingsTile(
-                title: Text(getModeDisplayName(mode)),
-                trailing: trailingWidgetFor(mode, currentMode),
-                onPressed: (context) {
-                  ref.read(themeModeProvider.notifier).setThemeMode(mode);
-                  Navigator.of(context).pop();
-                },
-              );
-            }).toList(),
-          ),
-        ],
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: SettingsList(
+          sections: [
+            SettingsSection(
+              tiles: ThemeMode.values.map((mode) {
+                return SettingsTile(
+                  title: Text(getModeDisplayName(mode)),
+                  trailing: trailingWidgetFor(mode, currentMode),
+                  onPressed: (context) {
+                    ref.read(themeModeProvider.notifier).setThemeMode(mode);
+                    Navigator.of(context).pop();
+                  },
+                );
+              }).toList(),
+            ),
+          ],
+        ),
       ),
     );
   }

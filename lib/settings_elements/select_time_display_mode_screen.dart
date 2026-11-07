@@ -12,31 +12,35 @@ class SelectTimeDisplayModeScreen extends ConsumerWidget {
     DisplayMode currentMode = ref.watch(displayModeProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('Select Time Display Mode')),
-      body: SettingsList(
-        sections: [
-          SettingsSection(
-            tiles: [
-              SettingsTile(
-                title: const Text('Absolute Time'),
-                description: const Text('Show actual time of day (e.g., 2:45:30 PM)'),
-                trailing: trailingWidgetFor(DisplayMode.absolute, currentMode),
-                onPressed: (context) {
-                  ref.read(displayModeProvider.notifier).setDisplayMode(DisplayMode.absolute);
-                  Navigator.of(context).pop();
-                },
-              ),
-              SettingsTile(
-                title: const Text('Relative Time'),
-                description: const Text('Show time relative to reference event (e.g., +0:02:15)'),
-                trailing: trailingWidgetFor(DisplayMode.relative, currentMode),
-                onPressed: (context) {
-                  ref.read(displayModeProvider.notifier).setDisplayMode(DisplayMode.relative);
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          ),
-        ],
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: SettingsList(
+          sections: [
+            SettingsSection(
+              tiles: [
+                SettingsTile(
+                  title: const Text('Absolute Time'),
+                  description: const Text('Show actual time of day (e.g., 2:45:30 PM)'),
+                  trailing: trailingWidgetFor(DisplayMode.absolute, currentMode),
+                  onPressed: (context) {
+                    ref.read(displayModeProvider.notifier).setDisplayMode(DisplayMode.absolute);
+                    Navigator.of(context).pop();
+                  },
+                ),
+                SettingsTile(
+                  title: const Text('Relative Time'),
+                  description: const Text('Show time relative to reference event (e.g., +0:02:15)'),
+                  trailing: trailingWidgetFor(DisplayMode.relative, currentMode),
+                  onPressed: (context) {
+                    ref.read(displayModeProvider.notifier).setDisplayMode(DisplayMode.relative);
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

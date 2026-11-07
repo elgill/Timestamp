@@ -517,7 +517,12 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         // Conditionally show the timer
-        if (showTimer) Center(child: _buildClock(35)),
+        if (showTimer)
+          SafeArea(
+            top: false,
+            bottom: false,
+            child: Center(child: _buildClock(35)),
+          ),
 
         // The buttons and the event list share whatever height is left, and
         // the buttons shrink if needed so every row stays visible.
