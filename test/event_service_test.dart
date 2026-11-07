@@ -126,6 +126,58 @@ void main() {
       expect((await reloaded()).referenceEvent, isNull);
     });
 
+    test('one unreadable event does not lose the rest', () async {
+      final good = at(9, 'good');
+      SharedPreferences.setMockInitialValues({
+        'events': [good.toJson(), '{not json', '{"time":"bad"}'],
+      });
+      expect((await reloaded()).events, [good]);
+    });
+
+    test('the reference is the same object as its event after a restart',
+        () async {
+      EventService()
+        ..addEvent(at(9, 'a'))
+        ..addEvent(at(10, 'b'));
+      final restored = await reloaded();
+      expect(restored.referenceEvent, same(restored.events.last));
+    });
+
+    test('a reference that drifted from its event is matched back to it',
+        () async {
+      final event = at(9, 'renamed');
+      SharedPreferences.setMockInitialValues({
+        'events': [at(10, 'newer').toJson(), event.toJson()],
+        referenceEventKey: at(9, 'old name').toJson(),
+      });
+      final restored = await reloaded();
+      expect(restored.referenceEvent, same(restored.events.last));
+      expect(restored.referenceEvent?.description, 'renamed');
+    });
+
+    test('a reference to a deleted event falls back to the oldest', () async {
+      SharedPreferences.setMockInitialValues({
+        'events': [at(10, 'newer').toJson(), at(9, 'oldest').toJson()],
+        referenceEventKey: at(8, 'deleted').toJson(),
+      });
+      expect((await reloaded()).referenceEvent?.description, 'oldest');
+    });
+
+    test('an unreadable reference falls back to the oldest', () async {
+      SharedPreferences.setMockInitialValues({
+        'events': [at(10, 'newer').toJson(), at(9, 'oldest').toJson()],
+        referenceEventKey: '{not json',
+      });
+      expect((await reloaded()).referenceEvent?.description, 'oldest');
+    });
+
+    test('a saved reference with no events left is cleared', () async {
+      SharedPreferences.setMockInitialValues({
+        referenceEventKey: at(8, 'deleted').toJson(),
+      });
+      expect((await reloaded()).referenceEvent, isNull);
+    });
+
     test('a first launch has no events and no reference', () async {
       final service = await reloaded();
       expect(service.events, isEmpty);

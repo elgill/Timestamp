@@ -74,6 +74,60 @@ void main() {
       await unmountApp(tester);
     });
 
+    testWidgets('description: Cancel discards the typing', (tester) async {
+      await openManualEntry(tester);
+
+      await tester.tap(find.text('Event Description'));
+      await settle(tester);
+      await tester.enterText(find.byType(TextField), 'typo');
+      await tester.tap(find.text('Cancel'));
+      await settle(tester);
+
+      expect(find.text('None'), findsOneWidget);
+      await saveEvent(tester);
+      expect(events(tester).events.single.description, '');
+      await settle(tester);
+      await unmountApp(tester);
+    });
+
+    testWidgets('description: Cancel keeps what was saved before',
+        (tester) async {
+      await openManualEntry(tester);
+
+      await tester.tap(find.text('Event Description'));
+      await settle(tester);
+      await tester.enterText(find.byType(TextField), 'keep');
+      await tester.tap(find.text('Save'));
+      await settle(tester);
+
+      await tester.tap(find.text('Event Description'));
+      await settle(tester);
+      await tester.enterText(find.byType(TextField), 'discard');
+      await tester.tap(find.text('Cancel'));
+      await settle(tester);
+
+      await saveEvent(tester);
+      expect(events(tester).events.single.description, 'keep');
+      await settle(tester);
+      await unmountApp(tester);
+    });
+
+    testWidgets('description: tapping outside the dialog discards the typing',
+        (tester) async {
+      await openManualEntry(tester);
+
+      await tester.tap(find.text('Event Description'));
+      await settle(tester);
+      await tester.enterText(find.byType(TextField), 'typo');
+      await tester.tapAt(const Offset(5, 5));
+      await settle(tester);
+
+      await saveEvent(tester);
+      expect(events(tester).events.single.description, '');
+      await settle(tester);
+      await unmountApp(tester);
+    });
+
     testWidgets('color', (tester) async {
       await openManualEntry(tester);
 
