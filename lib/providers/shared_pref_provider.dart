@@ -31,7 +31,10 @@ class SharedUtility {
   TimeFormat getTimeFormat() {
     final format = sharedPreferences.getString(sharedTimeFormatKey);
     if (format == null) return TimeFormat.local24Hour;
-    return TimeFormat.values.firstWhere((e) => e.toString() == format);
+    return TimeFormat.values.firstWhere(
+      (e) => e.toString() == format,
+      orElse: () => TimeFormat.local24Hour,
+    );
   }
 
   void setTimeFormat(TimeFormat format) {
@@ -41,7 +44,10 @@ class SharedUtility {
   TimeServer getTimeServer() {
     final value = sharedPreferences.getString(sharedTimeServerKey);
     if (value == null) return TimeServer.timeGoogleCom;
-    return TimeServer.values.firstWhere((e) => e.toString() == value);
+    return TimeServer.values.firstWhere(
+      (e) => e.toString() == value,
+      orElse: () => TimeServer.timeGoogleCom,
+    );
   }
 
   void setTimeServer(TimeServer value) {
@@ -51,7 +57,10 @@ class SharedUtility {
   ButtonLocation getButtonLocation() {
     final format = sharedPreferences.getString(buttonLocationKey);
     if (format == null) return ButtonLocation.top;
-    return ButtonLocation.values.firstWhere((e) => e.toString() == format);
+    return ButtonLocation.values.firstWhere(
+      (e) => e.toString() == format,
+      orElse: () => ButtonLocation.top,
+    );
   }
 
   void setButtonLocation(ButtonLocation location) {
@@ -71,7 +80,8 @@ class SharedUtility {
   List<String> getCustomEventButtonList() {
     final status = sharedPreferences.getStringList(customEventNamesKey);
     if (status == null) return [];
-    return status;
+    // Older versions could save duplicates; names must be unique.
+    return status.toSet().toList();
   }
 
   void setCustomEventButtonList(List<String> value) {

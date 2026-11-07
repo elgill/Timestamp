@@ -354,5 +354,37 @@ void main() {
         await closeApp(tester);
       });
     }
+
+    testWidgets('a link that cannot open explains instead of failing',
+        (tester) async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(_urlChannel, (_) async => false);
+
+      await openSettings(tester);
+      await tester.tap(find.text('Privacy Policy'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 750));
+
+      expect(find.text('Could not open https://gillin.dev/privacy'),
+          findsOneWidget);
+      await closeApp(tester);
+    });
+
+    testWidgets('a launch error is reported the same way', (tester) async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(_urlChannel, (call) async {
+        if (call.method == 'launch') throw PlatformException(code: 'failed');
+        return true;
+      });
+
+      await openSettings(tester);
+      await tester.tap(find.text('Privacy Policy'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 750));
+
+      expect(find.text('Could not open https://gillin.dev/privacy'),
+          findsOneWidget);
+      await closeApp(tester);
+    });
   });
 }

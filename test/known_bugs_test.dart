@@ -9,17 +9,12 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:settings_ui/settings_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timestamp/constants.dart';
-import 'package:timestamp/enums/button_location.dart';
-import 'package:timestamp/enums/time_format.dart';
-import 'package:timestamp/enums/time_server.dart';
 import 'package:timestamp/models/event.dart';
-import 'package:timestamp/providers/custom_button_names_provider.dart';
 import 'package:timestamp/providers/shared_pref_provider.dart';
 import 'package:timestamp/services/event_service.dart';
 import 'package:timestamp/services/export_service.dart';
@@ -86,58 +81,6 @@ void main() {
     });
   });
 
-  group('crashes', () {
-    // ReorderableListView rows are keyed by name.
-    testWidgets('adding a duplicate button name', skip: _skip, (tester) async {
-      setDevice(tester, tallScreen);
-      await pumpApp(tester, buttons: ['Aura'], rows: 1);
-      await tester.tap(find.byIcon(Icons.settings));
-      await settle(tester);
-      await tester.tap(find.text('Custom Button Names'));
-      await settle(tester);
-
-      await tester.enterText(find.byType(TextField), 'Aura');
-      await tester.tap(find.byIcon(Icons.add));
-      await tester.pump();
-
-      final error = tester.takeException();
-      await unmountApp(tester);
-      expect(error, isNull);
-    });
-
-    // Only getThemeMode has an orElse. A value from a newer version or a
-    // renamed enum throws on every build, so the app can't open.
-    test('unknown saved enum values fall back to the default', skip: _skip,
-        () async {
-      final utility = await utilityWith({
-        sharedTimeFormatKey: 'TimeFormat.gone',
-        sharedTimeServerKey: 'TimeServer.gone',
-        buttonLocationKey: 'ButtonLocation.gone',
-      });
-      expect(utility.getTimeFormat(), TimeFormat.local24Hour);
-      expect(utility.getTimeServer(), TimeServer.timeGoogleCom);
-      expect(utility.getButtonLocation(), ButtonLocation.top);
-    });
-
-    // _launchURL throws a String from an async callback that nothing awaits.
-    testWidgets('a link that cannot open does not raise an error', skip: _skip,
-        (tester) async {
-      const channel = MethodChannel('plugins.flutter.io/url_launcher');
-      final messenger =
-          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
-      messenger.setMockMethodCallHandler(channel, (_) async => false);
-      addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
-
-      setDevice(tester, tallScreen);
-      await pumpApp(tester, buttons: [], rows: 1);
-      await tester.tap(find.byIcon(Icons.settings));
-      await settle(tester);
-      await tester.tap(find.text('Privacy Policy'));
-      await settle(tester);
-      await unmountApp(tester);
-    });
-  });
-
   group('settings that do not fully work', () {
     // MainScreen.build only ever calls enable(); nothing calls disable()
     // when the setting is turned off.
@@ -164,23 +107,6 @@ void main() {
       expect(last, isFalse);
     });
 
-    // Whitespace passes the isNotEmpty check, giving a blank button.
-    testWidgets('a blank button name is ignored', skip: _skip, (tester) async {
-      setDevice(tester, tallScreen);
-      await pumpApp(tester, buttons: [], rows: 1);
-      await tester.tap(find.byIcon(Icons.settings));
-      await settle(tester);
-      await tester.tap(find.text('Custom Button Names'));
-      await settle(tester);
-
-      await tester.enterText(find.byType(TextField), '   ');
-      await tester.tap(find.byIcon(Icons.add));
-      await tester.pump();
-
-      final names = appContainer(tester).read(customButtonNamesProvider);
-      await unmountApp(tester);
-      expect(names, isEmpty);
-    });
   });
 
   group('efficiency and polish', () {

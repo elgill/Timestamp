@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:settings_ui/settings_ui.dart';
 import 'package:timestamp/providers/auto_lock_provider.dart';
@@ -31,12 +32,15 @@ import 'package:timestamp/app_providers.dart';
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
-  Future<void> _launchURL(String url) async {
-    if (await canLaunchUrl(Uri.parse(url))) {
-      await launchUrl(Uri.parse(url));
-    } else {
-      throw 'Could not launch $url';
+  Future<void> _launchURL(BuildContext context, String url) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final uri = Uri.parse(url);
+    try {
+      if (await canLaunchUrl(uri) && await launchUrl(uri)) return;
+    } on PlatformException {
+      // Reported below, same as a link that can't be opened.
     }
+    messenger.showSnackBar(SnackBar(content: Text('Could not open $url')));
   }
 
   @override
@@ -191,14 +195,14 @@ class SettingsScreen extends ConsumerWidget {
                 title: const Text('Privacy Policy'),
                 leading: const Icon(Icons.privacy_tip),
                 onPressed: (BuildContext context) {
-                  _launchURL('https://gillin.dev/privacy');
+                  _launchURL(context, 'https://gillin.dev/privacy');
                 },
               ),
               SettingsTile(
                 title: const Text('Feedback & Support'),
                 leading: const Icon(Icons.feedback),
                 onPressed: (BuildContext context) {
-                  _launchURL('https://gillin.dev/#contact');
+                  _launchURL(context, 'https://gillin.dev/#contact');
                 },
               ),
             ],

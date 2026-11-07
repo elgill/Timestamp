@@ -122,6 +122,17 @@ void main() {
       expect(utility.getThemeMode(), ThemeMode.dark);
     });
 
+    test('unknown enum values fall back to the default', () async {
+      final utility = await utilityWith({
+        sharedTimeFormatKey: 'TimeFormat.gone',
+        sharedTimeServerKey: 'TimeServer.gone',
+        buttonLocationKey: 'ButtonLocation.gone',
+      });
+      expect(utility.getTimeFormat(), TimeFormat.local24Hour);
+      expect(utility.getTimeServer(), TimeServer.timeGoogleCom);
+      expect(utility.getButtonLocation(), ButtonLocation.top);
+    });
+
     test('an unknown theme falls back to system', () async {
       final utility = await utilityWith({themeModeKey: 'ThemeMode.sepia'});
       expect(utility.getThemeMode(), ThemeMode.system);

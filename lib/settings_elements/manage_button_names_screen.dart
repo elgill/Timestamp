@@ -17,16 +17,25 @@ class _ManageButtonNamesScreenState extends ConsumerState<ManageButtonNamesScree
 
   void _addButtonName() {
     final List<String> currentNames = ref.read(customButtonNamesProvider);
-    if (_controller.text.isNotEmpty) {
-      setState(() {
-        currentNames.add(_controller.text);
-        ref.read(customButtonNamesProvider.notifier).setCustomButtonNameList(currentNames);
+    final name = _controller.text.trim();
+    if (name.isEmpty) return;
 
-        // Also sync with button models
-        ref.read(customButtonModelsProvider.notifier).syncWithButtonNames(currentNames);
-      });
-      _controller.clear();
+    // Buttons are identified by name, so names have to be unique.
+    if (currentNames.contains(name)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('"$name" already exists')),
+      );
+      return;
     }
+
+    setState(() {
+      currentNames.add(name);
+      ref.read(customButtonNamesProvider.notifier).setCustomButtonNameList(currentNames);
+
+      // Also sync with button models
+      ref.read(customButtonModelsProvider.notifier).syncWithButtonNames(currentNames);
+    });
+    _controller.clear();
   }
 
   void _onReorder(int oldIndex, int newIndex) {
