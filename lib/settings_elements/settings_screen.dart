@@ -36,7 +36,9 @@ class SettingsScreen extends ConsumerWidget {
     final messenger = ScaffoldMessenger.of(context);
     final uri = Uri.parse(url);
     try {
-      if (await canLaunchUrl(uri) && await launchUrl(uri)) return;
+      // No canLaunchUrl check: on Android 11+ it reports false for https
+      // unless the manifest declares a <queries> entry.
+      if (await launchUrl(uri)) return;
     } on PlatformException {
       // Reported below, same as a link that can't be opened.
     }

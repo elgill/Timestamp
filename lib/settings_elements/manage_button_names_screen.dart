@@ -15,14 +15,22 @@ class ManageButtonNamesScreen extends ConsumerStatefulWidget {
 class _ManageButtonNamesScreenState extends ConsumerState<ManageButtonNamesScreen> {
   final TextEditingController _controller = TextEditingController();
 
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   void _addButtonName() {
     final List<String> currentNames = ref.read(customButtonNamesProvider);
     final name = _controller.text.trim();
     if (name.isEmpty) return;
 
+    final messenger = ScaffoldMessenger.of(context)..clearSnackBars();
+
     // Buttons are identified by name, so names have to be unique.
     if (currentNames.contains(name)) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(content: Text('"$name" already exists')),
       );
       return;

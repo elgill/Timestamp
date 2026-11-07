@@ -37,6 +37,19 @@ void main() {
       expect(restored.description, 'old');
     });
 
+    for (final color in [9, -1, 'red', null]) {
+      test('a stored color of $color falls back to the default', () {
+        final restored = Event.fromJson(jsonEncode({
+          'time': '2024-01-02T03:04:05.000',
+          'precision': 7,
+          'description': 'kept',
+          'color': color,
+        }));
+        expect(restored.color, PredefinedColor.defaultColor);
+        expect(restored.description, 'kept');
+      });
+    }
+
     test('reads events saved before descriptions existed', () {
       final restored = Event.fromJson(jsonEncode({
         'time': '2024-01-02T03:04:05.000',

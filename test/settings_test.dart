@@ -367,6 +367,28 @@ void main() {
       });
     }
 
+    // On Android 11+ canLaunch answers false for https without a <queries>
+    // entry, even though launching works.
+    testWidgets('a link opens even if canLaunch says no', (tester) async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(_urlChannel, (call) async {
+        if (call.method == 'launch') {
+          launched.add((call.arguments as Map)['url'] as String);
+          return true;
+        }
+        return false;
+      });
+
+      await openSettings(tester);
+      await tester.tap(find.text('Privacy Policy'));
+      await settle(tester);
+
+      expect(launched, ['https://gillin.dev/privacy']);
+      expect(find.text('Could not open https://gillin.dev/privacy'),
+          findsNothing);
+      await closeApp(tester);
+    });
+
     testWidgets('a link that cannot open explains instead of failing',
         (tester) async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger

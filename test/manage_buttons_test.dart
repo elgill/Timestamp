@@ -97,6 +97,34 @@ void main() {
     await unmountApp(tester);
   });
 
+  testWidgets('repeated refusals do not queue up messages', (tester) async {
+    await openManageScreen(tester, ['Aura']);
+
+    await addButton(tester, 'Aura');
+    await addButton(tester, 'Aura');
+    await addButton(tester, 'Aura');
+    await tester.pump(const Duration(milliseconds: 750));
+    expect(find.text('"Aura" already exists'), findsOneWidget);
+
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('"Aura" already exists'), findsNothing);
+    await unmountApp(tester);
+  });
+
+  testWidgets('a corrected name clears the refusal', (tester) async {
+    await openManageScreen(tester, ['Aura']);
+
+    await addButton(tester, 'Aura');
+    await tester.pump(const Duration(milliseconds: 750));
+    await addButton(tester, 'Nausea');
+    await tester.pump(const Duration(milliseconds: 750));
+
+    expect(names(tester), ['Aura', 'Nausea']);
+    expect(find.text('"Aura" already exists'), findsNothing);
+    await unmountApp(tester);
+  });
+
   testWidgets('a name differing only by spaces is a duplicate', (tester) async {
     await openManageScreen(tester, ['Aura']);
 
@@ -272,6 +300,22 @@ void main() {
           closeTo(tester.getCenter(find.text('Orange')).dy, 12));
       await tester.pageBack();
       await settle(tester);
+      await unmountApp(tester);
+    });
+
+    testWidgets('a color set on a duplicate from an older version sticks',
+        (tester) async {
+      final model = jsonEncode(
+          ButtonModel('Aura', PredefinedColor.defaultColor).toJson());
+      final other = jsonEncode(
+          ButtonModel('Nausea', PredefinedColor.defaultColor).toJson());
+      await openManageScreen(tester, ['Aura', 'Nausea', 'Aura'],
+          prefs: {customButtonModelsKey: [model, other, model]});
+
+      await pickColor(tester, 'Aura', 'Red');
+      await addButton(tester, 'Dizzy');
+
+      expect(circleColor(tester, 'Aura'), Colors.red);
       await unmountApp(tester);
     });
 

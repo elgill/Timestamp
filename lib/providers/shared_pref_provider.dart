@@ -97,18 +97,24 @@ class SharedUtility {
     }
 
     try {
-      return modelStrings
-          .map((str) => ButtonModel.fromJson(jsonDecode(str)))
-          .toList();
+      return _firstPerName(
+          modelStrings.map((str) => ButtonModel.fromJson(jsonDecode(str))));
     } catch (e) {
       // If there's an error, try to migrate from the old format
       try {
-        return _migrateFromOldButtonModelFormat(modelStrings);
+        return _firstPerName(_migrateFromOldButtonModelFormat(modelStrings));
       } catch (e) {
         // Fallback to default if there's an error
         return [];
       }
     }
+  }
+
+  // Older versions could save duplicates; names must be unique. The first one
+  // is the one that was shown and recolored.
+  List<ButtonModel> _firstPerName(Iterable<ButtonModel> models) {
+    final seen = <String>{};
+    return models.where((model) => seen.add(model.name)).toList();
   }
 
 // Helper method to migrate from old format (with raw Color values) to new format (with PredefinedColor)
