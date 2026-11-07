@@ -415,6 +415,17 @@ void main() {
   });
 
   group('NTP status', () {
+    testWidgets('one NTP query at startup', (tester) async {
+      setDevice(tester, iPhone15ProPortrait);
+      late FakeNtpService ntp;
+      await pumpApp(tester,
+          buttons: [], rows: 1, onNtpCreated: (service) => ntp = service);
+
+      final requests = ntp.syncRequests;
+      await unmountApp(tester);
+      expect(requests, 1);
+    });
+
     testWidgets('before any sync', (tester) async {
       setDevice(tester, phone);
       await pumpApp(tester, buttons: [], rows: 1, ntpSynced: false);

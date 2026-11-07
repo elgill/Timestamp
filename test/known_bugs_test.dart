@@ -11,8 +11,6 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:timestamp/models/event.dart';
 
-import 'helpers/test_app.dart';
-
 const _skip = !bool.fromEnvironment('KNOWN_BUGS');
 
 void main() {
@@ -23,20 +21,6 @@ void main() {
     test('saved events identify an exact instant', skip: _skip, () {
       final saved = jsonDecode(Event(DateTime(2026, 3, 5, 14), 1).toJson());
       expect(saved['time'], matches(RegExp(r'(Z|[+-]\d\d:\d\d)$')));
-    });
-  });
-
-  group('efficiency and polish', () {
-    // Both NtpService's constructor and MainScreen.initState start a sync.
-    testWidgets('one NTP query at startup', skip: _skip, (tester) async {
-      setDevice(tester, iPhone15ProPortrait);
-      late FakeNtpService ntp;
-      await pumpApp(tester,
-          buttons: [], rows: 1, onNtpCreated: (service) => ntp = service);
-
-      final requests = ntp.syncRequests;
-      await unmountApp(tester);
-      expect(requests, 1);
     });
   });
 }

@@ -7,7 +7,11 @@ import 'package:timestamp/providers/shared_pref_provider.dart';
 final ntpServiceProvider = Provider<NtpService>((ref) => NtpService(ref));
 
 /// Performs the NTP query. Replaceable so tests don't need the network.
-typedef NtpFetcher = Future<NTPResponse> Function({String lookUpAddress});
+typedef NtpFetcher = Future<NTPResponse> Function(
+    {String lookUpAddress, Duration? timeout});
+
+/// NTP runs over UDP, so without a limit a lost packet waits forever.
+const ntpQueryTimeout = Duration(seconds: 5);
 
 class NtpService {
   final ProviderRef _ref;
@@ -37,9 +41,8 @@ class NtpService {
 
   Future<void> updateNtpOffset() async {
     try {
-      NTPResponse ntpResponse = await _fetchNtpData(
-          lookUpAddress:
-              _ref.watch(sharedUtilityProvider).getTimeServer().displayName);
+      NTPResponse ntpResponse = await _queryWithRetry(
+          _ref.watch(sharedUtilityProvider).getTimeServer().displayName);
       _timeServer = ntpResponse.lookupServer;
       _ntpOffset = ntpResponse.offset;
       _ntpStratum = ntpResponse.stratum;
@@ -52,6 +55,15 @@ class NtpService {
         loadNtpData();
       }
       // TODO: Handle exception here, perhaps through a callback or stream.
+    }
+  }
+
+  Future<NTPResponse> _queryWithRetry(String server) async {
+    try {
+      return await _fetchNtpData(
+          lookUpAddress: server, timeout: ntpQueryTimeout);
+    } catch (_) {
+      return _fetchNtpData(lookUpAddress: server, timeout: ntpQueryTimeout);
     }
   }
 

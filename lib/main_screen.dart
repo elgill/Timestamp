@@ -152,7 +152,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     ntpService = ref.read(ntpServiceProvider);
 
     eventManager.loadData();
-    ntpService.updateNtpOffset();
 
     _applyAutoLockSetting();
     ref.listenManual(autoLockProvider, (_, keepAwake) {

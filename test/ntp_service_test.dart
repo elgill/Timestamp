@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:advanced_ntp/ntp.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -23,9 +25,11 @@ class ScriptedNtp {
 
   final List<Object> results;
   final queried = <String>[];
+  final timeouts = <Duration?>[];
 
-  Future<NTPResponse> call({String lookUpAddress = ''}) async {
+  Future<NTPResponse> call({String lookUpAddress = '', Duration? timeout}) async {
     queried.add(lookUpAddress);
+    timeouts.add(timeout);
     final result = results.length > 1 ? results.removeAt(0) : results.first;
     if (result is Exception) throw result;
     return result as NTPResponse;
@@ -116,6 +120,26 @@ void main() {
     expect(ntp.queried.last, 'time.apple.com');
   });
 
+  test('every query has a time limit', () async {
+    final ntp = ScriptedNtp([Exception('offline')]);
+    await createService(ntp);
+    expect(ntp.timeouts, [ntpQueryTimeout, ntpQueryTimeout]);
+  });
+
+  test('a successful sync sends one query', () async {
+    final ntp = ScriptedNtp([response()]);
+    await createService(ntp);
+    expect(ntp.queried.length, 1);
+  });
+
+  test('a lost response is retried once', () async {
+    final ntp = ScriptedNtp([TimeoutException('lost'), response(offset: 5)]);
+    final service = await createService(ntp);
+    expect(ntp.queried.length, 2);
+    expect(service.isInfoRecieved, isTrue);
+    expect(service.ntpOffset, 5);
+  });
+
   test('a sync is saved for use when offline', () async {
     await createService(ScriptedNtp([response()]));
     await pumpEventQueue();
@@ -138,6 +162,12 @@ void main() {
       expect(service.roundTripTime, 9999);
     });
 
+    test('stops after one retry', () async {
+      final ntp = ScriptedNtp([TimeoutException('lost')]);
+      await createService(ntp);
+      expect(ntp.queried.length, 2);
+    });
+
     test('nothing saved leaves the defaults', () async {
       final service = await createService(ScriptedNtp([Exception('offline')]));
       expect(service.ntpOffset, 0);
@@ -153,16 +183,17 @@ void main() {
     test('a failed resync keeps the last good values', () async {
       final ntp = ScriptedNtp([response(), Exception('offline')]);
       final service = await createService(ntp);
-      // Startup used the first result; this one fails.
+      // Startup used the first result; this sync and its retry fail.
       await service.updateNtpOffset();
       await pumpEventQueue();
-      expect(ntp.queried.length, 2);
+      expect(ntp.queried.length, 3);
       expect(service.isInfoRecieved, isTrue);
       expect(service.ntpOffset, 250);
     });
 
     test('recovers on the next successful sync', () async {
-      final ntp = ScriptedNtp([Exception('offline'), response(offset: 5)]);
+      final ntp = ScriptedNtp(
+          [Exception('offline'), Exception('offline'), response(offset: 5)]);
       final service = await createService(ntp, prefs: {'ntpOffset': 77});
       expect(service.isInfoRecieved, isFalse);
       await service.updateNtpOffset();
