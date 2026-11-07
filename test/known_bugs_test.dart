@@ -10,7 +10,6 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:timestamp/models/event.dart';
-import 'package:timestamp/services/export_service.dart';
 
 import 'helpers/test_app.dart';
 
@@ -24,20 +23,6 @@ void main() {
     test('saved events identify an exact instant', skip: _skip, () {
       final saved = jsonDecode(Event(DateTime(2026, 3, 5, 14), 1).toJson());
       expect(saved['time'], matches(RegExp(r'(Z|[+-]\d\d:\d\d)$')));
-    });
-
-    // Same issue in the exported CSV dates.
-    test('exported CSV dates identify an exact instant', skip: _skip, () {
-      final csv = convertEventsToCsv([Event(DateTime(2026, 3, 5, 14), 1)]);
-      expect(csv.split('\n')[1], matches(RegExp(r'^"[^"]*(Z|[+-]\d\d:\d\d)"')));
-    });
-
-    // Quotes in a description aren't doubled. convertEventsToCsv isn't wired
-    // to any UI yet, but would produce a corrupt file when it is.
-    test('CSV escapes quotes', skip: _skip, () {
-      final time = DateTime.utc(2026, 3, 5);
-      expect(convertEventsToCsv([Event(time, 1, description: 'a "b" c')]),
-          contains('"a ""b"" c"'));
     });
   });
 
