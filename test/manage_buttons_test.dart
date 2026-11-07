@@ -187,7 +187,7 @@ void main() {
     void reorder(WidgetTester tester, int from, int to) {
       tester
           .widget<ReorderableListView>(find.byType(ReorderableListView))
-          .onReorder(from, to);
+          .onReorder!(from, to);
     }
 
     testWidgets('moving down', (tester) async {
