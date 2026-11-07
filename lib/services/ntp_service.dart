@@ -6,8 +6,12 @@ import 'package:timestamp/providers/shared_pref_provider.dart';
 
 final ntpServiceProvider = Provider<NtpService>((ref) => NtpService(ref));
 
+/// Performs the NTP query. Replaceable so tests don't need the network.
+typedef NtpFetcher = Future<NTPResponse> Function({String lookUpAddress});
+
 class NtpService {
   final ProviderRef _ref;
+  final NtpFetcher _fetchNtpData;
   bool _isInfoRecieved = false;
   int? _ntpOffset; //ms
   int? _roundTripTime; //ms
@@ -26,13 +30,14 @@ class NtpService {
   DateTime get lastSyncTime =>
       _lastSyncTime ?? DateTime.fromMillisecondsSinceEpoch(0);
 
-  NtpService(this._ref) {
+  NtpService(this._ref, {NtpFetcher fetchNtpData = getNtpData})
+      : _fetchNtpData = fetchNtpData {
     updateNtpOffset();
   }
 
   Future<void> updateNtpOffset() async {
     try {
-      NTPResponse ntpResponse = await getNtpData(
+      NTPResponse ntpResponse = await _fetchNtpData(
           lookUpAddress:
               _ref.watch(sharedUtilityProvider).getTimeServer().displayName);
       _timeServer = ntpResponse.lookupServer;

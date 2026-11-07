@@ -7,8 +7,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timestamp/constants.dart';
 import 'package:timestamp/main.dart';
+import 'package:timestamp/models/event.dart';
 import 'package:timestamp/providers/shared_pref_provider.dart';
 import 'package:timestamp/services/ntp_service.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
+// Only needed to fake the plugin; comes with wakelock_plus.
+// ignore: depend_on_referenced_packages
+import 'package:wakelock_plus_platform_interface/wakelock_plus_platform_interface.dart';
 
 /// NtpService that never touches the network.
 ///
@@ -19,8 +24,11 @@ class FakeNtpService extends NtpService {
 
   final bool synced;
 
+  /// How many syncs were requested (the constructor requests one).
+  int syncRequests = 0;
+
   @override
-  Future<void> updateNtpOffset() async {}
+  Future<void> updateNtpOffset() async => syncRequests++;
 
   @override
   bool get isInfoRecieved => synced;
@@ -28,6 +36,10 @@ class FakeNtpService extends NtpService {
   int get ntpOffset => synced ? 12 : 0;
   @override
   int get roundTripTime => synced ? 40 : 9999;
+  @override
+  int get ntpStratum => synced ? 2 : 9999;
+  @override
+  String get timeServer => synced ? 'time.test' : 'N/A';
   @override
   DateTime get lastSyncTime =>
       synced ? DateTime(2026, 11, 6, 9, 41) : super.lastSyncTime;
@@ -245,6 +257,7 @@ Future<void> pumpApp(
   required int rows,
   bool ntpSynced = true,
   Map<String, Object> extraPrefs = const {},
+  void Function(FakeNtpService)? onNtpCreated,
 }) async {
   SharedPreferences.setMockInitialValues({
     customEventNamesKey: buttons,
@@ -253,23 +266,78 @@ Future<void> pumpApp(
     disableAutoLockKey: false,
     ...extraPrefs,
   });
+  await relaunchApp(tester, ntpSynced: ntpSynced, onNtpCreated: onNtpCreated);
+}
+
+/// Starts the app on whatever is already in SharedPreferences, like a cold
+/// start after the app was closed. Call [unmountApp] first.
+Future<void> relaunchApp(
+  WidgetTester tester, {
+  bool ntpSynced = true,
+  void Function(FakeNtpService)? onNtpCreated,
+}) async {
   final prefs = await SharedPreferences.getInstance();
 
   await tester.pumpWidget(ProviderScope(
     overrides: [
       sharedPreferencesProvider.overrideWithValue(prefs),
-      ntpServiceProvider
-          .overrideWith((ref) => FakeNtpService(ref, synced: ntpSynced)),
+      ntpServiceProvider.overrideWith((ref) {
+        final ntp = FakeNtpService(ref, synced: ntpSynced);
+        onNtpCreated?.call(ntp);
+        return ntp;
+      }),
     ],
     child: const TimestampApp(),
   ));
-  await tester.pump();
+  // Saved events load asynchronously and appear on the next clock tick.
+  await tester.pump(const Duration(milliseconds: 20));
 }
 
 /// MainScreen runs a periodic timer; replace the tree so it gets cancelled.
 Future<void> unmountApp(WidgetTester tester) async {
   await tester.pumpWidget(const SizedBox());
 }
+
+/// Lets a route transition or dialog finish. `pumpAndSettle` can't be used
+/// while MainScreen is mounted: its clock timer never stops scheduling frames.
+Future<void> settle(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 500));
+}
+
+/// Tall enough that the whole settings list is built without scrolling.
+const tallScreen =
+    DeviceSpec('tall screen', Size(600, 1600), 2, EdgeInsets.zero);
+
+/// The events currently saved to SharedPreferences.
+Future<List<Event>> savedEvents() async {
+  final prefs = await SharedPreferences.getInstance();
+  return (prefs.getStringList('events') ?? []).map(Event.fromJson).toList();
+}
+
+/// Stands in for the wakelock plugin and records what the app asks of it.
+class FakeWakelock extends WakelockPlusPlatformInterface {
+  final calls = <bool>[];
+
+  @override
+  Future<void> toggle({required bool enable}) async => calls.add(enable);
+
+  @override
+  Future<bool> get enabled async => calls.isNotEmpty && calls.last;
+}
+
+/// Installs a [FakeWakelock] for the current test.
+FakeWakelock installFakeWakelock() {
+  final previous = wakelockPlusPlatformInstance;
+  final fake = FakeWakelock();
+  wakelockPlusPlatformInstance = fake;
+  addTearDown(() => wakelockPlusPlatformInstance = previous);
+  return fake;
+}
+
+/// The app's provider container, for reading state from a running app.
+ProviderContainer appContainer(WidgetTester tester) =>
+    ProviderScope.containerOf(tester.element(find.byType(MaterialApp)));
 
 /// Symptom-tracking labels similar to the ones in the user report:
 /// 15 buttons over 5 rows, including some longer than 12 characters.

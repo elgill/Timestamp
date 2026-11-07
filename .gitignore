@@ -874,3 +874,6 @@ condensed_files.txt
 !**/ios/**/default.perspectivev3
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 !pubspec.lock
+
+# Test coverage output
+/coverage/
