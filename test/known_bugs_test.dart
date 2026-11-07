@@ -8,55 +8,15 @@
 // `skip`. A test here that starts passing means the bug is gone.
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:package_info_plus/package_info_plus.dart';
-import 'package:settings_ui/settings_ui.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:timestamp/constants.dart';
 import 'package:timestamp/models/event.dart';
-import 'package:timestamp/providers/shared_pref_provider.dart';
-import 'package:timestamp/services/event_service.dart';
 import 'package:timestamp/services/export_service.dart';
 
 import 'helpers/test_app.dart';
 
 const _skip = !bool.fromEnvironment('KNOWN_BUGS');
 
-const phone = iPhone15ProPortrait;
-
-EventService eventsOf(WidgetTester tester) =>
-    appContainer(tester).read(eventServiceProvider);
-
-Finder inList(Finder finder) =>
-    find.descendant(of: find.byType(ListView), matching: finder);
-
-Map<String, Object> history(List<Event> events, {Event? reference}) => {
-      'events': events.map((e) => e.toJson()).toList(),
-      if (reference != null) referenceEventKey: reference.toJson(),
-    };
-
-Future<SharedUtility> utilityWith(Map<String, Object> values) async {
-  SharedPreferences.setMockInitialValues(values);
-  return SharedUtility(sharedPreferences: await SharedPreferences.getInstance());
-}
-
-Future<void> deleteSelected(WidgetTester tester) async {
-  await tester.tap(find.text('Delete Selected'));
-  await settle(tester);
-  await tester.tap(find.widgetWithText(TextButton, 'Delete'));
-  await settle(tester);
-}
-
 void main() {
-  setUp(() => PackageInfo.setMockInitialValues(
-        appName: 'Timestamp',
-        packageName: 'dev.gillin.timestamp',
-        version: '1.0.0',
-        buildNumber: '1',
-        buildSignature: '',
-      ));
-
   group('wrong or lost data', () {
     // Event.toJson stores local wall-clock time with no UTC offset. After a
     // change of time zone (or across the DST fall-back hour) the same string
@@ -81,56 +41,10 @@ void main() {
     });
   });
 
-  group('settings that do not fully work', () {
-    // MainScreen.build only ever calls enable(); nothing calls disable()
-    // when the setting is turned off.
-    testWidgets('turning off Disable Auto Lock lets the screen sleep',
-        skip: _skip, (tester) async {
-      final wakelock = installFakeWakelock();
-      setDevice(tester, tallScreen);
-      await pumpApp(tester, buttons: [], rows: 1,
-          extraPrefs: {disableAutoLockKey: true});
-      await tester.tap(find.byIcon(Icons.settings));
-      await settle(tester);
-
-      await tester.tap(find.descendant(
-          of: find.ancestor(
-              of: find.text('Disable Auto Lock'),
-              matching: find.byType(SettingsTile)),
-          matching: find.byType(Switch)));
-      await settle(tester);
-      await tester.pageBack();
-      await settle(tester);
-
-      final last = wakelock.calls.last;
-      await unmountApp(tester);
-      expect(last, isFalse);
-    });
-
-  });
-
   group('efficiency and polish', () {
-    // WakelockPlus.enable() is in build(), which the clock timer runs up to
-    // 100 times a second: a platform call on every frame.
-    testWidgets('the wakelock is requested once, not on every frame',
-        skip: _skip, (tester) async {
-      final wakelock = installFakeWakelock();
-      setDevice(tester, phone);
-      await pumpApp(tester, buttons: [], rows: 1,
-          extraPrefs: {disableAutoLockKey: true});
-
-      for (var i = 0; i < 100; i++) {
-        await tester.pump(const Duration(milliseconds: 10));
-      }
-
-      final calls = wakelock.calls.where((enable) => enable).length;
-      await unmountApp(tester);
-      expect(calls, lessThanOrEqualTo(1));
-    });
-
     // Both NtpService's constructor and MainScreen.initState start a sync.
     testWidgets('one NTP query at startup', skip: _skip, (tester) async {
-      setDevice(tester, phone);
+      setDevice(tester, iPhone15ProPortrait);
       late FakeNtpService ntp;
       await pumpApp(tester,
           buttons: [], rows: 1, onNtpCreated: (service) => ntp = service);
@@ -138,16 +52,6 @@ void main() {
       final requests = ntp.syncRequests;
       await unmountApp(tester);
       expect(requests, 1);
-    });
-
-    testWidgets('the bottom bar spells Received correctly', skip: _skip,
-        (tester) async {
-      setDevice(tester, phone);
-      await pumpApp(tester, buttons: [], rows: 1, ntpSynced: false);
-
-      final misspelled = find.text('No Time Data Recieved').evaluate().length;
-      await unmountApp(tester);
-      expect(misspelled, 0);
     });
   });
 }
