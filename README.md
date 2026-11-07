@@ -76,8 +76,8 @@ writes upload-ready PNGs to `build/store_screenshots/<device>/`:
 | `duo-inner` | iPhone Duo, open | 2853 x 2007 | iPhone Duo (inner display) |
 
 -   Pass folder names to capture only those devices.
--   `duo-inner` only runs when named: the simulator boots closed and only
-    Device Hub can open it, so the tool waits for you to do that.
+-   `duo-inner` needs [duoctl](https://github.com/skarol/duoctl) to unfold the
+    simulator: `brew install skarol/tap/duoctl`.
 -   The tool creates its own `Store Screenshots ...` simulators, so your other
     simulators and their data are left alone.
 -   Edit scenes and demo data in `test_driver/store_screenshots.dart`. Sizes

@@ -1,6 +1,6 @@
 // Produces App Store screenshots from the real app on iOS simulators.
 //
-//   dart run tool/store_screenshots.dart              # all but duo-inner
+//   dart run tool/store_screenshots.dart              # every device
 //   dart run tool/store_screenshots.dart duo-inner    # just these
 //
 // Images land in build/store_screenshots/<device>/, ready to upload. Scenes
@@ -8,6 +8,9 @@
 //
 // Runs on its own simulators, created on first use, so your usual simulators
 // and their data are left alone.
+//
+// The iPhone Duo's inner display needs duoctl to unfold the simulator:
+//   brew install skarol/tap/duoctl
 //
 // Sizes follow Apple's specifications, last checked November 2026:
 // https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications
@@ -21,7 +24,7 @@ const _simulatorPrefix = 'Store Screenshots';
 
 class Target {
   const Target(this.id, this.deviceType, this.sizes,
-      {this.display, this.needsOpening = false});
+      {this.display, this.unfolded = false});
 
   final String id;
 
@@ -35,8 +38,8 @@ class Target {
   /// Which screen to capture, on devices with more than one.
   final String? display;
 
-  /// Needs someone to unfold the simulator, so only runs when asked for.
-  final bool needsOpening;
+  /// Needs the simulator unfolded before capturing.
+  final bool unfolded;
 }
 
 const targets = [
@@ -49,7 +52,7 @@ const targets = [
       [(2064, 2752), (2048, 2732)]),
   Target('duo-outer', 'iPhone-Duo', [(1398, 2034)], display: 'primary'),
   Target('duo-inner', 'iPhone-Duo', [(2007, 2853)],
-      display: 'primary-1', needsOpening: true),
+      display: 'primary-1', unfolded: true),
 ];
 
 Future<String> run(String executable, List<String> args) async {
@@ -83,23 +86,22 @@ bool isBlank(img.Image image) {
   return image.every((pixel) => pixel == first);
 }
 
-/// simctl can't open the Duo, and it boots closed, so someone has to.
-Future<void> waitForOpen(Target target, String udid) async {
-  stdout.writeln('Open "$_simulatorPrefix ${target.id}" in Device Hub '
-      '(Xcode > Open Developer Tool) and unfold it. Waiting...');
-  final probe = File('$_outDir/.probe.png');
-  try {
-    for (var attempt = 0; attempt < 100; attempt++) {
-      await simctl([
-        'io', udid, 'screenshot', '--display=${target.display}', probe.path,
-      ]);
-      if (!isBlank(img.decodePng(probe.readAsBytesSync())!)) return;
-      await Future.delayed(const Duration(seconds: 3));
-    }
-  } finally {
-    if (probe.existsSync()) probe.deleteSync();
+/// The Duo boots closed and simctl can't open it.
+// TODO: Replace duoctl once Apple ships a way to fold the simulator, such as a
+// simctl command or an XCTest API. duoctl relies on private interfaces, so an
+// Xcode update can break it. Check each major Xcode release.
+Future<void> unfold(Target target, String udid) async {
+  // duoctl fails until the displays settle, about 30 seconds after boot. Too
+  // early and the hinge opens but the screen doesn't switch, so close it again
+  // before each try.
+  late ProcessResult result;
+  for (var attempt = 0; attempt < 12; attempt++) {
+    await Process.run('duoctl', ['-d', udid, 'close']);
+    result = await Process.run('duoctl', ['-d', udid, 'open']);
+    if (result.exitCode == 0) return;
+    await Future.delayed(const Duration(seconds: 3));
   }
-  throw Exception('${target.id} was not opened in time');
+  throw Exception('${target.id} did not unfold: ${result.stderr}');
 }
 
 Future<void> capture(Target target, String udid, Directory dir) async {
@@ -144,8 +146,8 @@ Future<void> main(List<String> args) async {
     stderr.writeln('Devices: ${ids.join(', ')}');
     exit(64);
   }
-  final selected = targets.where((target) =>
-      args.isEmpty ? !target.needsOpening : args.contains(target.id));
+  final selected = targets
+      .where((target) => args.isEmpty || args.contains(target.id));
 
   final problems = <String>[];
   for (final target in selected) {
@@ -157,7 +159,7 @@ Future<void> main(List<String> args) async {
     final udid = await simulatorFor(target);
     await simctl(['bootstatus', udid, '-b']);
     try {
-      if (target.needsOpening) await waitForOpen(target, udid);
+      if (target.unfolded) await unfold(target, udid);
       await capture(target, udid, dir);
     } finally {
       await simctl(['shutdown', udid]);
