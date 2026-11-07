@@ -80,6 +80,38 @@ void main() {
     });
   });
 
+  group('calendarDay', () {
+    // Each format has to give the day it was asked for whatever time zone
+    // the tests run in, so these only use times that pin that day down.
+    test('UTC format uses the UTC day', () {
+      expect(calendarDay(DateTime.utc(2026, 3, 2, 23, 30), TimeFormat.utc24Hour),
+          DateTime.utc(2026, 3, 2));
+      expect(calendarDay(DateTime.utc(2026, 3, 3, 0, 30), TimeFormat.utc24Hour),
+          DateTime.utc(2026, 3, 3));
+    });
+
+    test('UTC format converts a local time first', () {
+      final local = DateTime.utc(2026, 3, 2, 23, 30).toLocal();
+      expect(calendarDay(local, TimeFormat.utc24Hour), DateTime.utc(2026, 3, 2));
+    });
+
+    test('local formats use the local day', () {
+      for (final format in [TimeFormat.local12Hour, TimeFormat.local24Hour]) {
+        expect(calendarDay(DateTime(2026, 3, 5, 0, 30), format),
+            DateTime.utc(2026, 3, 5));
+        expect(calendarDay(DateTime(2026, 3, 5, 23, 30), format),
+            DateTime.utc(2026, 3, 5));
+      }
+    });
+
+    test('formatDate shows that day for every format', () {
+      final day = calendarDay(DateTime.utc(2026, 3, 2, 12), TimeFormat.utc24Hour);
+      for (final format in TimeFormat.values) {
+        expect(formatDate(day, format), 'Mon Mar 02, 2026');
+      }
+    });
+  });
+
   group('formatDate', () {
     test('local formats use the local calendar day', () {
       final time = DateTime(2026, 3, 5, 23, 59);

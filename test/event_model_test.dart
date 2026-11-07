@@ -94,6 +94,14 @@ void main() {
   });
 
   group('ButtonModel', () {
+    for (final index in [9, -1]) {
+      test('a stored color of $index falls back to the default', () {
+        expect(
+            ButtonModel.fromJson({'name': 'Aura', 'predefinedColor': index}),
+            ButtonModel('Aura', PredefinedColor.defaultColor));
+      });
+    }
+
     test('round trips through JSON', () {
       final model = ButtonModel('Aura', PredefinedColor.orange);
       expect(ButtonModel.fromJson(model.toJson()), model);

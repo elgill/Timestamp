@@ -220,6 +220,19 @@ void main() {
           [ButtonModel('Aura', PredefinedColor.red)]);
     });
 
+    test('an unknown color does not cost the other buttons theirs', () async {
+      final utility = await utilityWith({
+        customButtonModelsKey: [
+          jsonEncode(ButtonModel('Aura', PredefinedColor.red).toJson()),
+          jsonEncode({'name': 'Nausea', 'predefinedColor': 9}),
+        ]
+      });
+      expect(utility.getCustomButtonModels(), [
+        ButtonModel('Aura', PredefinedColor.red),
+        ButtonModel('Nausea', PredefinedColor.defaultColor),
+      ]);
+    });
+
     test('unreadable data gives no models rather than a crash', () async {
       final utility = await utilityWith({
         customButtonModelsKey: ['{not json']

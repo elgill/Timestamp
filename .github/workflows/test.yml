@@ -20,6 +20,10 @@ jobs:
       - name: Run tests
         run: flutter test
 
+      # Calendar-day mistakes only show up east of UTC.
+      - name: Run date tests east of UTC
+        run: TZ=Asia/Kolkata flutter test test/main_screen_test.dart test/time_utils_test.dart
+
       # Renders the main screen on simulated iPhone/iPad sizes (portrait and
       # landscape) so layout changes can be checked visually on each PR.
       - name: Render device screenshots

@@ -24,7 +24,9 @@ class ButtonModel {
   static ButtonModel fromJson(Map<String, dynamic> json) {
     return ButtonModel(
       json['name'] as String,
-      PredefinedColor.values[json['predefinedColor'] as int],
+      // The cast has to throw when the key is missing: that is how the old
+      // raw-color format is detected and migrated.
+      PredefinedColorExtension.fromIndex(json['predefinedColor'] as int),
     );
   }
 

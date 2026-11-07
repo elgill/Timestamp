@@ -26,17 +26,9 @@ class Event {
       DateTime.parse(data['time']),
       data['precision'],
       description: data['description'] ?? "", // If null, assign empty string
-      color: _colorFromIndex(data['color']),
+      color: PredefinedColorExtension.fromIndex(data['color']),
     );
     return event;
-  }
-
-  // A color this version doesn't know must not cost the user the event.
-  static PredefinedColor _colorFromIndex(Object? index) {
-    const colors = PredefinedColor.values;
-    return index is int && index >= 0 && index < colors.length
-        ? colors[index]
-        : PredefinedColor.defaultColor;
   }
 
   @override

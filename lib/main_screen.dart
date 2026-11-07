@@ -184,14 +184,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   Map<DateTime, List<Event>> get _groupedEvents {
     final grouped = groupBy<Event, DateTime>(
       eventManager.events,
-      (event) {
-        DateTime dateTime = event.time;
-        if (ref.watch(sharedUtilityProvider).getTimeFormat() ==
-            TimeFormat.utc24Hour) {
-          dateTime = dateTime.toUtc();
-        }
-        return DateTime(dateTime.year, dateTime.month, dateTime.day);
-      },
+      (event) => calendarDay(
+          event.time, ref.watch(sharedUtilityProvider).getTimeFormat()),
     );
     final sortedKeys = grouped.keys.toList()
       ..sort(
@@ -557,9 +551,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
               Padding(
                 padding: const EdgeInsets.all(1.0),
                 child: Text(
-                  // sectionDate is already the right calendar day for the
-                  // time format, so it must not be converted again.
-                  formatDate(sectionDate, TimeFormat.local24Hour),
+                  formatDate(sectionDate,
+                      ref.watch(sharedUtilityProvider).getTimeFormat()),
                   style: const TextStyle(
                       fontSize: 20, fontWeight: FontWeight.bold),
                 ),
