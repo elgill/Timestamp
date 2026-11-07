@@ -60,6 +60,31 @@
     Writes PNGs to `build/screenshots/`. CI uploads these as the
     `device-screenshots` artifact on every push.
 
+## App Store screenshots
+
+`dart run tool/store_screenshots.dart`
+
+Runs the real app on iOS simulators with demo data and a frozen clock, and
+writes upload-ready PNGs to `build/store_screenshots/<device>/`:
+
+| Folder | Device | Size | Display class in App Store Connect |
+| --- | --- | --- | --- |
+| `iphone-69` | iPhone 18 Pro Max | 1320 x 2868 | iPhone with Dynamic Island (large) |
+| `iphone-63` | iPhone 18 Pro | 1206 x 2622 | iPhone with Dynamic Island (medium) |
+| `ipad-13` | iPad Pro 13-inch | 2064 x 2752 | iPad 13" |
+| `duo-outer` | iPhone Duo, closed | 1398 x 2034 | iPhone Duo (outer display) |
+| `duo-inner` | iPhone Duo, open | 2853 x 2007 | iPhone Duo (inner display) |
+
+-   Pass folder names to capture only those devices.
+-   `duo-inner` only runs when named: the simulator boots closed and only
+    Device Hub can open it, so the tool waits for you to do that.
+-   The tool creates its own `Store Screenshots ...` simulators, so your other
+    simulators and their data are left alone.
+-   Edit scenes and demo data in `test_driver/store_screenshots.dart`. Sizes
+    are checked against the list in `tool/store_screenshots.dart`; compare it
+    with [Apple's specifications](https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications)
+    when new devices ship.
+
 ## Support
 
 For bugs, feature requests, or further assistance, please open an issue in this repository.
