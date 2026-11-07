@@ -133,7 +133,9 @@ class _ManualEventEntryScreenState
   }
 
   void _showDescriptionDialog() {
-    showDialog(
+    final previousDescription = _descriptionController.text;
+
+    showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -155,16 +157,18 @@ class _ManualEventEntryScreenState
             TextButton(
               child: const Text('Save'),
               onPressed: () {
-                setState(() {
-                  // No need to set anything, as the controller is already updated
-                });
-                Navigator.of(context).pop();
+                Navigator.of(context).pop(true);
               },
             ),
           ],
         );
       },
-    );
+    ).then((saved) {
+      // The field edits the controller directly, so anything but Save
+      // (including tapping outside the dialog) has to undo the typing.
+      if (saved != true) _descriptionController.text = previousDescription;
+      if (mounted) setState(() {});
+    });
   }
 
   void _showColorSelectionScreen() {

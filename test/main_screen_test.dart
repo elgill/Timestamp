@@ -286,9 +286,10 @@ void main() {
       });
       await tester.pump();
 
-      // Two separate days in any zone. The heading text itself is covered in
-      // known_bugs_test.dart: it is a day early east of UTC.
-      expect(inList(find.textContaining(', 2026')), findsNWidgets(2));
+      // Only tells correct from a day early when run east of UTC, e.g.
+      // TZ=Asia/Kolkata flutter test test/main_screen_test.dart
+      expect(inList(find.text('Mon Mar 02, 2026')), findsOneWidget);
+      expect(inList(find.text('Tue Mar 03, 2026')), findsOneWidget);
       await unmountApp(tester);
     });
 
@@ -615,6 +616,94 @@ void main() {
       await confirmDelete(tester);
 
       expect(remaining(tester), ['New', 'three', 'one']);
+      await unmountApp(tester);
+    });
+
+    testWidgets('selection stays correct when a future event exists',
+        (tester) async {
+      setDevice(tester, phone);
+      final future = Event(DateTime.now().add(const Duration(days: 1)), -1,
+          description: 'future');
+      await pumpApp(tester, buttons: ['New'], rows: 1,
+          extraPrefs: history([future], reference: future));
+      await tester.tap(find.text('Edit'));
+      await tester.pump();
+
+      await tester.tap(inList(find.text('future')));
+      await tester.pump();
+      await tester.tap(recordButton('New'));
+      await tester.pump();
+      await tester.tap(find.text('Delete Selected'));
+      await confirmDelete(tester);
+
+      expect(remaining(tester), ['New']);
+      await unmountApp(tester);
+    });
+
+    testWidgets('recording outside delete mode works with a future event',
+        (tester) async {
+      setDevice(tester, phone);
+      final future = Event(DateTime.now().add(const Duration(days: 1)), -1,
+          description: 'future');
+      await pumpApp(tester, buttons: ['New'], rows: 1,
+          extraPrefs: history([future], reference: future));
+
+      await tester.tap(recordButton('New'));
+      await tester.pump();
+      await tester.tap(find.text('Edit'));
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+      expect(find.byType(Checkbox), findsNWidgets(2));
+      await unmountApp(tester);
+    });
+
+    testWidgets('identical events can be selected separately', (tester) async {
+      setDevice(tester, phone);
+      final time = DateTime(2026, 3, 2, 10);
+      final a = Event(time, -1, description: 'same');
+      final b = Event(time, -1, description: 'same');
+      await pumpApp(tester, buttons: [], rows: 1,
+          extraPrefs: history([a, b], reference: a));
+      await tester.tap(find.text('Edit'));
+      await tester.pump();
+
+      await tester.tap(find.byType(Checkbox).last);
+      await tester.pump();
+
+      expect(
+          tester
+              .widgetList<Checkbox>(find.byType(Checkbox))
+              .map((c) => c.value),
+          [false, true]);
+
+      await tester.tap(find.text('Delete Selected'));
+      await confirmDelete(tester);
+      expect(remaining(tester), ['same']);
+      await unmountApp(tester);
+    });
+
+    testWidgets('deleting an edited reference event after a relaunch',
+        (tester) async {
+      setDevice(tester, phone);
+      final event = Event(DateTime(2026, 3, 2, 10), 1, description: 'ref');
+      await pumpApp(tester, buttons: [], rows: 1,
+          extraPrefs: history([event], reference: event));
+
+      await tester.tap(inList(find.text('ref')));
+      await settle(tester);
+      await tester.enterText(find.byType(TextField), 'renamed');
+      await tester.pump();
+      await tester.pageBack();
+      await settle(tester);
+      await tester.tap(find.text('Edit'));
+      await tester.pump();
+      await tester.tap(inList(find.text('renamed')));
+      await tester.pump();
+      await tester.tap(find.text('Delete Selected'));
+      await confirmDelete(tester);
+
+      expect(eventsOf(tester).referenceEvent, isNull);
       await unmountApp(tester);
     });
 

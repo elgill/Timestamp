@@ -50,10 +50,13 @@ extension PredefinedColorExtension on PredefinedColor {
   }
 
   static PredefinedColor fromColor(Color color) {
-    if (color == Colors.red) return PredefinedColor.red;
-    if (color == Colors.green) return PredefinedColor.green;
-    if (color == Colors.orange) return PredefinedColor.orange;
-    if (color == Colors.purple) return PredefinedColor.purple;
+    // Compare values: a plain Color never equals a MaterialColor like
+    // Colors.red, even with the same value.
+    final value = color.toARGB32();
+    if (value == Colors.red.toARGB32()) return PredefinedColor.red;
+    if (value == Colors.green.toARGB32()) return PredefinedColor.green;
+    if (value == Colors.orange.toARGB32()) return PredefinedColor.orange;
+    if (value == Colors.purple.toARGB32()) return PredefinedColor.purple;
     return PredefinedColor.defaultColor;
   }
 }

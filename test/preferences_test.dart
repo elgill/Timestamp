@@ -167,6 +167,23 @@ void main() {
           [ButtonModel('Aura', PredefinedColor.defaultColor)]);
     });
 
+    test('the old raw-color format keeps palette colors', () async {
+      final utility = await utilityWith({
+        customButtonModelsKey: [
+          jsonEncode({'name': 'Aura', 'color': Colors.red.toARGB32()}),
+          jsonEncode({'name': 'Dizzy', 'color': Colors.green.toARGB32()}),
+          jsonEncode({'name': 'Fog', 'color': Colors.orange.toARGB32()}),
+          jsonEncode({'name': 'Rest', 'color': Colors.purple.toARGB32()}),
+        ]
+      });
+      expect(utility.getCustomButtonModels(), [
+        ButtonModel('Aura', PredefinedColor.red),
+        ButtonModel('Dizzy', PredefinedColor.green),
+        ButtonModel('Fog', PredefinedColor.orange),
+        ButtonModel('Rest', PredefinedColor.purple),
+      ]);
+    });
+
     test('unreadable data gives no models rather than a crash', () async {
       final utility = await utilityWith({
         customButtonModelsKey: ['{not json']

@@ -297,8 +297,13 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     );
   }
 
+  /// Position of this exact event. [List.indexOf] compares by value, which
+  /// would confuse two identical events.
+  int _indexOfEvent(Event event) =>
+      eventManager.events.indexWhere((e) => identical(e, event));
+
   Widget _buildEventTile(Event event) {
-    final eventIndex = eventManager.events.indexOf(event);
+    final eventIndex = _indexOfEvent(event);
 
     return Column(
       children: [
@@ -544,8 +549,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
               Padding(
                 padding: const EdgeInsets.all(1.0),
                 child: Text(
-                  formatDate(sectionDate,
-                      ref.watch(sharedUtilityProvider).getTimeFormat()),
+                  // sectionDate is already the right calendar day for the
+                  // time format, so it must not be converted again.
+                  formatDate(sectionDate, TimeFormat.local24Hour),
                   style: const TextStyle(
                       fontSize: 20, fontWeight: FontWeight.bold),
                 ),
@@ -621,15 +627,18 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         precision = ntpService.roundTripTime ~/ 2;
       }
       setState(() {
-        eventManager.addEvent(
-            Event(
-              now,
-              precision,
-              description: name ?? '',
-              color: predefinedColor, // Save the button's color with the event
-            )
+        final event = Event(
+          now,
+          precision,
+          description: name ?? '',
+          color: predefinedColor, // Save the button's color with the event
         );
-        selectedEvents.insert(0, false);
+        eventManager.addEvent(event);
+        // A future-dated event can sort above the new one, so it isn't
+        // necessarily first.
+        if (isInDeleteMode) {
+          selectedEvents.insert(_indexOfEvent(event), false);
+        }
         SystemSound.play(SystemSoundType.click);
         HapticFeedback.lightImpact();
       });

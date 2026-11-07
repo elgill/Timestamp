@@ -80,6 +80,11 @@ void main() {
           PredefinedColor.purple);
     });
 
+    test('recognises plain colors with the same value', () {
+      expect(PredefinedColorExtension.fromColor(Color(Colors.red.toARGB32())),
+          PredefinedColor.red);
+    });
+
     test('anything else is the default', () {
       expect(PredefinedColorExtension.fromColor(Colors.teal),
           PredefinedColor.defaultColor);
