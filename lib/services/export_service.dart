@@ -3,15 +3,6 @@ import 'package:timestamp/enums/time_format.dart';
 import 'package:timestamp/utils/time_utils.dart';
 
 
-String convertEventsToCsv(List<Event> events) {
-  StringBuffer buffer = StringBuffer();
-  buffer.writeln("Date,Description");
-  for (var event in events) {
-    buffer.writeln('"${event.time.toIso8601String()}","${event.description}"');
-  }
-  return buffer.toString();
-}
-
 String convertEventsToPlainText(List<Event> events, TimeFormat timeFormat, {bool includeAccuracy = false}) {
   // Group events by day
   Map<DateTime, List<Event>> groupedEvents = {};

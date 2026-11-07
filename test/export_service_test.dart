@@ -79,16 +79,4 @@ void main() {
       expect(text, contains('00:30:00.0 UTC'));
     });
   });
-
-  group('convertEventsToCsv', () {
-    test('header only with no events', () {
-      expect(convertEventsToCsv([]), 'Date,Description\n');
-    });
-
-    test('one quoted row per event', () {
-      final time = DateTime(2026, 3, 5, 9, 30);
-      expect(convertEventsToCsv([Event(time, 1, description: 'Aura, mild')]),
-          'Date,Description\n"${time.toIso8601String()}","Aura, mild"\n');
-    });
-  });
 }
