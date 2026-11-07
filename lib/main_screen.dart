@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timestamp/enums/button_location.dart';
 import 'package:timestamp/enums/predefined_colors.dart';
 import 'package:timestamp/enums/time_format.dart';
+import 'package:timestamp/providers/auto_lock_provider.dart';
 import 'package:timestamp/providers/custom_button_models_provider.dart';
 import 'package:timestamp/providers/custom_button_names_provider.dart';
 import 'package:timestamp/providers/display_mode_provider.dart';
@@ -54,6 +55,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   DateTime displayTime = DateTime.now();
   late Timer _timer;
+  late final AppLifecycleListener _lifecycleListener;
 
   bool isInDeleteMode = false; // To track the delete mode
   List<bool> selectedEvents = []; // To track selected events for deletion
@@ -149,6 +151,14 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
     eventManager.loadData();
     ntpService.updateNtpOffset();
+
+    _applyAutoLockSetting();
+    ref.listenManual(autoLockProvider, (_, keepAwake) {
+      WakelockPlus.toggle(enable: keepAwake);
+    });
+    // The OS may drop the wakelock while the app is in the background.
+    _lifecycleListener = AppLifecycleListener(onResume: _applyAutoLockSetting);
+
     _timer = Timer.periodic(const Duration(milliseconds: 10), (timer) {
       setState(() {
         //displayTime = ntpService.currentTime;
@@ -156,8 +166,13 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     });
   }
 
+  void _applyAutoLockSetting() {
+    if (ref.read(autoLockProvider)) WakelockPlus.enable();
+  }
+
   @override
   void dispose() {
+    _lifecycleListener.dispose();
     _timer.cancel();
     _buttonScrollController.dispose();
     super.dispose();
@@ -263,7 +278,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Text('No Time Data Recieved'),
+                                  Text('No Time Data Received'),
                                 ],
                               ),
                       ),
@@ -440,10 +455,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (ref.watch(sharedUtilityProvider).getDisableAutoLock()) {
-      WakelockPlus.enable();
-    }
-
     // On short screens the clock moves into the app bar to free up room
     // for the record buttons.
     final clockInAppBar =

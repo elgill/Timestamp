@@ -247,6 +247,18 @@ void main() {
       await closeApp(tester);
     });
 
+    testWidgets('disable auto lock takes effect immediately', (tester) async {
+      final wakelock = installFakeWakelock();
+      await openSettings(tester, prefs: {disableAutoLockKey: true});
+
+      await flipSwitch(tester, 'Disable Auto Lock');
+      expect(wakelock.calls.last, isFalse, reason: 'lets the screen sleep');
+
+      await flipSwitch(tester, 'Disable Auto Lock');
+      expect(wakelock.calls.last, isTrue, reason: 'keeps the screen on');
+      await closeApp(tester);
+    });
+
     testWidgets('disable auto lock is saved', (tester) async {
       installFakeWakelock();
       await openSettings(tester);

@@ -422,7 +422,8 @@ void main() {
       expect(find.textContaining('No Time Data'), findsOneWidget);
       await tester.tap(find.textContaining('No Time Data'));
       await settle(tester);
-      expect(find.text('No Time Data Received'), findsOneWidget);
+      // The bottom bar and the dialog.
+      expect(find.text('No Time Data Received'), findsNWidgets(2));
 
       await tester.tap(find.text('Close'));
       await settle(tester);
@@ -919,6 +920,46 @@ void main() {
       await pumpApp(tester, buttons: [], rows: 1);
 
       expect(wakelock.calls, isNot(contains(true)));
+      await unmountApp(tester);
+    });
+
+    testWidgets('is requested once, not on every frame', (tester) async {
+      final wakelock = installFakeWakelock();
+      setDevice(tester, phone);
+      await pumpApp(tester, buttons: [], rows: 1,
+          extraPrefs: {disableAutoLockKey: true});
+
+      for (var i = 0; i < 100; i++) {
+        await tester.pump(const Duration(milliseconds: 10));
+      }
+
+      expect(wakelock.calls, [true]);
+      await unmountApp(tester);
+    });
+
+    testWidgets('is requested again when returning to the app', (tester) async {
+      final wakelock = installFakeWakelock();
+      setDevice(tester, phone);
+      await pumpApp(tester, buttons: [], rows: 1,
+          extraPrefs: {disableAutoLockKey: true});
+
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+
+      expect(wakelock.calls, [true, true]);
+      await unmountApp(tester);
+    });
+
+    testWidgets('stays off when returning to the app with the setting off',
+        (tester) async {
+      final wakelock = installFakeWakelock();
+      setDevice(tester, phone);
+      await pumpApp(tester, buttons: [], rows: 1);
+
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+
+      expect(wakelock.calls, isEmpty);
       await unmountApp(tester);
     });
 
