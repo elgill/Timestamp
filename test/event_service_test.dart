@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timestamp/constants.dart';
@@ -48,6 +50,12 @@ void main() {
   group('deleting selected', () {
     late EventService service;
 
+    /// The events at the positions flagged true.
+    List<Event> flagged(List<bool> flags) => [
+          for (var i = 0; i < flags.length; i++)
+            if (flags[i]) service.events[i]
+        ];
+
     setUp(() {
       service = EventService()
         ..addEvent(at(10, 'reference'))
@@ -57,36 +65,58 @@ void main() {
       // Newest first: newest, middle, reference, oldest.
     });
 
-    test('removes exactly the selected indexes', () {
-      service.deleteSelectedEvents([true, false, false, true]);
+    test('removes exactly the selected events', () {
+      service.deleteSelectedEvents(flagged([true, false, false, true]));
       expect(service.events.map((e) => e.description), ['middle', 'reference']);
     });
 
     test('nothing selected changes nothing', () {
-      service.deleteSelectedEvents([false, false, false, false]);
+      service.deleteSelectedEvents(flagged([false, false, false, false]));
       expect(service.events, hasLength(4));
       expect(service.referenceEvent?.description, 'reference');
     });
 
     test('keeps the reference if it survives', () {
-      service.deleteSelectedEvents([true, true, false, true]);
+      service.deleteSelectedEvents(flagged([true, true, false, true]));
       expect(service.referenceEvent?.description, 'reference');
     });
 
     test('deleting the reference falls back to the oldest event', () {
-      service.deleteSelectedEvents([false, false, true, false]);
+      service.deleteSelectedEvents(flagged([false, false, true, false]));
       expect(service.referenceEvent?.description, 'oldest');
     });
 
     test('fallback never lands on an event deleted in the same pass', () {
-      service.deleteSelectedEvents([false, false, true, true]);
+      service.deleteSelectedEvents(flagged([false, false, true, true]));
       expect(service.referenceEvent?.description, 'middle');
     });
 
     test('deleting everything clears the reference', () {
-      service.deleteSelectedEvents([true, true, true, true]);
+      service.deleteSelectedEvents(flagged([true, true, true, true]));
       expect(service.events, isEmpty);
       expect(service.referenceEvent, isNull);
+    });
+
+    test('deleting a copy of an event leaves the original', () {
+      final original = at(8, 'twin');
+      final copy = at(8, 'twin');
+      service
+        ..addEvent(original)
+        ..addEvent(copy)
+        ..deleteSelectedEvents([copy]);
+      expect(service.events.where((e) => identical(e, original)), hasLength(1));
+      expect(service.events.where((e) => identical(e, copy)), isEmpty);
+    });
+
+    test('deleting a copy of the reference keeps the reference', () {
+      final reference = at(9, 'twin');
+      final copy = at(9, 'twin');
+      final other = EventService()
+        ..addEvent(reference)
+        ..addEvent(copy)
+        ..addEvent(at(8, 'oldest'))
+        ..deleteSelectedEvents([copy]);
+      expect(other.referenceEvent, same(reference));
     });
   });
 
@@ -108,10 +138,11 @@ void main() {
     });
 
     test('deleting selected events is saved', () async {
+      final newer = at(10, 'b');
       EventService()
         ..addEvent(at(9, 'a'))
-        ..addEvent(at(10, 'b'))
-        ..deleteSelectedEvents([true, false]);
+        ..addEvent(newer)
+        ..deleteSelectedEvents([newer]);
       expect((await reloaded()).events.single.description, 'a');
     });
 
@@ -134,6 +165,20 @@ void main() {
       expect((await reloaded()).events, [good]);
     });
 
+    test('an unknown color keeps the event, through a save too', () async {
+      final json = jsonDecode(at(9, 'kept').toJson()) as Map<String, dynamic>;
+      SharedPreferences.setMockInitialValues({
+        'events': [
+          jsonEncode({...json, 'color': 9})
+        ],
+      });
+      final restored = await reloaded();
+      expect(restored.events.single.description, 'kept');
+
+      await restored.saveData();
+      expect((await reloaded()).events.single.description, 'kept');
+    });
+
     test('the reference is the same object as its event after a restart',
         () async {
       EventService()
@@ -153,6 +198,17 @@ void main() {
       final restored = await reloaded();
       expect(restored.referenceEvent, same(restored.events.last));
       expect(restored.referenceEvent?.description, 'renamed');
+    });
+
+    test('of two events at the same time, the exact match is the reference',
+        () async {
+      SharedPreferences.setMockInitialValues({
+        'events': [at(9, 'breakfast').toJson(), at(9, 'meds').toJson()],
+        referenceEventKey: at(9, 'meds').toJson(),
+      });
+      final restored = await reloaded();
+      expect(restored.referenceEvent, same(restored.events.last));
+      expect(restored.referenceEvent?.description, 'meds');
     });
 
     test('a reference to a deleted event falls back to the oldest', () async {

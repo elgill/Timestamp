@@ -195,6 +195,31 @@ void main() {
       ]);
     });
 
+    test('duplicates saved by older versions keep the first', () async {
+      final utility = await utilityWith({
+        customButtonModelsKey: [
+          jsonEncode(ButtonModel('Aura', PredefinedColor.red).toJson()),
+          jsonEncode(ButtonModel('Nausea', PredefinedColor.green).toJson()),
+          jsonEncode(ButtonModel('Aura', PredefinedColor.purple).toJson()),
+        ]
+      });
+      expect(utility.getCustomButtonModels(), [
+        ButtonModel('Aura', PredefinedColor.red),
+        ButtonModel('Nausea', PredefinedColor.green),
+      ]);
+    });
+
+    test('duplicates in the old raw-color format keep the first', () async {
+      final utility = await utilityWith({
+        customButtonModelsKey: [
+          jsonEncode({'name': 'Aura', 'color': Colors.red.toARGB32()}),
+          jsonEncode({'name': 'Aura', 'color': Colors.green.toARGB32()}),
+        ]
+      });
+      expect(utility.getCustomButtonModels(),
+          [ButtonModel('Aura', PredefinedColor.red)]);
+    });
+
     test('unreadable data gives no models rather than a crash', () async {
       final utility = await utilityWith({
         customButtonModelsKey: ['{not json']

@@ -620,6 +620,28 @@ void main() {
       await unmountApp(tester);
     });
 
+    // Events from the autumn clock-change hour can load out of order, so the
+    // first recording re-sorts existing events.
+    testWidgets('selection follows its event when recording re-sorts the list',
+        (tester) async {
+      setDevice(tester, phone);
+      await pumpApp(tester, buttons: ['New'], rows: 1,
+          extraPrefs: history([first, third, second], reference: first));
+      await tester.pump();
+      await tester.tap(find.text('Edit'));
+      await tester.pump();
+
+      await tester.tap(find.text('three'));
+      await tester.pump();
+      await tester.tap(recordButton('New'));
+      await tester.pump();
+      await tester.tap(find.text('Delete Selected'));
+      await confirmDelete(tester);
+
+      expect(remaining(tester), ['New', 'two', 'one']);
+      await unmountApp(tester);
+    });
+
     testWidgets('selection stays correct when a future event exists',
         (tester) async {
       setDevice(tester, phone);
@@ -681,6 +703,8 @@ void main() {
       await tester.tap(find.text('Delete Selected'));
       await confirmDelete(tester);
       expect(remaining(tester), ['same']);
+      expect(eventsOf(tester).referenceEvent,
+          same(eventsOf(tester).events.single));
       await unmountApp(tester);
     });
 

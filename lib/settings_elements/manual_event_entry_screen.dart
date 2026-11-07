@@ -21,7 +21,7 @@ class ManualEventEntryScreen extends ConsumerStatefulWidget {
 class _ManualEventEntryScreenState
     extends ConsumerState<ManualEventEntryScreen> {
   DateTime selectedDate = DateTime.now();
-  final TextEditingController _descriptionController = TextEditingController();
+  String description = '';
   PredefinedColor selectedColor = PredefinedColor.defaultColor;
 
   @override
@@ -56,7 +56,7 @@ class _ManualEventEntryScreenState
             ),
             SettingsTile.navigation(
               title: const Text('Event Description'),
-              value: Text(_descriptionController.text.isEmpty ? 'None' : _descriptionController.text),
+              value: Text(description.isEmpty ? 'None' : description),
               onPressed: (context) {
                 _showDescriptionDialog();
               },
@@ -132,43 +132,13 @@ class _ManualEventEntryScreenState
     );
   }
 
-  void _showDescriptionDialog() {
-    final previousDescription = _descriptionController.text;
-
-    showDialog<bool>(
+  Future<void> _showDescriptionDialog() async {
+    final saved = await showDialog<String>(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Event Description'),
-          content: TextField(
-            controller: _descriptionController,
-            decoration: const InputDecoration(
-              hintText: 'Enter event description',
-            ),
-            autofocus: true,
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Save'),
-              onPressed: () {
-                Navigator.of(context).pop(true);
-              },
-            ),
-          ],
-        );
-      },
-    ).then((saved) {
-      // The field edits the controller directly, so anything but Save
-      // (including tapping outside the dialog) has to undo the typing.
-      if (saved != true) _descriptionController.text = previousDescription;
-      if (mounted) setState(() {});
-    });
+      builder: (context) => _DescriptionDialog(initialText: description),
+    );
+    // Null means Cancel or a tap outside the dialog.
+    if (saved != null && mounted) setState(() => description = saved);
   }
 
   void _showColorSelectionScreen() {
@@ -207,7 +177,7 @@ class _ManualEventEntryScreenState
     Event newEvent = Event(
       finalDate,
       -1,
-      description: _descriptionController.text,
+      description: description,
       color: selectedColor,
     );
 
@@ -227,10 +197,53 @@ class _ManualEventEntryScreenState
 
     Navigator.of(context).pop();
   }
+}
+
+/// Pops with the typed text on Save, and with null otherwise.
+class _DescriptionDialog extends StatefulWidget {
+  const _DescriptionDialog({required this.initialText});
+
+  final String initialText;
+
+  @override
+  State<_DescriptionDialog> createState() => _DescriptionDialogState();
+}
+
+class _DescriptionDialogState extends State<_DescriptionDialog> {
+  late final TextEditingController _controller =
+      TextEditingController(text: widget.initialText);
 
   @override
   void dispose() {
-    _descriptionController.dispose();
+    _controller.dispose();
     super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Event Description'),
+      content: TextField(
+        controller: _controller,
+        decoration: const InputDecoration(
+          hintText: 'Enter event description',
+        ),
+        autofocus: true,
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: const Text('Cancel'),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        TextButton(
+          child: const Text('Save'),
+          onPressed: () {
+            Navigator.of(context).pop(_controller.text);
+          },
+        ),
+      ],
+    );
   }
 }

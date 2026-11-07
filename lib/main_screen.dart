@@ -58,13 +58,14 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   late final AppLifecycleListener _lifecycleListener;
 
   bool isInDeleteMode = false; // To track the delete mode
-  List<bool> selectedEvents = []; // To track selected events for deletion
+  // Events selected for deletion. Held by identity: positions change when the
+  // list re-sorts, and two events can be equal.
+  final Set<Event> selectedEvents = Set.identity();
 
   void toggleDeleteMode() {
     setState(() {
       isInDeleteMode = !isInDeleteMode;
-      selectedEvents =
-          List.generate(eventManager.events.length, (index) => false);
+      selectedEvents.clear();
     });
   }
 
@@ -288,10 +289,10 @@ class _MainScreenState extends ConsumerState<MainScreen> {
               : Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: ElevatedButton(
-                    onPressed: selectedEvents.contains(true)
+                    onPressed: selectedEvents.isNotEmpty
                         ? showDeleteSelectedEventsDialog
                         : showDeleteAllEventsDialog,
-                    child: Text(selectedEvents.contains(true)
+                    child: Text(selectedEvents.isNotEmpty
                         ? 'Delete Selected'
                         : 'Delete All'),
                     style: ElevatedButton.styleFrom(
@@ -312,18 +313,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     );
   }
 
-  /// Position of this exact event. [List.indexOf] compares by value, which
-  /// would confuse two identical events.
-  int _indexOfEvent(Event event) =>
-      eventManager.events.indexWhere((e) => identical(e, event));
-
   Widget _buildEventTile(Event event) {
-    final eventIndex = _indexOfEvent(event);
-
     return Column(
       children: [
         InkWell(
-          onTap: () => _onEventTap(event, eventIndex),
+          onTap: () => _onEventTap(event),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: Row(
@@ -331,7 +325,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 const SizedBox(width: 8), // Left padding
                 // Checkbox or color indicator
                 isInDeleteMode
-                    ? _buildEventCheckbox(eventIndex)
+                    ? _buildEventCheckbox(event)
                     : _buildColorIndicator(event),
                 const SizedBox(width: 12), // Space between indicator and content
                 // Event content
@@ -400,19 +394,25 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     }
   }
 
-  Widget _buildEventCheckbox(int eventIndex) {
+  Widget _buildEventCheckbox(Event event) {
     return Checkbox(
-      value: selectedEvents[eventIndex],
-      onChanged: (bool? value) {
-        setState(() {
-          selectedEvents[eventIndex] = value!;
-        });
-      },
+      value: selectedEvents.contains(event),
+      onChanged: (_) => _toggleSelected(event),
     );
   }
 
-  _onEventTap(Event event, int eventIndex) async {
+  void _toggleSelected(Event event) {
+    setState(() {
+      if (!selectedEvents.remove(event)) selectedEvents.add(event);
+    });
+  }
+
+  _onEventTap(Event event) async {
     if (!isInDeleteMode) {
+      // Not List.indexOf: it compares by value, which would confuse two
+      // identical events.
+      final eventIndex =
+          eventManager.events.indexWhere((e) => identical(e, event));
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -446,10 +446,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         ),
       );
     } else {
-      setState(() {
-        // Toggle the selection state for the corresponding event
-        selectedEvents[eventIndex] = !selectedEvents[eventIndex];
-      });
+      _toggleSelected(event);
     }
   }
 
@@ -638,18 +635,12 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         precision = ntpService.roundTripTime ~/ 2;
       }
       setState(() {
-        final event = Event(
+        eventManager.addEvent(Event(
           now,
           precision,
           description: name ?? '',
           color: predefinedColor, // Save the button's color with the event
-        );
-        eventManager.addEvent(event);
-        // A future-dated event can sort above the new one, so it isn't
-        // necessarily first.
-        if (isInDeleteMode) {
-          selectedEvents.insert(_indexOfEvent(event), false);
-        }
+        ));
         SystemSound.play(SystemSoundType.click);
         HapticFeedback.lightImpact();
       });

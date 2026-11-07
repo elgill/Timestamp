@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timestamp/models/event.dart';
@@ -44,16 +45,15 @@ class EventService {
   /// The entry in [events] that [saved] refers to. The reference has to be
   /// that same object so edits to the event also apply to the reference.
   ///
-  /// Matches on what can't be edited, since older versions could save a
-  /// reference that had drifted from its event. Falls back to the oldest
-  /// event, as deleting the reference does.
+  /// Prefers an exact match, since events can share a time. Then matches on
+  /// what can't be edited, since older versions could save a reference that
+  /// had drifted from its event. Falls back to the oldest event, as deleting
+  /// the reference does.
   Event? _findReference(Event? saved) {
-    for (final event in events) {
-      if (event.time == saved?.time && event.precision == saved?.precision) {
-        return event;
-      }
-    }
-    return events.lastOrNull;
+    return events.firstWhereOrNull((event) => event == saved) ??
+        events.firstWhereOrNull((event) =>
+            event.time == saved?.time && event.precision == saved?.precision) ??
+        events.lastOrNull;
   }
 
   void addEvent(Event evt) {
@@ -67,18 +67,12 @@ class EventService {
     addEvent(evt);
   }
 
-  void deleteSelectedEvents(List<bool> selectedEvents) {
-    for (int i = selectedEvents.length - 1; i >= 0; i--) {
-      if (selectedEvents[i]) {
-        Event removedEvent = events[i];
-        events.removeAt(i);
-        if (removedEvent == referenceEvent) {
-          referenceEvent = null;
-          if(events.isNotEmpty) {
-            referenceEvent = events.last;
-          }
-        }
-      }
+  /// Deletes exactly these objects, leaving any equal copies of them alone.
+  void deleteSelectedEvents(Iterable<Event> selectedEvents) {
+    final selected = Set<Event>.identity()..addAll(selectedEvents);
+    events.removeWhere(selected.contains);
+    if (selected.contains(referenceEvent)) {
+      referenceEvent = events.lastOrNull;
     }
     saveData();
   }
