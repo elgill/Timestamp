@@ -24,7 +24,7 @@ const _simulatorPrefix = 'Store Screenshots';
 
 class Target {
   const Target(this.id, this.deviceType, this.sizes,
-      {this.display, this.unfolded = false});
+      {this.cutout, this.display, this.unfolded = false});
 
   final String id;
 
@@ -34,6 +34,10 @@ class Target {
   /// Sizes Apple accepts for this display class, as width x height in either
   /// orientation.
   final List<(int, int)> sizes;
+
+  /// A point inside the camera cutout. The simulator sometimes draws the
+  /// cutout into a capture, and the app never draws pure black there.
+  final (int, int)? cutout;
 
   /// Which screen to capture, on devices with more than one.
   final String? display;
@@ -46,11 +50,13 @@ const targets = [
   // Apple's summary requires the medium class while its table requires the
   // large one, so provide both.
   Target('iphone-69', 'iPhone-18-Pro-Max',
-      [(1320, 2868), (1290, 2796), (1260, 2736)]),
-  Target('iphone-63', 'iPhone-18-Pro', [(1206, 2622), (1179, 2556)]),
+      [(1320, 2868), (1290, 2796), (1260, 2736)], cutout: (660, 90)),
+  Target('iphone-63', 'iPhone-18-Pro', [(1206, 2622), (1179, 2556)],
+      cutout: (603, 90)),
   Target('ipad-13', 'iPad-Pro-13-inch-M5-12GB',
       [(2064, 2752), (2048, 2732)]),
-  Target('duo-outer', 'iPhone-Duo', [(1398, 2034)], display: 'primary'),
+  Target('duo-outer', 'iPhone-Duo', [(1398, 2034)],
+      cutout: (1252, 142), display: 'primary'),
   Target('duo-inner', 'iPhone-Duo', [(2007, 2853)],
       display: 'primary-1', unfolded: true),
 ];
@@ -78,6 +84,11 @@ Future<String> simulatorFor(Target target) async {
   }
   final type = 'com.apple.CoreSimulator.SimDeviceType.${target.deviceType}';
   return (await simctl(['create', name, type])).trim();
+}
+
+bool hasCutout(img.Image image, (int, int) point) {
+  final pixel = image.getPixel(point.$1, point.$2);
+  return pixel.r == 0 && pixel.g == 0 && pixel.b == 0;
 }
 
 /// A display that's switched off still captures, as solid black.
@@ -114,6 +125,7 @@ Future<void> capture(Target target, String udid, Directory dir) async {
     'SCREENSHOT_UDID': udid,
     'SCREENSHOT_DIR': dir.path,
     if (target.display != null) 'SCREENSHOT_DISPLAY': target.display!,
+    if (target.cutout case (final x, final y)) 'SCREENSHOT_CUTOUT': '$x,$y',
   }, mode: ProcessStartMode.inheritStdio);
   if (await process.exitCode != 0) {
     throw Exception('flutter drive failed for ${target.id}');
@@ -133,11 +145,11 @@ String? finish(File file, Target target) {
 
   if (isBlank(image)) return 'blank image; is this display active?';
 
-  // The simulator occasionally draws the Dynamic Island into a capture. The
-  // app bar behind it is never pure black.
-  final top = image.getPixel(w ~/ 2, 90);
-  final island = top.r == 0 && top.g == 0 && top.b == 0;
-  return island ? 'Dynamic Island in the image; capture it again' : null;
+  final cutout = target.cutout;
+  if (cutout != null && hasCutout(image, cutout)) {
+    return 'camera cutout in the image; capture it again';
+  }
+  return null;
 }
 
 Future<void> main(List<String> args) async {

@@ -2,7 +2,6 @@
 // with demo data and a frozen clock. Started by tool/store_screenshots.dart.
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_driver/driver_extension.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -97,11 +96,6 @@ Future<void> main() async {
           .setDisplayMode(DisplayMode.absolute);
       await settle();
       await controller.tap(find.text(_detailEvent));
-    },
-    'settings': () async {
-      await controller.tap(find.byType(BackButton));
-      await settle();
-      await controller.tap(find.byIcon(CupertinoIcons.settings));
     },
   };
 
