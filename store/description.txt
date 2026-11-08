@@ -1,0 +1,14 @@
+Precise Timestamp records exactly when something happens, to the tenth of a second. Tap a button and the time is saved.
+
+Your phone's clock can drift by a second or more. So when the app opens, it checks the time against a time server, and you can see the last sync, the offset and the round trip time. That way you know how much to trust the numbers.
+
+What it does:
+
+- Record the time with one tap, or record when your finger touches the screen instead of when you lift it
+- Set up named, colored buttons like "Start", "Lap" or "Car 12", and each one labels its own events
+- Switch to relative mode to see every event as + or − from a reference event
+- Events are grouped by day, and you can add a description to any of them
+- Edit or delete events, or add one by hand if you missed it
+- Share your event log as plain text
+- 12-hour, 24-hour or UTC time, light or dark theme, and an option to keep the screen on
+- Choose your time server: pool.ntp.org, Google, Apple, Cloudflare or NIST
