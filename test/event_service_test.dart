@@ -240,4 +240,115 @@ void main() {
       expect(service.referenceEvent, isNull);
     });
   });
+
+  group('upgrading from a version without ids', () {
+    // Exactly what version 1.1.5 saves, and older versions before colors
+    // and descriptions existed.
+    const oldEvents = [
+      '{"time":"2026-03-05T12:00:00.000","precision":8,"description":"Finish","color":1}',
+      '{"time":"2026-03-05T10:30:00.250","precision":-1,"description":"","color":0}',
+      '{"time":"2026-03-05T10:00:00.000","precision":15,"description":"Lap"}',
+      '{"time":"2026-03-05T09:00:00.000","precision":12}',
+    ];
+    const oldReference =
+        '{"time":"2026-03-05T10:00:00.000","precision":15,"description":"Lap"}';
+
+    setUp(() => SharedPreferences.setMockInitialValues({
+          'events': oldEvents,
+          referenceEventKey: oldReference,
+        }));
+
+    test('every event loads with all its fields', () async {
+      final restored = await reloaded();
+      expect(restored.events, [
+        Event(DateTime(2026, 3, 5, 12), 8,
+            description: 'Finish', color: PredefinedColor.red),
+        Event(DateTime(2026, 3, 5, 10, 30, 0, 250), -1),
+        Event(DateTime(2026, 3, 5, 10), 15, description: 'Lap'),
+        Event(DateTime(2026, 3, 5, 9), 12),
+      ]);
+    });
+
+    test('the reference stays on the same event', () async {
+      final restored = await reloaded();
+      expect(restored.referenceEvent, same(restored.events[2]));
+      expect(restored.referenceEvent?.description, 'Lap');
+    });
+
+    test('each event gets a different id', () async {
+      final ids = (await reloaded()).events.map((e) => e.id).toSet();
+      expect(ids, hasLength(oldEvents.length));
+    });
+
+    test('the new ids are saved straight away', () async {
+      await reloaded();
+      final prefs = await SharedPreferences.getInstance();
+      final saved = prefs.getStringList('events')!;
+      expect(saved, hasLength(oldEvents.length));
+      for (final json in saved) {
+        expect(Event.hasId(jsonDecode(json)), isTrue, reason: json);
+      }
+    });
+
+    test('ids stay the same from one launch to the next', () async {
+      final first = (await reloaded()).events.map((e) => e.id).toList();
+      final second = (await reloaded()).events.map((e) => e.id).toList();
+      expect(second, first);
+    });
+
+    test('the saved reference has the same id as its event', () async {
+      final restored = await reloaded();
+      await reloaded();
+      final prefs = await SharedPreferences.getInstance();
+      final reference = Event.fromJson(prefs.getString(referenceEventKey)!);
+      expect(reference.id, restored.referenceEvent!.id);
+    });
+
+    test('a log that already has ids is not saved again', () async {
+      final event = at(9, 'a');
+      SharedPreferences.setMockInitialValues({
+        'events': [event.toJson()],
+      });
+      final service = await reloaded();
+      final prefs = await SharedPreferences.getInstance();
+      // A save would also write the reference.
+      expect(prefs.getString(referenceEventKey), isNull);
+      expect(service.events.single.id, event.id);
+    });
+  });
+
+  group('ids', () {
+    test('of two identical events, the reference is the one with its id',
+        () async {
+      final first = at(9, 'twin');
+      final second = at(9, 'twin');
+      SharedPreferences.setMockInitialValues({
+        'events': [first.toJson(), second.toJson()],
+        referenceEventKey: second.toJson(),
+      });
+      final restored = await reloaded();
+      expect(restored.referenceEvent?.id, second.id);
+      expect(restored.referenceEvent, same(restored.events.last));
+    });
+
+    test('a reference whose description changed is still found by id',
+        () async {
+      final event = at(9, 'renamed');
+      SharedPreferences.setMockInitialValues({
+        'events': [at(9, 'other').toJson(), event.toJson()],
+        referenceEventKey: Event(event.time, event.precision,
+                id: event.id, description: 'old name')
+            .toJson(),
+      });
+      final restored = await reloaded();
+      expect(restored.referenceEvent?.id, event.id);
+      expect(restored.referenceEvent?.description, 'renamed');
+    });
+
+    test('ids survive a restart', () async {
+      final event = at(9);
+      EventService().addEvent(event);
+      expect((await reloaded()).events.single.id, event.id);
+    });
+  });
 }

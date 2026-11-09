@@ -71,6 +71,60 @@ void main() {
     });
   });
 
+  group('Event ids', () {
+    test('every new event gets its own id', () {
+      final ids = {for (var i = 0; i < 100; i++) Event(DateTime(2026), 1).id};
+      expect(ids, hasLength(100));
+    });
+
+    test('the id survives a round trip', () {
+      final event = Event(DateTime(2026), 1);
+      expect(Event.fromJson(event.toJson()).id, event.id);
+    });
+
+    test('an event saved before ids existed is given one', () {
+      // Exactly what version 1.1.5 saves.
+      final restored = Event.fromJson(
+          '{"time":"2026-03-05T09:00:00.000","precision":12,"description":"Start","color":2}');
+      expect(restored.id, isNotEmpty);
+      expect(restored, Event(DateTime(2026, 3, 5, 9), 12,
+          description: 'Start', color: PredefinedColor.green));
+    });
+
+    for (final id in [null, '', 42]) {
+      test('a stored id of ${jsonEncode(id)} is replaced with a new one', () {
+        final restored = Event.fromJson(jsonEncode({
+          'id': id,
+          'time': '2024-01-02T03:04:05.000',
+          'precision': 7,
+          'description': 'kept',
+        }));
+        expect(restored.id, isA<String>());
+        expect(restored.id, isNotEmpty);
+        expect(restored.description, 'kept');
+      });
+    }
+
+    test('older versions still find every field they read, unchanged', () {
+      // A downgraded app ignores the id but needs the rest as before.
+      final json = jsonDecode(Event(DateTime(2026, 3, 5, 9, 0, 0, 123), 12,
+              description: 'Start', color: PredefinedColor.green)
+          .toJson());
+      expect(json, {
+        'id': isA<String>(),
+        'time': '2026-03-05T09:00:00.123',
+        'precision': 12,
+        'description': 'Start',
+        'color': 2,
+      });
+    });
+
+    test('ids do not affect equality', () {
+      final time = DateTime(2026);
+      expect(Event(time, 1, id: 'a'), Event(time, 1, id: 'b'));
+    });
+  });
+
   group('Event equality', () {
     final time = DateTime(2026, 1, 1);
     final base = Event(time, 1, description: 'a', color: PredefinedColor.red);

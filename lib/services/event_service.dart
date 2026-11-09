@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -32,6 +34,21 @@ class EventService {
     if (referenceEventString != null) {
       referenceEvent = _findReference(_tryParse(referenceEventString));
     }
+
+    // Events saved before ids existed were just given one. Save them, so
+    // each keeps that id instead of getting a new one on every launch.
+    if (eventsStringList.any(_savedWithoutId)) {
+      await saveData();
+    }
+  }
+
+  static bool _savedWithoutId(String json) {
+    try {
+      final data = jsonDecode(json);
+      return data is Map<String, dynamic> && !Event.hasId(data);
+    } catch (_) {
+      return false;
+    }
   }
 
   static Event? _tryParse(String json) {
@@ -45,12 +62,14 @@ class EventService {
   /// The entry in [events] that [saved] refers to. The reference has to be
   /// that same object so edits to the event also apply to the reference.
   ///
-  /// Prefers an exact match, since events can share a time. Then matches on
+  /// Prefers the same id, then an exact match, since events can share a
+  /// time and older versions saved no ids. Then matches on
   /// what can't be edited, since older versions could save a reference that
   /// had drifted from its event. Falls back to the oldest event, as deleting
   /// the reference does.
   Event? _findReference(Event? saved) {
-    return events.firstWhereOrNull((event) => event == saved) ??
+    return events.firstWhereOrNull((event) => event.id == saved?.id) ??
+        events.firstWhereOrNull((event) => event == saved) ??
         events.firstWhereOrNull((event) =>
             event.time == saved?.time && event.precision == saved?.precision) ??
         events.lastOrNull;
