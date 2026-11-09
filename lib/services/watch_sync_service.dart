@@ -102,10 +102,18 @@ class WatchSyncService {
 
     var upTo = 0;
     final changes = <WatchChanges>[];
+    // The watch sends each change twice, a fast copy and a sure one, and
+    // either can come first. An event is only ever taken in once, so the
+    // late copy can't bring back an event deleted in between.
+    final seen = importedIds.toSet();
     for (final item in inbox) {
       upTo = max(upTo, item['sequence'] as int? ?? 0);
       try {
-        changes.add(WatchChanges.parse(item['json'] as String));
+        final change = WatchChanges.parse(item['json'] as String);
+        changes.add(WatchChanges(
+          added: change.added.where((event) => seen.add(event.id)).toList(),
+          deletedIds: change.deletedIds,
+        ));
       } catch (error) {
         // Unreadable; cleared with the rest so it can't block what follows.
         debugPrint('Skipping an unreadable watch delivery: $error');

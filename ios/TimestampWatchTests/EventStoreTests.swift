@@ -111,6 +111,21 @@ struct EventStoreTests {
         #expect(store.events.map(\.label) == ["Lap", "phone"])
     }
 
+    @Test func eventsAreUnconfirmedUntilThePhoneHasThem() throws {
+        let store = EventStore(fileURL: fileURL)
+        let first = event(10, "first"), second = event(20, "second"), third = event(30, "third")
+        store.add(second)
+        store.add(first)
+        store.add(third)
+        #expect(store.unconfirmed == [first, second, third])
+
+        store.apply(try context([second], imported: [first.id]))
+        #expect(store.unconfirmed == [third])
+
+        store.delete(ids: [third.id])
+        #expect(store.unconfirmed.isEmpty)
+    }
+
     @Test func thePhonesReferenceIsUsed() throws {
         let store = EventStore(fileURL: fileURL)
         let reference = event(20, "ref")

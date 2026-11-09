@@ -303,6 +303,53 @@ void main() {
       expect(inbox, isEmpty);
     });
 
+    test('the fast and the sure copy of a change add the event once',
+        () async {
+      final lap = at(10, 'Lap');
+      inbox.addAll([
+        delivery(1, added: [lap]),
+        delivery(2, added: [lap])
+      ]);
+      await sync.importInbox();
+      expect(events.events, hasLength(1));
+    });
+
+    test('a late copy can\'t bring back an event the watch deleted',
+        () async {
+      final lap = at(10, 'Lap');
+      // Fast copies of the add and the delete, then the add's sure copy.
+      inbox.addAll([
+        delivery(1, added: [lap]),
+        delivery(2, deleted: [lap.id]),
+        delivery(3, added: [lap]),
+      ]);
+      await sync.importInbox();
+      expect(events.events, isEmpty);
+    });
+
+    test('a copy arriving in a later import is still ignored', () async {
+      final lap = at(10, 'Lap');
+      inbox.addAll([
+        delivery(1, added: [lap]),
+        delivery(2, deleted: [lap.id]),
+      ]);
+      await sync.importInbox();
+      inbox.add(delivery(3, added: [lap]));
+      await sync.importInbox();
+      expect(events.events, isEmpty);
+    });
+
+    test('a late copy can\'t bring back an event deleted on the phone',
+        () async {
+      final lap = at(10, 'Lap');
+      inbox.add(delivery(1, added: [lap]));
+      await sync.importInbox();
+      events.deleteSelectedEvents([events.events.single]);
+      inbox.add(delivery(2, added: [lap]));
+      await sync.importInbox();
+      expect(events.events, isEmpty);
+    });
+
     test('imports at the same time are applied one after the other',
         () async {
       inbox.add(delivery(1, added: [at(10)]));

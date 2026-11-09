@@ -77,10 +77,10 @@ records events on its own and syncs with the phone through WatchConnectivity:
     (`-d <udid>`) now that the app has a watch companion.
 
 -   **Testing on simulators**: run the phone app with `flutter run`, and install
-    the watch app after the phone app, so the phone sees it as installed. Phone
-    to watch sync works on simulators, but the watch's events only reach the
-    phone on real devices, because `transferUserInfo` doesn't deliver between
-    simulators.
+    the watch app after the phone app, so the phone sees it as installed. The
+    watch sends each change twice: as a message while the phone is in reach,
+    and as a `transferUserInfo` backup that the system may hold for minutes.
+    On simulators only the message arrives, so keep the phone app open.
 
 ## App Store screenshots
 

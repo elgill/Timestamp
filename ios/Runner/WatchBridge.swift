@@ -90,8 +90,19 @@ final class WatchBridge: NSObject, WCSessionDelegate {
 
     // MARK: WCSessionDelegate
 
+    /// Changes the watch queued to arrive even if this app wasn't running.
     func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any] = [:]) {
-        guard let json = userInfo["json"] as? String else { return }
+        receive(userInfo)
+    }
+
+    /// The same changes, sent straight here while the watch could reach the
+    /// phone. Usually arrives first; Flutter ignores the second copy.
+    func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
+        receive(message)
+    }
+
+    private func receive(_ payload: [String: Any]) {
+        guard let json = payload["json"] as? String else { return }
         inboxQueue.async {
             let sequence = self.defaults.integer(forKey: Self.lastSequenceKey) + 1
             self.defaults.set(sequence, forKey: Self.lastSequenceKey)

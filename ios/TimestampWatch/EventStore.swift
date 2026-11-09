@@ -38,6 +38,11 @@ final class EventStore {
         changed()
     }
 
+    /// Recorded here and not yet seen in what the phone sent, oldest first.
+    var unconfirmed: [WatchEvent] {
+        recorded.sorted { $0.time < $1.time }
+    }
+
     func canDelete(_ event: WatchEvent) -> Bool {
         ownIds.contains(event.id)
     }
