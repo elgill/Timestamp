@@ -26,6 +26,8 @@ final class WatchSettings {
     /// Record when the finger lands instead of when it lifts, which is
     /// earlier and so closer to the moment the user reacted to.
     var recordOnTouchDown: Bool { didSet { save() } }
+    /// What the watch's events give as their precision. See `WatchClock`.
+    var phoneAccuracy: PhoneAccuracy? { didSet { save() } }
 
     @ObservationIgnored private let defaults: UserDefaults
 
@@ -33,6 +35,7 @@ final class WatchSettings {
         static let buttons = "buttons"
         static let timeFormat = "timeFormat"
         static let recordOnTouchDown = "recordOnTouchDown"
+        static let phoneAccuracy = "phoneAccuracy"
     }
 
     init(defaults: UserDefaults = .standard) {
@@ -42,11 +45,14 @@ final class WatchSettings {
         timeFormat = (defaults.object(forKey: Key.timeFormat) as? Int)
             .flatMap(TimeFormat.init(rawValue:)) ?? .local24Hour
         recordOnTouchDown = defaults.object(forKey: Key.recordOnTouchDown) as? Bool ?? true
+        phoneAccuracy = defaults.data(forKey: Key.phoneAccuracy)
+            .flatMap { try? JSONDecoder().decode(PhoneAccuracy.self, from: $0) }
     }
 
     private func save() {
         defaults.set(try? JSONEncoder().encode(buttons), forKey: Key.buttons)
         defaults.set(timeFormat.rawValue, forKey: Key.timeFormat)
         defaults.set(recordOnTouchDown, forKey: Key.recordOnTouchDown)
+        defaults.set(try? JSONEncoder().encode(phoneAccuracy), forKey: Key.phoneAccuracy)
     }
 }

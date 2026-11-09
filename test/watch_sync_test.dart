@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:advanced_ntp/ntp.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -14,6 +16,7 @@ import 'package:timestamp/providers/custom_button_models_provider.dart';
 import 'package:timestamp/providers/custom_button_names_provider.dart';
 import 'package:timestamp/providers/shared_pref_provider.dart';
 import 'package:timestamp/services/event_service.dart';
+import 'package:timestamp/services/ntp_service.dart';
 import 'package:timestamp/services/watch_protocol.dart';
 import 'package:timestamp/services/watch_sync_service.dart';
 
@@ -68,6 +71,7 @@ void main() {
         ],
         timeFormat: TimeFormat.local12Hour,
         importedIds: ['A1B2C3D4-0000-4000-8000-000000000001'],
+        accuracy: (precision: 22, syncedAt: fromMillis(1794164400000)),
       );
       expect(jsonDecode(json), jsonDecode(fixture('context.json')));
     });
@@ -75,8 +79,10 @@ void main() {
     test('what the watch sends is read', () {
       final changes = WatchChanges.parse(fixture('changes.json'));
       expect(changes.added.single.id, 'A1B2C3D4-0000-4000-8000-000000000001');
-      expect(changes.added.single, Event(fromMillis(1794164602470), -1,
-          description: 'Lap', color: PredefinedColor.orange));
+      expect(
+          changes.added.single,
+          Event(fromMillis(1794164602470), -1,
+              description: 'Lap', color: PredefinedColor.orange));
       expect(changes.deletedIds, ['A1B2C3D4-0000-4000-8000-000000000002']);
     });
 
@@ -128,6 +134,8 @@ void main() {
       expect(json['events'].first['id'], events.first.id);
       // The reference is sent even when it's older than those.
       expect(json['reference']['id'], events.last.id);
+      // No time server sync given.
+      expect(json['accuracy'], isNull);
     });
   });
 
@@ -155,7 +163,9 @@ void main() {
 
     test('a color for a name that is gone is left out', () {
       expect(
-          watchButtons(['Lap'], [
+          watchButtons([
+            'Lap'
+          ], [
             ButtonModel('Lap', PredefinedColor.orange),
             ButtonModel('Gone', PredefinedColor.red),
           ]),
@@ -316,9 +326,9 @@ void main() {
           .setMockMethodCallHandler(watchChannel, null);
     });
 
-    Map<String, dynamic> lastContext() => jsonDecode(
-        (calls.lastWhere((c) => c.method == 'updateContext').arguments
-            as Map)['json']);
+    Map<String, dynamic> lastContext() => jsonDecode((calls
+        .lastWhere((c) => c.method == 'updateContext')
+        .arguments as Map)['json']);
 
     test('takes in the inbox, then clears what it took', () async {
       final lap = at(10, 'Lap');
@@ -344,8 +354,7 @@ void main() {
       expect(inbox, isEmpty);
     });
 
-    test('the fast and the sure copy of a change add the event once',
-        () async {
+    test('the fast and the sure copy of a change add the event once', () async {
       final lap = at(10, 'Lap');
       inbox.addAll([
         delivery(1, added: [lap]),
@@ -355,8 +364,7 @@ void main() {
       expect(events.events, hasLength(1));
     });
 
-    test('a late copy can\'t bring back an event the watch deleted',
-        () async {
+    test('a late copy can\'t bring back an event the watch deleted', () async {
       final lap = at(10, 'Lap');
       // Fast copies of the add and the delete, then the add's sure copy.
       inbox.addAll([
@@ -391,8 +399,7 @@ void main() {
       expect(events.events, isEmpty);
     });
 
-    test('imports at the same time are applied one after the other',
-        () async {
+    test('imports at the same time are applied one after the other', () async {
       inbox.add(delivery(1, added: [at(10)]));
       await Future.wait([sync.importInbox(), sync.importInbox()]);
       expect(events.events, hasLength(1));
@@ -457,6 +464,10 @@ void main() {
           sharedPreferencesProvider
               .overrideWithValue(await SharedPreferences.getInstance()),
           watchSyncEnabledProvider.overrideWithValue(true),
+          // No network in tests.
+          ntpServiceProvider.overrideWith((ref) => NtpService(ref,
+              fetchNtpData: ({lookUpAddress = '', timeout}) =>
+                  Future.error(const SocketException('offline')))),
         ]);
         container.read(watchSyncProvider);
       });
@@ -509,8 +520,80 @@ void main() {
             .read(customButtonModelsProvider.notifier)
             .updateButtonColor('Start', PredefinedColor.purple);
         await pumpEventQueue();
-        expect(lastContext()['buttons'],
-            [{'name': 'Start', 'color': PredefinedColor.purple.index}]);
+        expect(lastContext()['buttons'], [
+          {'name': 'Start', 'color': PredefinedColor.purple.index}
+        ]);
+      });
+    });
+
+    group('the phone\'s accuracy', () {
+      late Completer<NTPResponse> ntpReply;
+      late NtpService ntp;
+
+      setUp(() async {
+        ntpReply = Completer();
+        final container = ProviderContainer(overrides: [
+          sharedPreferencesProvider
+              .overrideWithValue(await SharedPreferences.getInstance()),
+          ntpServiceProvider.overrideWith((ref) => NtpService(ref,
+              fetchNtpData: ({lookUpAddress = '', timeout}) =>
+                  ntpReply.future)),
+        ]);
+        addTearDown(container.dispose);
+        ntp = container.read(ntpServiceProvider);
+        sync.dispose();
+        sync = WatchSyncService(
+          events: events,
+          ntp: ntp,
+          prefs: await SharedPreferences.getInstance(),
+          buttons: () => [],
+          timeFormat: () => TimeFormat.utc24Hour,
+        );
+      });
+
+      final syncedAt = DateTime.utc(2026, 3, 5, 12);
+      NTPResponse response({int roundTrip = 45}) => NTPResponse(
+            dateTime: syncedAt,
+            offset: 250,
+            roundTripDelay: roundTrip,
+            lookupServer: '216.239.35.0',
+            stratum: 1,
+          );
+
+      test('is not sent before a time server sync', () async {
+        await sync.start();
+        expect(lastContext()['accuracy'], isNull);
+      });
+
+      test('is sent after each sync, as the phone\'s events get it', () async {
+        await sync.start();
+        calls.clear();
+        ntpReply.complete(response());
+        await pumpEventQueue();
+        expect(lastContext()['accuracy'], {
+          // Half the round trip, in whole milliseconds.
+          'precision': 22,
+          'syncedAt': syncedAt.millisecondsSinceEpoch,
+        });
+
+        ntpReply = Completer()..complete(response(roundTrip: 120));
+        await ntp.updateNtpOffset();
+        await pumpEventQueue();
+        expect(lastContext()['accuracy']['precision'], 60);
+      });
+
+      test('a sync from before the start is sent at the start', () async {
+        ntpReply.complete(response());
+        await pumpEventQueue();
+        await sync.start();
+        expect(lastContext()['accuracy']['precision'], 22);
+      });
+
+      test('a saved offset from an earlier run is not used', () async {
+        ntpReply.completeError(const SocketException('offline'));
+        await pumpEventQueue();
+        await sync.start();
+        expect(lastContext()['accuracy'], isNull);
       });
     });
 

@@ -23,6 +23,9 @@ class NtpService {
   String? _timeServer;
   DateTime? _lastSyncTime;
 
+  /// Called after each successful sync with a time server.
+  void Function()? onSynced;
+
   DateTime get currentTime =>
       DateTime.now().add(Duration(milliseconds: _ntpOffset ?? 0));
 
@@ -50,6 +53,7 @@ class NtpService {
       _lastSyncTime = ntpResponse.dateTime;
       _isInfoRecieved = true;
       saveNtpData();
+      onSynced?.call();
     } catch (error) {
       if (!_isInfoRecieved) {
         loadNtpData();

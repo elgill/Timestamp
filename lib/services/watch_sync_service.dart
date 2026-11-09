@@ -14,6 +14,7 @@ import 'package:timestamp/providers/custom_button_names_provider.dart';
 import 'package:timestamp/providers/shared_pref_provider.dart';
 import 'package:timestamp/providers/time_format_provider.dart';
 import 'package:timestamp/services/event_service.dart';
+import 'package:timestamp/services/ntp_service.dart';
 import 'package:timestamp/services/watch_protocol.dart';
 
 const watchChannel = MethodChannel('dev.gillin.timestamp/watch');
@@ -24,9 +25,10 @@ final watchSyncEnabledProvider = Provider<bool>((ref) => Platform.isIOS);
 final watchSyncProvider = Provider<WatchSyncService>((ref) {
   final service = WatchSyncService(
     events: ref.read(eventServiceProvider),
+    ntp: ref.read(ntpServiceProvider),
     prefs: ref.read(sharedPreferencesProvider),
-    buttons: () => watchButtons(
-        ref.read(customButtonNamesProvider), ref.read(customButtonModelsProvider)),
+    buttons: () => watchButtons(ref.read(customButtonNamesProvider),
+        ref.read(customButtonModelsProvider)),
     timeFormat: () => ref.read(sharedUtilityProvider).getTimeFormat(),
     enabled: ref.read(watchSyncEnabledProvider),
   );
@@ -41,7 +43,9 @@ final watchSyncProvider = Provider<WatchSyncService>((ref) {
 /// its color. The names list is what the main screen draws; the models only
 /// hold colors, and aren't reordered with the names.
 List<ButtonModel> watchButtons(List<String> names, List<ButtonModel> models) {
-  final colors = {for (final model in models) model.name: model.predefinedColor};
+  final colors = {
+    for (final model in models) model.name: model.predefinedColor
+  };
   return [
     for (final name in names)
       ButtonModel(name, colors[name] ?? PredefinedColor.defaultColor)
@@ -56,12 +60,14 @@ List<ButtonModel> watchButtons(List<String> names, List<ButtonModel> models) {
 class WatchSyncService {
   WatchSyncService({
     required EventService events,
+    NtpService? ntp,
     required SharedPreferences prefs,
     required List<ButtonModel> Function() buttons,
     required TimeFormat Function() timeFormat,
     this.enabled = true,
     MethodChannel channel = watchChannel,
   })  : _events = events,
+        _ntp = ntp,
         _prefs = prefs,
         _buttons = buttons,
         _timeFormat = timeFormat,
@@ -70,6 +76,7 @@ class WatchSyncService {
   /// Only iOS has a watch app.
   final bool enabled;
   final EventService _events;
+  final NtpService? _ntp;
   final SharedPreferences _prefs;
   final List<ButtonModel> Function() _buttons;
   final TimeFormat Function() _timeFormat;
@@ -88,6 +95,7 @@ class WatchSyncService {
   Future<void> start() async {
     if (!enabled) return;
     _events.onSaved = pushContext;
+    _ntp?.onSynced = pushContext;
     _channel.setMethodCallHandler((call) async {
       if (call.method == 'inboxChanged') await importInbox();
     });
@@ -99,6 +107,7 @@ class WatchSyncService {
   void dispose() {
     _lifecycleListener?.dispose();
     if (_events.onSaved == pushContext) _events.onSaved = null;
+    if (_ntp?.onSynced == pushContext) _ntp?.onSynced = null;
   }
 
   Future<void> importInbox() {
@@ -155,13 +164,22 @@ class WatchSyncService {
   Future<void> _rememberImported(List<String> ids) async {
     if (ids.isEmpty) return;
     final all = [...importedIds, ...ids];
-    await _prefs.setStringList(importedIdsKey,
-        all.sublist(max(0, all.length - importedIdsKept)));
+    await _prefs.setStringList(
+        importedIdsKey, all.sublist(max(0, all.length - importedIdsKept)));
   }
 
   List<String> get importedIds => _prefs.getStringList(importedIdsKey) ?? [];
 
-  /// Sends the watch the newest events, the buttons and the time format.
+  /// As the phone's own events get it: half the time server's round trip,
+  /// once this run of the app has synced. A saved offset isn't measured.
+  ({int precision, DateTime syncedAt})? get _accuracy {
+    final ntp = _ntp;
+    if (ntp == null || !ntp.isInfoRecieved) return null;
+    return (precision: ntp.roundTripTime ~/ 2, syncedAt: ntp.lastSyncTime);
+  }
+
+  /// Sends the watch the newest events, the buttons, the time format and
+  /// the phone's accuracy.
   Future<void> pushContext() async {
     if (!enabled) return;
     final json = WatchProtocol.context(
@@ -170,6 +188,7 @@ class WatchSyncService {
       buttons: _buttons(),
       timeFormat: _timeFormat(),
       importedIds: importedIds,
+      accuracy: _accuracy,
     );
     try {
       await _channel.invokeMethod('updateContext', {'json': json});

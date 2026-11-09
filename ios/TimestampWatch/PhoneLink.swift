@@ -79,6 +79,9 @@ final class PhoneLink: NSObject, WCSessionDelegate {
             store.apply(context)
             settings.buttons = context.buttons
             settings.timeFormat = context.timeFormat
+            if settings.phoneAccuracy != context.accuracy {
+                settings.phoneAccuracy = context.accuracy
+            }
         } catch {
             print("Reading what the phone sent failed: \(error)")
         }

@@ -11,9 +11,11 @@ struct PhoneContext: Decodable {
     var reference: WatchEvent?
     /// The watch's events the phone has taken in.
     var importedIds: [String]
+    /// How accurate the phone's time is, if it has synced with a time server.
+    var accuracy: PhoneAccuracy?
 
     enum CodingKeys: String, CodingKey {
-        case buttons, timeFormat, events, reference, importedIds
+        case buttons, timeFormat, events, reference, importedIds, accuracy
     }
 
     init(from decoder: Decoder) throws {
@@ -26,11 +28,20 @@ struct PhoneContext: Decodable {
             .compactMap(\.value) ?? []
         reference = try? c.decode(WatchEvent.self, forKey: .reference)
         importedIds = (try? c.decode([String].self, forKey: .importedIds)) ?? []
+        accuracy = try? c.decode(PhoneAccuracy.self, forKey: .accuracy)
     }
 
     static func decode(json: String) throws -> PhoneContext {
         try WatchJSON.decoder.decode(PhoneContext.self, from: Data(json.utf8))
     }
+}
+
+/// The phone's last sync with a time server: the precision its own events
+/// get, and when it was measured.
+struct PhoneAccuracy: Codable, Equatable {
+    /// Milliseconds.
+    var precision: Int
+    var syncedAt: Date
 }
 
 /// What the watch sends: events it recorded and events it deleted. Read by

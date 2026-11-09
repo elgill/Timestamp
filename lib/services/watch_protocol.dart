@@ -40,12 +40,17 @@ class WatchProtocol {
   ///
   /// [importedIds] are the watch's events the phone has taken in, so the
   /// watch can stop holding them even if they've since been deleted here.
+  ///
+  /// [accuracy] is the precision the phone gives its own events, and when
+  /// it was measured; the watch gives its events the same. Null until the
+  /// phone has synced with a time server.
   static String context({
     required List<Event> events,
     required Event? reference,
     required List<ButtonModel> buttons,
     required TimeFormat timeFormat,
     required List<String> importedIds,
+    ({int precision, DateTime syncedAt})? accuracy,
   }) {
     return jsonEncode({
       'buttons': [
@@ -58,6 +63,12 @@ class WatchProtocol {
       ],
       'reference': reference == null ? null : eventToMap(reference),
       'importedIds': importedIds,
+      'accuracy': accuracy == null
+          ? null
+          : {
+              'precision': accuracy.precision,
+              'syncedAt': accuracy.syncedAt.millisecondsSinceEpoch,
+            },
     });
   }
 }

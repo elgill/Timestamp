@@ -82,6 +82,14 @@ records events on its own and syncs with the phone through WatchConnectivity:
     and as a `transferUserInfo` backup that the system may hold for minutes.
     On simulators only the message arrives, so keep the phone app open.
 
+-   **The watch's time**: events use the watch's own clock, which Apple keeps
+    synced. They get the precision the phone gives its own events (half the
+    time server's round trip), sent with the rest of the phone's context,
+    while the phone's last time server sync is under 6 hours old. Otherwise
+    it's -1, unknown. Correcting the watch's clock against the phone's time
+    was tried and dropped: the phone can only be reached over a link that
+    is slower and less even than the clock's own error.
+
 ## App Store screenshots
 
 `dart run tool/store_screenshots.dart`

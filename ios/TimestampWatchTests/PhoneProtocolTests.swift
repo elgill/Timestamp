@@ -33,6 +33,8 @@ struct PhoneProtocolTests {
         ])
         #expect(context.reference == context.events.last)
         #expect(context.importedIds == ["A1B2C3D4-0000-4000-8000-000000000001"])
+        #expect(context.accuracy == PhoneAccuracy(
+            precision: 22, syncedAt: Date(timeIntervalSince1970: 1_794_164_400)))
     }
 
     @Test func writesWhatThePhoneReads() throws {
@@ -55,6 +57,8 @@ struct PhoneProtocolTests {
         #expect(context.buttons.isEmpty)
         #expect(context.timeFormat == .utc24Hour)
         #expect(context.reference == nil)
+        // From a phone that hasn't synced with a time server, or an older app.
+        #expect(context.accuracy == nil)
     }
 
     @Test func oneUnreadableEventDoesNotLoseTheRest() throws {
