@@ -60,6 +60,28 @@
     Writes PNGs to `build/screenshots/`. CI uploads these as the
     `device-screenshots` artifact on every push.
 
+## Apple Watch app
+
+A native SwiftUI app in `ios/TimestampWatch`, embedded in the iOS app. It
+records events on its own and syncs with the phone through WatchConnectivity:
+`ios/Runner/WatchBridge.swift` on the phone side and
+`lib/services/watch_sync_service.dart` on the Flutter side.
+
+-   **Run its tests**
+    `xcodebuild test -workspace ios/Runner.xcworkspace -scheme TimestampWatch -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)'`
+
+-   **Message format**: `test/fixtures/watch` holds an example of each message.
+    The Dart and Swift tests both check against them.
+
+-   **Simulator builds**: `flutter build ios --simulator` needs a device
+    (`-d <udid>`) now that the app has a watch companion.
+
+-   **Testing on simulators**: run the phone app with `flutter run`, and install
+    the watch app after the phone app, so the phone sees it as installed. Phone
+    to watch sync works on simulators, but the watch's events only reach the
+    phone on real devices, because `transferUserInfo` doesn't deliver between
+    simulators.
+
 ## App Store screenshots
 
 `dart run tool/store_screenshots.dart`

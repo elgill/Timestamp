@@ -28,6 +28,7 @@ import 'pages/event_detail.dart';
 import 'pages/help_page.dart';
 import 'services/event_service.dart';
 import 'services/ntp_service.dart';
+import 'services/watch_sync_service.dart';
 import 'package:timestamp/utils/time_utils.dart';
 import 'package:timestamp/models/event.dart';
 import 'package:timestamp/utils/button_layout.dart';
@@ -151,7 +152,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     eventManager = ref.read(eventServiceProvider);
     ntpService = ref.read(ntpServiceProvider);
 
-    eventManager.loadData();
+    eventManager.loadData().then((_) => ref.read(watchSyncProvider).start());
 
     _applyAutoLockSetting();
     ref.listenManual(autoLockProvider, (_, keepAwake) {

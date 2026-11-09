@@ -11,11 +11,13 @@
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
 		16379ADFA3D20B805BFD6E1B /* ClockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5060BC5FFC9C59B359DBD5E /* ClockView.swift */; };
 		1E60DF32332364826C043701 /* RecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F1FDEA5A8283792F09B09A8 /* RecordView.swift */; };
+		3189DC5A1595CD7E2A6A3109 /* PhoneLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AA098EEDBB2C44372177AEE /* PhoneLink.swift */; };
 		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		3E454C4A8867F7C0ADC76CFE /* TimestampWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = C7933E06B04A4DEB10E01901 /* TimestampWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		5333C3C1E5C7058143E98FAA /* WatchSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846B73B066D29990071D58D3 /* WatchSettings.swift */; };
 		58C83BC7831DDC4ABF1D6FC8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0143EB4F65C13D5635F57EAC /* Assets.xcassets */; };
+		5C25944455722F16D5F0230C /* WatchBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C7A8B22C8FB1CF50E2534F6 /* WatchBridge.swift */; };
 		6A8C0E82D061C3767750E909 /* EventStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16186391A7A4C8549D16A449 /* EventStoreTests.swift */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
 		78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };
@@ -23,9 +25,11 @@
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		A0BD2A3338EAA08FA41C1A30 /* EventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 165824154C8A26A395F58260 /* EventStore.swift */; };
+		CC7C5240E9CB23DF4A3BA653 /* PhoneProtocolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 733E943EB5DBB2D5950469B8 /* PhoneProtocolTests.swift */; };
 		D77B50532281787212EE341F /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DDF90944E32D8D612242089 /* Pods_RunnerTests.framework */; };
 		DA178ED38E71E3CE638386E8 /* TimeSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = E007E84580D8199BEF0198A6 /* TimeSource.swift */; };
 		DBD53F1CBFB88FE3BBD145A0 /* TimeFormattingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B9F975F0524B7F5E730192 /* TimeFormattingTests.swift */; };
+		DED74BDE65E7F6A96B6EDD59 /* PhoneProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33473D5E59F531786EBE9A9A /* PhoneProtocol.swift */; };
 		E2FCA001FB01FD604056F32F /* TimestampWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C2194AC1D8FD818D6AD010 /* TimestampWatchApp.swift */; };
 		EEAEC8FBC1108F8B2A0A0F14 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A1F1C29E862E1CDB9F6315F5 /* Pods_Runner.framework */; };
 		F22E9FFDD9B85D6B12465B36 /* WatchEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D9FE5EAAA11B4FC2CFB307 /* WatchEvent.swift */; };
@@ -91,10 +95,12 @@
 		2730E68A3B7D9CB803E19D99 /* Pods-RunnerTests.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.profile.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.profile.xcconfig"; sourceTree = "<group>"; };
 		331C807B294A618700263BE5 /* RunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerTests.swift; sourceTree = "<group>"; };
 		331C8081294A63A400263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		33473D5E59F531786EBE9A9A /* PhoneProtocol.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PhoneProtocol.swift; sourceTree = "<group>"; };
 		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
 		3DDF90944E32D8D612242089 /* Pods_RunnerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RunnerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5FCA6C3FB50E382107A4BF9E /* TimeFormatting.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TimeFormatting.swift; sourceTree = "<group>"; };
 		6F1FDEA5A8283792F09B09A8 /* RecordView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RecordView.swift; sourceTree = "<group>"; };
+		733E943EB5DBB2D5950469B8 /* PhoneProtocolTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PhoneProtocolTests.swift; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7629CEFC6539CB6869D3B617 /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
@@ -111,6 +117,8 @@
 		97C146FD1CF9000F007C117D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		9AA098EEDBB2C44372177AEE /* PhoneLink.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PhoneLink.swift; sourceTree = "<group>"; };
+		9C7A8B22C8FB1CF50E2534F6 /* WatchBridge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchBridge.swift; sourceTree = "<group>"; };
 		A1F1C29E862E1CDB9F6315F5 /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A5060BC5FFC9C59B359DBD5E /* ClockView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ClockView.swift; sourceTree = "<group>"; };
 		A9DA460351EC17C8346E1CEC /* TimestampWatchTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TimestampWatchTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -189,6 +197,8 @@
 				846B73B066D29990071D58D3 /* WatchSettings.swift */,
 				0143EB4F65C13D5635F57EAC /* Assets.xcassets */,
 				BCA48DE331D1FC66064FE844 /* TimestampWatch.xcconfig */,
+				33473D5E59F531786EBE9A9A /* PhoneProtocol.swift */,
+				9AA098EEDBB2C44372177AEE /* PhoneLink.swift */,
 			);
 			name = TimestampWatch;
 			path = TimestampWatch;
@@ -249,6 +259,7 @@
 				1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */,
 				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
+				9C7A8B22C8FB1CF50E2534F6 /* WatchBridge.swift */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
@@ -258,6 +269,7 @@
 			children = (
 				16186391A7A4C8549D16A449 /* EventStoreTests.swift */,
 				D3B9F975F0524B7F5E730192 /* TimeFormattingTests.swift */,
+				733E943EB5DBB2D5950469B8 /* PhoneProtocolTests.swift */,
 			);
 			name = TimestampWatchTests;
 			path = TimestampWatchTests;
@@ -557,6 +569,7 @@
 			files = (
 				6A8C0E82D061C3767750E909 /* EventStoreTests.swift in Sources */,
 				DBD53F1CBFB88FE3BBD145A0 /* TimeFormattingTests.swift in Sources */,
+				CC7C5240E9CB23DF4A3BA653 /* PhoneProtocolTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -573,6 +586,8 @@
 				E2FCA001FB01FD604056F32F /* TimestampWatchApp.swift in Sources */,
 				F22E9FFDD9B85D6B12465B36 /* WatchEvent.swift in Sources */,
 				5333C3C1E5C7058143E98FAA /* WatchSettings.swift in Sources */,
+				DED74BDE65E7F6A96B6EDD59 /* PhoneProtocol.swift in Sources */,
+				3189DC5A1595CD7E2A6A3109 /* PhoneLink.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -582,6 +597,7 @@
 			files = (
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
+				5C25944455722F16D5F0230C /* WatchBridge.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

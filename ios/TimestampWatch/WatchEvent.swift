@@ -2,9 +2,11 @@ import Foundation
 import SwiftUI
 
 /// One recorded moment. Mirrors the phone's `Event` (lib/models/event.dart),
-/// plus an `id` so an event that reaches the phone twice is only added once.
+/// including its `id`, which is how the phone and watch recognise an event
+/// they've already seen.
 struct WatchEvent: Codable, Identifiable, Equatable {
-    var id: UUID
+    /// Compared as text: the phone's ids are lowercase, the watch's uppercase.
+    var id: String
     /// Already corrected by the best clock offset known when it was recorded.
     var time: Date
     /// How far `time` could be off, in milliseconds. -1 when unknown, as on
@@ -14,7 +16,7 @@ struct WatchEvent: Codable, Identifiable, Equatable {
     var color: EventColor
 
     init(
-        id: UUID = UUID(),
+        id: String = UUID().uuidString,
         time: Date,
         precision: Int,
         label: String = "",
@@ -67,5 +69,46 @@ extension Color {
             green: Double((hex >> 8) & 0xFF) / 255,
             blue: Double(hex & 0xFF) / 255
         )
+    }
+}
+
+/// JSON as the phone and the event file use it: times in whole milliseconds
+/// since 1970.
+enum WatchJSON {
+    static let encoder: JSONEncoder = {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .custom { date, encoder in
+            var container = encoder.singleValueContainer()
+            // Down, not to nearest, so the tenths never change. From 2038
+            // on, some times read back from milliseconds come out just under
+            // (...470 as ...469.9998); the 1µs nudge stops those losing a
+            // millisecond on every save.
+            try container.encode((date.timeIntervalSince1970 * 1000 + 0.001).rounded(.down))
+        }
+        return encoder
+    }()
+
+    static let decoder: JSONDecoder = {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .millisecondsSince1970
+        return decoder
+    }()
+}
+
+/// Decodes to nil instead of failing, so one bad array element doesn't fail
+/// the whole array.
+struct Lossy<Value: Codable>: Codable {
+    let value: Value?
+
+    init(value: Value?) {
+        self.value = value
+    }
+
+    init(from decoder: Decoder) throws {
+        value = try? Value(from: decoder)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        try value.encode(to: encoder)
     }
 }

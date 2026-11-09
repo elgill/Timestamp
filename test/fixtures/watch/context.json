@@ -1,0 +1,31 @@
+{
+  "buttons": [
+    {"name": "Start", "color": 2},
+    {"name": "Lap", "color": 3}
+  ],
+  "timeFormat": 0,
+  "events": [
+    {
+      "id": "6f1c1a0e-3b55-4c9e-9f5a-0b8e5d2b1a01",
+      "time": 1794164602470,
+      "precision": 40,
+      "description": "Lap",
+      "color": 3
+    },
+    {
+      "id": "9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d",
+      "time": 1794164500000,
+      "precision": -1,
+      "description": "",
+      "color": 0
+    }
+  ],
+  "reference": {
+    "id": "9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d",
+    "time": 1794164500000,
+    "precision": -1,
+    "description": "",
+    "color": 0
+  },
+  "importedIds": ["A1B2C3D4-0000-4000-8000-000000000001"]
+}

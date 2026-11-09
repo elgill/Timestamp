@@ -2,6 +2,8 @@ import SwiftUI
 
 /// Recorded events, newest first and grouped by day, as on the phone.
 struct EventsView: View {
+    let link: PhoneLink
+
     @Environment(EventStore.self) private var store
     @Environment(WatchSettings.self) private var settings
     @AppStorage("showRelative") private var showRelative = false
@@ -39,9 +41,12 @@ struct EventsView: View {
                             event: event,
                             format: settings.timeFormat,
                             reference: showRelative ? store.reference : nil)
+                        // Events from the phone are deleted on the phone.
+                        .deleteDisabled(!store.canDelete(event))
                     }
                     .onDelete { offsets in
-                        store.delete(ids: Set(offsets.map { day.events[$0].id }))
+                        let deleted = store.delete(ids: Set(offsets.map { day.events[$0].id }))
+                        link.send(deleted: deleted)
                     }
                 }
             }

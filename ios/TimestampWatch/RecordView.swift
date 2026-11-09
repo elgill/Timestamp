@@ -4,6 +4,7 @@ import WatchKit
 /// The clock and the record buttons.
 struct RecordView: View {
     let timeSource: TimeSource
+    let link: PhoneLink
 
     @Environment(EventStore.self) private var store
     @Environment(WatchSettings.self) private var settings
@@ -84,6 +85,7 @@ struct RecordView: View {
             color: config?.color ?? .defaultColor)
         WKInterfaceDevice.current().play(.click)
         store.add(event)
+        link.send(added: [event])
         withAnimation { lastRecorded = event }
     }
 }
