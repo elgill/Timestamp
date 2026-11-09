@@ -6,9 +6,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timestamp/enums/predefined_colors.dart';
 import 'package:timestamp/enums/time_format.dart';
 import 'package:timestamp/models/button_model.dart';
 import 'package:timestamp/providers/custom_button_models_provider.dart';
+import 'package:timestamp/providers/custom_button_names_provider.dart';
 import 'package:timestamp/providers/shared_pref_provider.dart';
 import 'package:timestamp/providers/time_format_provider.dart';
 import 'package:timestamp/services/event_service.dart';
@@ -16,19 +18,35 @@ import 'package:timestamp/services/watch_protocol.dart';
 
 const watchChannel = MethodChannel('dev.gillin.timestamp/watch');
 
+/// Only iOS has a watch app. Overridden in tests.
+final watchSyncEnabledProvider = Provider<bool>((ref) => Platform.isIOS);
+
 final watchSyncProvider = Provider<WatchSyncService>((ref) {
   final service = WatchSyncService(
     events: ref.read(eventServiceProvider),
     prefs: ref.read(sharedPreferencesProvider),
-    buttons: () => ref.read(customButtonModelsProvider),
+    buttons: () => watchButtons(
+        ref.read(customButtonNamesProvider), ref.read(customButtonModelsProvider)),
     timeFormat: () => ref.read(sharedUtilityProvider).getTimeFormat(),
-    enabled: Platform.isIOS,
+    enabled: ref.read(watchSyncEnabledProvider),
   );
+  ref.listen(customButtonNamesProvider, (_, __) => service.pushContext());
   ref.listen(customButtonModelsProvider, (_, __) => service.pushContext());
   ref.listen(is24HourTimeProvider, (_, __) => service.pushContext());
   ref.onDispose(service.dispose);
   return service;
 });
+
+/// The buttons as the phone shows them: the names in their order, each with
+/// its color. The names list is what the main screen draws; the models only
+/// hold colors, and aren't reordered with the names.
+List<ButtonModel> watchButtons(List<String> names, List<ButtonModel> models) {
+  final colors = {for (final model in models) model.name: model.predefinedColor};
+  return [
+    for (final name in names)
+      ButtonModel(name, colors[name] ?? PredefinedColor.defaultColor)
+  ];
+}
 
 /// Keeps the watch app and the phone's events in step, through the iOS side
 /// (ios/Runner/WatchBridge.swift).

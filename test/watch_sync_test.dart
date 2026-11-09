@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timestamp/constants.dart';
@@ -9,6 +10,9 @@ import 'package:timestamp/enums/predefined_colors.dart';
 import 'package:timestamp/enums/time_format.dart';
 import 'package:timestamp/models/button_model.dart';
 import 'package:timestamp/models/event.dart';
+import 'package:timestamp/providers/custom_button_models_provider.dart';
+import 'package:timestamp/providers/custom_button_names_provider.dart';
+import 'package:timestamp/providers/shared_pref_provider.dart';
 import 'package:timestamp/services/event_service.dart';
 import 'package:timestamp/services/watch_protocol.dart';
 import 'package:timestamp/services/watch_sync_service.dart';
@@ -124,6 +128,43 @@ void main() {
       expect(json['events'].first['id'], events.first.id);
       // The reference is sent even when it's older than those.
       expect(json['reference']['id'], events.last.id);
+    });
+  });
+
+  group('the watch\'s buttons', () {
+    test('follow the order of the names, as the phone shows them', () {
+      expect(
+        watchButtons(
+          ['Finish', 'Start'],
+          [
+            ButtonModel('Start', PredefinedColor.green),
+            ButtonModel('Finish', PredefinedColor.red),
+          ],
+        ),
+        [
+          ButtonModel('Finish', PredefinedColor.red),
+          ButtonModel('Start', PredefinedColor.green),
+        ],
+      );
+    });
+
+    test('a name without a color gets the default', () {
+      expect(watchButtons(['Lap'], []),
+          [ButtonModel('Lap', PredefinedColor.defaultColor)]);
+    });
+
+    test('a color for a name that is gone is left out', () {
+      expect(
+          watchButtons(['Lap'], [
+            ButtonModel('Lap', PredefinedColor.orange),
+            ButtonModel('Gone', PredefinedColor.red),
+          ]),
+          [ButtonModel('Lap', PredefinedColor.orange)]);
+    });
+
+    test('no names means the single default button', () {
+      expect(watchButtons([], [ButtonModel('Stale', PredefinedColor.red)]),
+          isEmpty);
     });
   });
 
@@ -406,6 +447,71 @@ void main() {
       ]);
       expect(lastContext()['timeFormat'], TimeFormat.utc24Hour.index);
       expect(lastContext()['reference']['id'], reference.id);
+    });
+
+    group('through the providers', () {
+      late ProviderContainer container;
+
+      setUp(() async {
+        container = ProviderContainer(overrides: [
+          sharedPreferencesProvider
+              .overrideWithValue(await SharedPreferences.getInstance()),
+          watchSyncEnabledProvider.overrideWithValue(true),
+        ]);
+        container.read(watchSyncProvider);
+      });
+
+      tearDown(() => container.dispose());
+
+      List<String> sentButtonNames() => [
+            for (final button in lastContext()['buttons'] as List)
+              button['name'] as String
+          ];
+
+      /// What the button settings screen does to add a button.
+      void addButton(String name) {
+        final names = container.read(customButtonNamesProvider)..add(name);
+        container
+            .read(customButtonNamesProvider.notifier)
+            .setCustomButtonNameList(names);
+        container
+            .read(customButtonModelsProvider.notifier)
+            .syncWithButtonNames(names);
+      }
+
+      test('a new button is sent', () async {
+        addButton('Start');
+        await pumpEventQueue();
+        expect(sentButtonNames(), ['Start']);
+      });
+
+      test('reordering the buttons is sent, in the new order', () async {
+        addButton('Start');
+        addButton('Lap');
+        addButton('Finish');
+        await pumpEventQueue();
+        calls.clear();
+
+        // What the screen does on a drag: the same list, changed in place.
+        final names = container.read(customButtonNamesProvider);
+        names.insert(0, names.removeAt(2));
+        container
+            .read(customButtonNamesProvider.notifier)
+            .setCustomButtonNameList(names);
+        await pumpEventQueue();
+
+        expect(sentButtonNames(), ['Finish', 'Start', 'Lap']);
+      });
+
+      test('a new color is sent', () async {
+        addButton('Start');
+        container
+            .read(customButtonModelsProvider.notifier)
+            .updateButtonColor('Start', PredefinedColor.purple);
+        await pumpEventQueue();
+        expect(lastContext()['buttons'],
+            [{'name': 'Start', 'color': PredefinedColor.purple.index}]);
+      });
     });
 
     test('once started, every change on the phone is sent', () async {

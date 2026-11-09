@@ -13,6 +13,8 @@ class CustomButtonNamesNotifier extends StateNotifier<List<String>> {
 
   void setCustomButtonNameList(List<String> value) {
     ref.watch(sharedUtilityProvider).setCustomEventButtonList(value);
-    state = value;
+    // A copy: callers change the current list in place, and setting the
+    // same list back wouldn't tell listeners (like the watch sync) anything.
+    state = [...value];
   }
 }
