@@ -877,3 +877,9 @@ condensed_files.txt
 
 # Test coverage output
 /coverage/
+
+# App Store Connect API keys
+*.p8
+
+# Per-machine App Store Connect config (see AGENTS.md)
+.asc.env
