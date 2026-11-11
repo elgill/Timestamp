@@ -21,12 +21,7 @@ struct EventsView: View {
         .navigationTitle("Events")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    showRelative.toggle()
-                } label: {
-                    Image(systemName: showRelative ? "plusminus" : "clock")
-                }
-                .accessibilityLabel(showRelative ? "Show clock times" : "Show relative times")
+                RelativeToggle()
             }
         }
     }
@@ -64,6 +59,21 @@ struct EventsView: View {
             }
         }
         return days
+    }
+}
+
+/// Switches times between the time of day and the time since the reference
+/// event. The events and the clock share the setting.
+struct RelativeToggle: View {
+    @AppStorage("showRelative") private var showRelative = false
+
+    var body: some View {
+        Button {
+            showRelative.toggle()
+        } label: {
+            Image(systemName: showRelative ? "plusminus" : "clock")
+        }
+        .accessibilityLabel(showRelative ? "Show clock times" : "Show relative times")
     }
 }
 

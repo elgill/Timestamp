@@ -66,17 +66,24 @@ struct RecordView: View {
             ToolbarItem(placement: .topBarLeading) {
                 RecordHeader(timeSource: timeSource, recorder: recorder)
             }
+            ToolbarItem(placement: .topBarTrailing) {
+                RelativeToggle()
+            }
         }
     }
 }
 
 /// The clock, or for a moment after recording, what was recorded. Tapping
-/// the confirmation opens the event, which is how to undo it.
+/// the confirmation opens the event, which is how to undo it. Tapping the
+/// clock switches between the time of day and the time since the reference
+/// event, as on the phone; the events list follows along.
 private struct RecordHeader: View {
     let timeSource: TimeSource
     let recorder: Recorder
 
     @Environment(WatchSettings.self) private var settings
+    @Environment(EventStore.self) private var store
+    @AppStorage("showRelative") private var showRelative = false
 
     private static let confirmFor: TimeInterval = 2
 
@@ -87,7 +94,16 @@ private struct RecordHeader: View {
                 NavigationLink(value: event.id) { confirmation(event) }
                     .buttonStyle(.plain)
             } else {
-                ClockView(timeSource: timeSource, format: settings.timeFormat)
+                Button {
+                    showRelative.toggle()
+                } label: {
+                    ClockView(
+                        timeSource: timeSource,
+                        format: settings.timeFormat,
+                        reference: showRelative ? store.reference?.time : nil)
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint(showRelative ? "Shows the time of day" : "Shows the time since the reference event")
             }
         }
     }
@@ -95,7 +111,9 @@ private struct RecordHeader: View {
     private func confirmation(_ event: WatchEvent) -> some View {
         HStack(spacing: 4) {
             // A long label gives way; the time always shows.
-            Text("✓ \(event.label.isEmpty ? "Recorded" : event.label)")
+            // Unnamed, the check is enough: "Recorded" wouldn't fit beside
+            // the time and the toggle.
+            Text(event.label.isEmpty ? "✓" : "✓ \(event.label)")
                 .lineLimit(1)
                 .truncationMode(.tail)
             Text(TimeFormatting.parts(event.time, settings.timeFormat).time)
@@ -104,7 +122,8 @@ private struct RecordHeader: View {
         }
         .font(.system(size: 15, weight: .semibold, design: .rounded))
         .foregroundStyle(.tint)
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Recorded \(event.label) \(TimeFormatting.parts(event.time, settings.timeFormat).time)")
         .accessibilityHint("Opens the event")
     }
 }
