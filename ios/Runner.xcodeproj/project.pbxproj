@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -202,7 +202,6 @@
 				33473D5E59F531786EBE9A9A /* PhoneProtocol.swift */,
 				9AA098EEDBB2C44372177AEE /* PhoneLink.swift */,
 			);
-			name = TimestampWatch;
 			path = TimestampWatch;
 			sourceTree = "<group>";
 		};
@@ -274,7 +273,6 @@
 				733E943EB5DBB2D5950469B8 /* PhoneProtocolTests.swift */,
 				19589D08C2AC30A9D5C59288 /* WatchClockTests.swift */,
 			);
-			name = TimestampWatchTests;
 			path = TimestampWatchTests;
 			sourceTree = "<group>";
 		};
@@ -288,7 +286,6 @@
 				E38E72134EB225F512E18235 /* Pods-RunnerTests.release.xcconfig */,
 				2730E68A3B7D9CB803E19D99 /* Pods-RunnerTests.profile.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
