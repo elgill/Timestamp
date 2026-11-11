@@ -32,6 +32,7 @@ struct PhoneProtocolTests {
                 precision: -1),
         ])
         #expect(context.reference == context.events.last)
+        #expect(context.referenceSetAt == Date(timeIntervalSince1970: 1_794_164_550))
         #expect(context.importedIds == ["A1B2C3D4-0000-4000-8000-000000000001"])
         #expect(context.accuracy == PhoneAccuracy(
             precision: 22, syncedAt: Date(timeIntervalSince1970: 1_794_164_400)))
@@ -43,7 +44,10 @@ struct PhoneProtocolTests {
                 id: "A1B2C3D4-0000-4000-8000-000000000001",
                 time: Date(timeIntervalSince1970: 1_794_164_602.47),
                 precision: -1, label: "Lap", color: .orange)],
-            deleted: ["A1B2C3D4-0000-4000-8000-000000000002"])
+            deleted: ["A1B2C3D4-0000-4000-8000-000000000002"],
+            reference: ReferenceChoice(
+                id: "A1B2C3D4-0000-4000-8000-000000000001",
+                setAt: Date(timeIntervalSince1970: 1_794_164_610.25)))
 
         let written = try JSONSerialization.jsonObject(with: Data(changes.json().utf8)) as? NSDictionary
         let expected = try JSONSerialization.jsonObject(with: Data(fixture("changes.json").utf8)) as? NSDictionary
@@ -57,8 +61,15 @@ struct PhoneProtocolTests {
         #expect(context.buttons.isEmpty)
         #expect(context.timeFormat == .utc24Hour)
         #expect(context.reference == nil)
+        #expect(context.referenceSetAt == nil)
         // From a phone that hasn't synced with a time server, or an older app.
         #expect(context.accuracy == nil)
+    }
+
+    @Test func changesWithoutAReferenceLeaveItOut() throws {
+        let json = try WatchChanges(deleted: ["a"]).json()
+        let written = try JSONSerialization.jsonObject(with: Data(json.utf8)) as? [String: Any]
+        #expect(written?["reference"] == nil)
     }
 
     @Test func oneUnreadableEventDoesNotLoseTheRest() throws {

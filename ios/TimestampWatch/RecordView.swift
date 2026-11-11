@@ -27,10 +27,42 @@ final class Recorder {
         lastRecorded = event
     }
 
+    /// Makes `event` the reference, here and on the phone.
+    func setReference(_ event: WatchEvent) {
+        WKInterfaceDevice.current().play(.click)
+        link.send(reference: store.setReference(event))
+    }
+
     /// Deletes an event recorded on this watch. The phone's own events are
     /// deleted on the phone.
     func delete(_ ids: Set<String>) {
         link.send(deleted: store.delete(ids: ids))
+    }
+}
+
+/// The top bar every page shares: the clock (or what was just recorded) on
+/// the left, and the clock/± toggle on the right, which takes the place of
+/// the system's time.
+extension View {
+    func clockBar(timeSource: TimeSource) -> some View {
+        modifier(ClockBar(timeSource: timeSource))
+    }
+}
+
+private struct ClockBar: ViewModifier {
+    let timeSource: TimeSource
+
+    @Environment(Recorder.self) private var recorder
+
+    func body(content: Content) -> some View {
+        content.toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                RecordHeader(timeSource: timeSource, recorder: recorder)
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                RelativeToggle()
+            }
+        }
     }
 }
 
@@ -62,14 +94,7 @@ struct RecordView: View {
         }
         // The buttons are the point of the screen; give them every bit.
         .ignoresSafeArea(edges: .bottom)
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                RecordHeader(timeSource: timeSource, recorder: recorder)
-            }
-            ToolbarItem(placement: .topBarTrailing) {
-                RelativeToggle()
-            }
-        }
+        .clockBar(timeSource: timeSource)
     }
 }
 

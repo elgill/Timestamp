@@ -12,15 +12,17 @@ struct EventStoreTests {
     }
 
     func context(
-        _ events: [WatchEvent], reference: WatchEvent? = nil, imported: [String] = []
+        _ events: [WatchEvent], reference: WatchEvent? = nil, imported: [String] = [],
+        referenceSetAt: TimeInterval? = nil
     ) throws -> PhoneContext {
-        let json: [String: Any] = [
+        var json: [String: Any] = [
             "buttons": [],
             "timeFormat": 1,
             "events": try events.map { try JSONSerialization.jsonObject(with: WatchJSON.encoder.encode($0)) },
             "reference": try reference.map { try JSONSerialization.jsonObject(with: WatchJSON.encoder.encode($0)) } ?? NSNull(),
             "importedIds": imported,
         ]
+        if let referenceSetAt { json["referenceSetAt"] = referenceSetAt * 1000 }
         let data = try JSONSerialization.data(withJSONObject: json)
         return try PhoneContext.decode(json: String(decoding: data, as: UTF8.self))
     }
@@ -181,6 +183,93 @@ struct EventStoreTests {
         store.apply(try context([event(30), lap, event(25)], reference: lap))
         store.delete(ids: [lap.id])
         #expect(store.reference?.time.timeIntervalSince1970 == 25)
+    }
+
+    // MARK: Choosing the reference
+
+    func at(_ seconds: TimeInterval) -> Date { Date(timeIntervalSince1970: seconds) }
+
+    @Test func aChosenReferenceShowsAtOnce() throws {
+        let store = EventStore(fileURL: fileURL)
+        let a = event(10), b = event(20)
+        store.apply(try context([b, a], reference: a, referenceSetAt: 100))
+        let choice = store.setReference(b, at: at(200))
+        #expect(choice == ReferenceChoice(id: b.id, setAt: at(200)))
+        #expect(store.reference == b)
+    }
+
+    @Test func aContextSentBeforeThePhoneHeardDoesNotUndoIt() throws {
+        let store = EventStore(fileURL: fileURL)
+        let a = event(10), b = event(20)
+        store.apply(try context([b, a], reference: a, referenceSetAt: 100))
+        store.setReference(b, at: at(200))
+        store.apply(try context([b, a], reference: a, referenceSetAt: 100))
+        #expect(store.reference == b)
+    }
+
+    @Test func onceThePhoneHasItThePhonesWordIsUsedAgain() throws {
+        let store = EventStore(fileURL: fileURL)
+        let a = event(10), b = event(20)
+        store.apply(try context([b, a], reference: a))
+        store.setReference(b, at: at(200))
+        store.apply(try context([b, a], reference: b, referenceSetAt: 200))
+        #expect(store.reference == b)
+
+        // Later, the phone falls back to the oldest when b is deleted there.
+        store.apply(try context([a], reference: a, referenceSetAt: 200))
+        #expect(store.reference == a)
+    }
+
+    @Test func aLaterChoiceOnThePhoneWins() throws {
+        let store = EventStore(fileURL: fileURL)
+        let a = event(10), b = event(20)
+        store.apply(try context([b, a], reference: a))
+        store.setReference(b, at: at(200))
+        store.apply(try context([b, a], reference: a, referenceSetAt: 300))
+        #expect(store.reference == a)
+    }
+
+    @Test func aChoiceOfAnEventDeletedOnThePhoneIsDropped() throws {
+        let store = EventStore(fileURL: fileURL)
+        let a = event(10), b = event(20)
+        store.apply(try context([b, a], reference: a))
+        store.setReference(b, at: at(200))
+        store.apply(try context([a], reference: a))
+        #expect(store.reference == a)
+    }
+
+    @Test func itsOwnEventCanBeChosenBeforeThePhoneHasIt() throws {
+        let store = EventStore(fileURL: fileURL)
+        let a = event(10), lap = event(20, "Lap")
+        store.apply(try context([a], reference: a))
+        store.add(lap)
+        store.setReference(lap, at: at(200))
+        // Sent before the phone got the event.
+        store.apply(try context([a], reference: a))
+        #expect(store.reference == lap)
+    }
+
+    @Test func deletingTheChosenEventFallsBack() throws {
+        let store = EventStore(fileURL: fileURL)
+        let a = event(10), lap = event(20, "Lap")
+        store.apply(try context([a], reference: a))
+        store.add(lap)
+        store.setReference(lap, at: at(200))
+        store.delete(ids: [lap.id])
+        #expect(store.reference == a)
+    }
+
+    @Test func aChoiceSurvivesARelaunch() throws {
+        let store = EventStore(fileURL: fileURL)
+        let a = event(10), b = event(20)
+        store.apply(try context([b, a], reference: a))
+        store.setReference(b, at: at(200))
+
+        let reloaded = EventStore(fileURL: fileURL)
+        #expect(reloaded.reference == b)
+        // And is still held over an old context.
+        reloaded.apply(try context([b, a], reference: a))
+        #expect(reloaded.reference == b)
     }
 
     @Test func everythingSurvivesARelaunch() throws {

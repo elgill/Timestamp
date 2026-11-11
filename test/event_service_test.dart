@@ -120,6 +120,28 @@ void main() {
     });
   });
 
+  group('choosing the reference', () {
+    test('records when, and survives a restart', () async {
+      final lap = at(10);
+      final service = EventService()
+        ..addEvent(at(9))
+        ..addEvent(lap);
+      final before = DateTime.now();
+      service.setReference(lap);
+      expect(service.referenceEvent, same(lap));
+      expect(service.referenceSetAt!.isBefore(before), isFalse);
+
+      final restored = await reloaded();
+      expect(restored.referenceEvent?.id, lap.id);
+      expect(restored.referenceSetAt, isNotNull);
+    });
+
+    test('a reference never chosen has no time', () async {
+      EventService().addEvent(at(9));
+      expect((await reloaded()).referenceSetAt, isNull);
+    });
+  });
+
   group('persistence', () {
     test('adding saves events and reference without an explicit save', () async {
       EventService()

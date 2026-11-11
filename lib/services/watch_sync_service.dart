@@ -140,6 +140,8 @@ class WatchSyncService {
         changes.add(WatchChanges(
           added: change.added.where((event) => seen.add(event.id)).toList(),
           deletedIds: change.deletedIds,
+          // Both copies pass; the second is no newer, so it's ignored.
+          reference: change.reference,
         ));
       } catch (error) {
         // Unreadable; cleared with the rest so it can't block what follows.
@@ -185,6 +187,7 @@ class WatchSyncService {
     final json = WatchProtocol.context(
       events: _events.events,
       reference: _events.referenceEvent,
+      referenceSetAt: _events.referenceSetAt,
       buttons: _buttons(),
       timeFormat: _timeFormat(),
       importedIds: importedIds,

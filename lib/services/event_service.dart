@@ -13,6 +13,11 @@ class EventService {
   List<Event> events = [];
   Event? referenceEvent;
 
+  /// When someone last chose the reference, here or on the watch. A choice
+  /// from the watch that's older than this lost to a later one and is
+  /// ignored. Falling back to the oldest event isn't a choice and leaves it.
+  DateTime? referenceSetAt;
+
   /// Called after every save, which follows every change.
   void Function()? onSaved;
 
@@ -25,6 +30,12 @@ class EventService {
       await prefs.setString(referenceEventKey, referenceEvent!.toJson());
     } else {
       await prefs.remove(referenceEventKey);
+    }
+    if (referenceSetAt != null) {
+      await prefs.setInt(
+          referenceSetAtKey, referenceSetAt!.millisecondsSinceEpoch);
+    } else {
+      await prefs.remove(referenceSetAtKey);
     }
     onSaved?.call();
   }
@@ -39,6 +50,9 @@ class EventService {
     if (referenceEventString != null) {
       referenceEvent = _findReference(_tryParse(referenceEventString));
     }
+    final setAt = prefs.get(referenceSetAtKey);
+    referenceSetAt =
+        setAt is int ? DateTime.fromMillisecondsSinceEpoch(setAt) : null;
 
     // Events saved before ids existed were just given one. Save them, so
     // each keeps that id instead of getting a new one on every launch.
@@ -78,6 +92,13 @@ class EventService {
         events.firstWhereOrNull((event) =>
             event.time == saved?.time && event.precision == saved?.precision) ??
         events.lastOrNull;
+  }
+
+  /// Makes [event] the reference, chosen [at] (now by default).
+  void setReference(Event event, {DateTime? at}) {
+    referenceEvent = event;
+    referenceSetAt = at ?? DateTime.now();
+    saveData();
   }
 
   void addEvent(Event evt) {
@@ -123,6 +144,8 @@ class EventService {
       if (referenceEvent != null && deleted.contains(referenceEvent!.id)) {
         referenceEvent = null;
       }
+
+      changed |= _applyWatchReference(change.reference);
     }
     if (!changed) return;
 
@@ -130,6 +153,22 @@ class EventService {
     // Without a reference, the oldest event becomes it, as when deleting.
     referenceEvent ??= events.lastOrNull;
     await saveData();
+  }
+
+  /// Takes the watch's choice of reference, unless a later choice was made
+  /// since (here, or on the watch and already taken in) or the event is gone.
+  /// A copy of a choice that arrives twice is the same age the second time,
+  /// so it changes nothing.
+  bool _applyWatchReference(WatchReference? choice) {
+    if (choice == null) return false;
+    if (referenceSetAt != null && !choice.setAt.isAfter(referenceSetAt!)) {
+      return false;
+    }
+    final event = events.firstWhereOrNull((e) => e.id == choice.id);
+    if (event == null) return false;
+    referenceEvent = event;
+    referenceSetAt = choice.setAt;
+    return true;
   }
 
   void deleteAllEvents() {

@@ -9,13 +9,15 @@ struct PhoneContext: Decodable {
     var timeFormat: TimeFormat
     var events: [WatchEvent]
     var reference: WatchEvent?
+    /// When the reference was last chosen, on either side; nil if never.
+    var referenceSetAt: Date?
     /// The watch's events the phone has taken in.
     var importedIds: [String]
     /// How accurate the phone's time is, if it has synced with a time server.
     var accuracy: PhoneAccuracy?
 
     enum CodingKeys: String, CodingKey {
-        case buttons, timeFormat, events, reference, importedIds, accuracy
+        case buttons, timeFormat, events, reference, referenceSetAt, importedIds, accuracy
     }
 
     init(from decoder: Decoder) throws {
@@ -27,6 +29,7 @@ struct PhoneContext: Decodable {
         events = (try? c.decode([Lossy<WatchEvent>].self, forKey: .events))?
             .compactMap(\.value) ?? []
         reference = try? c.decode(WatchEvent.self, forKey: .reference)
+        referenceSetAt = try? c.decode(Date.self, forKey: .referenceSetAt)
         importedIds = (try? c.decode([String].self, forKey: .importedIds)) ?? []
         accuracy = try? c.decode(PhoneAccuracy.self, forKey: .accuracy)
     }
@@ -44,12 +47,21 @@ struct PhoneAccuracy: Codable, Equatable {
     var syncedAt: Date
 }
 
-/// What the watch sends: events it recorded and events it deleted. Read by
+/// A reference event chosen on the watch, and when. Of the phone's and the
+/// watch's choices, the later wins.
+struct ReferenceChoice: Codable, Equatable {
+    var id: String
+    var setAt: Date
+}
+
+/// What the watch sends: events it recorded and deleted, and a reference it
+/// chose. Read by
 /// `WatchChanges.parse` in lib/services/watch_protocol.dart;
 /// test/fixtures/watch/changes.json is an example.
 struct WatchChanges: Encodable {
     var added: [WatchEvent] = []
     var deleted: [String] = []
+    var reference: ReferenceChoice?
 
     func json() throws -> String {
         String(decoding: try WatchJSON.encoder.encode(self), as: UTF8.self)

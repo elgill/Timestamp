@@ -8,8 +8,9 @@ import Observation
 final class EventStore {
     /// Newest first.
     private(set) var events: [WatchEvent] = []
-    /// What relative times count from: the phone's reference event, or
-    /// without one the oldest event, as on the phone.
+    /// What relative times count from: the reference chosen here until the
+    /// phone has caught up, else the phone's reference event, or without one
+    /// the oldest event, as on the phone.
     private(set) var reference: WatchEvent?
 
     /// Recorded here and not yet seen in what the phone sent.
@@ -17,6 +18,10 @@ final class EventStore {
     /// The phone's newest events, as last sent.
     @ObservationIgnored private var phoneEvents: [WatchEvent] = []
     @ObservationIgnored private var phoneReference: WatchEvent?
+    /// Chosen here and not yet settled with the phone. Kept over what the
+    /// phone sends until the phone has taken it in or has a later choice, so
+    /// a context sent before the phone heard of it can't undo it.
+    @ObservationIgnored private var chosenReference: ReferenceChoice?
     /// Events recorded on this watch. Only these can be deleted here; the
     /// rest belong to the phone.
     @ObservationIgnored private var ownIds: Set<String> = []
@@ -43,6 +48,16 @@ final class EventStore {
         recorded.sorted { $0.time < $1.time }
     }
 
+    /// Makes `event` the reference here and returns the choice, for the
+    /// phone to take too.
+    @discardableResult
+    func setReference(_ event: WatchEvent, at time: Date = Date()) -> ReferenceChoice {
+        let choice = ReferenceChoice(id: event.id, setAt: time)
+        chosenReference = choice
+        changed()
+        return choice
+    }
+
     func canDelete(_ event: WatchEvent) -> Bool {
         ownIds.contains(event.id)
     }
@@ -54,6 +69,10 @@ final class EventStore {
         let deleted = ids.intersection(ownIds)
         guard !deleted.isEmpty else { return [] }
         recorded.removeAll { deleted.contains($0.id) }
+        // The phone falls back on its own once it deletes the event too.
+        if let chosen = chosenReference, deleted.contains(chosen.id) {
+            chosenReference = nil
+        }
         ownIds.subtract(deleted)
         hiddenIds.formUnion(deleted)
         changed()
@@ -71,6 +90,12 @@ final class EventStore {
         // The phone has processed a delete once the event is gone from it.
         hiddenIds.formIntersection(phoneIds)
         ownIds.formIntersection(phoneIds.union(recorded.map(\.id)))
+        if let chosen = chosenReference {
+            let settled = context.referenceSetAt.map { $0 >= chosen.setAt } ?? false
+            // Deleted on the phone, so it can't take the choice.
+            let gone = !phoneIds.contains(chosen.id) && !recorded.contains { $0.id == chosen.id }
+            if settled || gone { chosenReference = nil }
+        }
         changed()
     }
 
@@ -88,7 +113,9 @@ final class EventStore {
         events = (recorded + phoneEvents)
             .filter { !hiddenIds.contains($0.id) && seen.insert($0.id).inserted }
             .sorted { $0.time > $1.time }
-        if let phoneReference, !hiddenIds.contains(phoneReference.id) {
+        if let chosen = chosenReference, let event = events.first(where: { $0.id == chosen.id }) {
+            reference = event
+        } else if let phoneReference, !hiddenIds.contains(phoneReference.id) {
             reference = phoneReference
         } else {
             reference = events.last
@@ -101,6 +128,7 @@ final class EventStore {
         var recorded: [Lossy<WatchEvent>]
         var phoneEvents: [Lossy<WatchEvent>]
         var phoneReference: WatchEvent?
+        var chosenReference: ReferenceChoice?
         var ownIds: [String]
         var hiddenIds: [String]
     }
@@ -113,6 +141,7 @@ final class EventStore {
         recorded = saved.recorded.compactMap(\.value)
         phoneEvents = saved.phoneEvents.compactMap(\.value)
         phoneReference = saved.phoneReference
+        chosenReference = saved.chosenReference
         ownIds = Set(saved.ownIds)
         hiddenIds = Set(saved.hiddenIds)
     }
@@ -122,6 +151,7 @@ final class EventStore {
             recorded: recorded.map { Lossy(value: $0) },
             phoneEvents: phoneEvents.map { Lossy(value: $0) },
             phoneReference: phoneReference,
+            chosenReference: chosenReference,
             ownIds: ownIds.sorted(),
             hiddenIds: hiddenIds.sorted())
         do {

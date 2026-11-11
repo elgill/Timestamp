@@ -47,6 +47,7 @@ class WatchProtocol {
   static String context({
     required List<Event> events,
     required Event? reference,
+    DateTime? referenceSetAt,
     required List<ButtonModel> buttons,
     required TimeFormat timeFormat,
     required List<String> importedIds,
@@ -62,6 +63,8 @@ class WatchProtocol {
         for (final event in events.take(recentEventCount)) eventToMap(event)
       ],
       'reference': reference == null ? null : eventToMap(reference),
+      // So the watch knows when the phone has caught up with its choice.
+      'referenceSetAt': referenceSetAt?.millisecondsSinceEpoch,
       'importedIds': importedIds,
       'accuracy': accuracy == null
           ? null
@@ -73,12 +76,23 @@ class WatchProtocol {
   }
 }
 
-/// Events the watch recorded and events it deleted, in one delivery.
+/// The watch's choice of reference event, and when it was made.
+class WatchReference {
+  WatchReference(this.id, this.setAt);
+
+  final String id;
+  final DateTime setAt;
+}
+
+/// Events the watch recorded and deleted, and the reference it chose, in
+/// one delivery.
 class WatchChanges {
-  WatchChanges({this.added = const [], this.deletedIds = const []});
+  WatchChanges(
+      {this.added = const [], this.deletedIds = const [], this.reference});
 
   final List<Event> added;
   final List<String> deletedIds;
+  final WatchReference? reference;
 
   /// Reads a delivery from the watch. One unreadable event is skipped
   /// rather than losing the rest.
@@ -96,6 +110,15 @@ class WatchChanges {
         for (final id in data['deleted'] as List? ?? const [])
           if (id is String) id
       ],
+      reference: _parseReference(data['reference']),
     );
+  }
+
+  static WatchReference? _parseReference(Object? data) {
+    if (data is! Map) return null;
+    final id = data['id'], setAt = data['setAt'];
+    if (id is! String || setAt is! num) return null;
+    return WatchReference(
+        id, DateTime.fromMicrosecondsSinceEpoch((setAt * 1000).round()));
   }
 }

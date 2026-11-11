@@ -23,9 +23,9 @@ final class PhoneLink: NSObject, WCSessionDelegate {
 
     /// Queues changes for the phone. They're delivered in order, even if the
     /// phone app isn't running or the phone is out of reach.
-    func send(added: [WatchEvent] = [], deleted: [String] = []) {
-        guard !added.isEmpty || !deleted.isEmpty else { return }
-        unsent.append(WatchChanges(added: added, deleted: deleted))
+    func send(added: [WatchEvent] = [], deleted: [String] = [], reference: ReferenceChoice? = nil) {
+        guard !added.isEmpty || !deleted.isEmpty || reference != nil else { return }
+        unsent.append(WatchChanges(added: added, deleted: deleted, reference: reference))
         flush()
     }
 

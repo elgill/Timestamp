@@ -32,7 +32,7 @@ struct TimestampWatchApp: App {
                     ForEach(Array(ButtonLayout.pages(settings.buttons).enumerated()), id: \.offset) { _, page in
                         RecordView(page: page, timeSource: timeSource)
                     }
-                    EventsView()
+                    EventsView(timeSource: timeSource)
                 }
                 .tabViewStyle(.verticalPage)
                 .navigationDestination(for: String.self) { id in

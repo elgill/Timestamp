@@ -415,8 +415,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             event: eventManager.events[eventIndex],
             onSetAsReference: (event) {
               setState(() {
-                eventManager.referenceEvent = event;
-                eventManager.saveData();
+                eventManager.setReference(event);
               });
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(

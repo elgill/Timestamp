@@ -2,6 +2,8 @@ import SwiftUI
 
 /// Recorded events, newest first and grouped by day, as on the phone.
 struct EventsView: View {
+    let timeSource: TimeSource
+
     @Environment(EventStore.self) private var store
     @Environment(WatchSettings.self) private var settings
     @Environment(Recorder.self) private var recorder
@@ -18,12 +20,9 @@ struct EventsView: View {
                 list
             }
         }
-        .navigationTitle("Events")
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                RelativeToggle()
-            }
-        }
+        // The same bar as the button pages, and no title: the events are
+        // plain to see, and a title only took room under the clock.
+        .clockBar(timeSource: timeSource)
     }
 
     private var list: some View {
@@ -152,6 +151,20 @@ struct EventDetailView: View {
                 Text(details(of: event))
                     .font(.footnote)
                     .foregroundStyle(.secondary)
+
+                if store.reference?.id == event.id {
+                    Label("Reference", systemImage: "plusminus")
+                        .font(.footnote)
+                        .foregroundStyle(.tint)
+                        .padding(.top, 6)
+                } else {
+                    Button {
+                        recorder.setReference(event)
+                    } label: {
+                        Label("Set as Reference", systemImage: "plusminus")
+                    }
+                    .padding(.top, 6)
+                }
 
                 if store.canDelete(event) {
                     Button(role: .destructive) {
