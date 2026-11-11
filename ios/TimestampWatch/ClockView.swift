@@ -20,7 +20,9 @@ struct ClockView: View {
                 .font(.system(size: 17, weight: .semibold, design: .rounded))
                 .monospacedDigit()
                 .lineLimit(1)
-                .minimumScaleFactor(0.7)
+                // Enough for "+2y 103d 08:00:12.0" beside the toggle on the
+                // smallest watch.
+                .minimumScaleFactor(0.5)
                 .accessibilityLabel(label)
         }
     }
