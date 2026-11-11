@@ -259,6 +259,75 @@ struct EventStoreTests {
         #expect(store.reference == a)
     }
 
+    // MARK: Choosing the reference while events are deleted
+
+    @Test func aChoiceEchoedToTheMillisecondSettles() throws {
+        let store = EventStore(fileURL: fileURL)
+        let a = event(10), b = event(20)
+        store.apply(try context([b, a], reference: a))
+        let choice = store.setReference(b, at: at(200.123_456))
+        // What the phone sends back: whole milliseconds.
+        store.apply(try context([b, a], reference: b, referenceSetAt: 200.123))
+        #expect(choice.setAt == at(200.123))
+        // Settled, so the phone's word counts again: it falls back to a.
+        store.apply(try context([a], reference: a, referenceSetAt: 200.123))
+        #expect(store.reference == a)
+    }
+
+    @Test func thePhoneDeletingEverythingDropsTheChoice() throws {
+        let store = EventStore(fileURL: fileURL)
+        let a = event(10), b = event(20)
+        store.apply(try context([b, a], reference: a))
+        store.setReference(b, at: at(200))
+        store.apply(try context([]))
+        #expect(store.reference == nil)
+        #expect(store.events.isEmpty)
+    }
+
+    @Test func itsOwnChosenEventTakenInAndDeletedOnThePhoneIsDropped() throws {
+        let store = EventStore(fileURL: fileURL)
+        let a = event(10), lap = event(20, "Lap")
+        store.apply(try context([a], reference: a))
+        store.add(lap)
+        store.setReference(lap, at: at(200))
+        // The phone took the event in, then deleted it, before the choice came.
+        store.apply(try context([a], reference: a, imported: [lap.id]))
+        #expect(store.reference == a)
+        #expect(!store.events.contains(lap))
+    }
+
+    @Test func deletingAnotherEventKeepsTheChoice() throws {
+        let store = EventStore(fileURL: fileURL)
+        let a = event(10), lap = event(20, "Lap"), b = event(30)
+        store.apply(try context([b, a], reference: a))
+        store.add(lap)
+        store.setReference(b, at: at(200))
+        store.delete(ids: [lap.id])
+        #expect(store.reference == b)
+    }
+
+    @Test func deletingThePhonesReferenceHereKeepsAChoiceMadeHere() throws {
+        let store = EventStore(fileURL: fileURL)
+        let a = event(10), lap = event(20, "Lap"), b = event(30)
+        store.add(lap)
+        store.apply(try context([b, lap, a], reference: lap))
+        store.setReference(b, at: at(200))
+        store.delete(ids: [lap.id])
+        #expect(store.reference == b)
+    }
+
+    @Test func choosingAgainAfterTheChosenEventIsDeletedWorks() throws {
+        let store = EventStore(fileURL: fileURL)
+        let a = event(10), lap = event(20, "Lap"), b = event(30)
+        store.apply(try context([b, a], reference: a))
+        store.add(lap)
+        store.setReference(lap, at: at(200))
+        store.delete(ids: [lap.id])
+        store.setReference(b, at: at(300))
+        store.apply(try context([b, a], reference: a, referenceSetAt: 100))
+        #expect(store.reference == b)
+    }
+
     @Test func aChoiceSurvivesARelaunch() throws {
         let store = EventStore(fileURL: fileURL)
         let a = event(10), b = event(20)

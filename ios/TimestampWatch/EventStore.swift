@@ -52,7 +52,10 @@ final class EventStore {
     /// phone to take too.
     @discardableResult
     func setReference(_ event: WatchEvent, at time: Date = Date()) -> ReferenceChoice {
-        let choice = ReferenceChoice(id: event.id, setAt: time)
+        // To the millisecond, as it's sent: the phone echoes it back that
+        // way, and must compare equal to settle the choice.
+        let millis = (time.timeIntervalSince1970 * 1000 + 0.001).rounded(.down)
+        let choice = ReferenceChoice(id: event.id, setAt: Date(timeIntervalSince1970: millis / 1000))
         chosenReference = choice
         changed()
         return choice

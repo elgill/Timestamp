@@ -295,9 +295,8 @@ void main() {
           ..addEvent(first)
           ..addEvent(lap);
         service.setReference(first, at: DateTime(2026, 3, 5, 10, 5));
-        await service.applyWatchChanges([
-          WatchChanges(reference: chosen(lap, 1))
-        ]);
+        await service
+            .applyWatchChanges([WatchChanges(reference: chosen(lap, 1))]);
         expect(service.referenceEvent, same(first));
       });
 
@@ -307,9 +306,8 @@ void main() {
           ..addEvent(first)
           ..addEvent(lap);
         service.setReference(first, at: DateTime(2026, 3, 5, 10, 0));
-        await service.applyWatchChanges([
-          WatchChanges(reference: chosen(lap, 1))
-        ]);
+        await service
+            .applyWatchChanges([WatchChanges(reference: chosen(lap, 1))]);
         expect(service.referenceEvent, same(lap));
       });
 
@@ -333,9 +331,8 @@ void main() {
           ..addEvent(first)
           ..addEvent(lap);
         service.deleteSelectedEvents([lap]);
-        await service.applyWatchChanges([
-          WatchChanges(reference: chosen(lap, 1))
-        ]);
+        await service
+            .applyWatchChanges([WatchChanges(reference: chosen(lap, 1))]);
         expect(service.referenceEvent, same(first));
         expect(service.events, hasLength(1));
       });
@@ -361,9 +358,8 @@ void main() {
         service.setReference(second, at: DateTime(2026, 3, 5, 10, 0));
         service.deleteSelectedEvents([second]);
         expect(service.referenceEvent, same(first));
-        await service.applyWatchChanges([
-          WatchChanges(reference: chosen(lap, 1))
-        ]);
+        await service
+            .applyWatchChanges([WatchChanges(reference: chosen(lap, 1))]);
         expect(service.referenceEvent, same(lap));
       });
     });
@@ -558,7 +554,8 @@ void main() {
       expect(kept.first, 'old1');
     });
 
-    test('a reference that arrives before its event is taken with the late copy',
+    test(
+        'a reference that arrives before its event is taken with the late copy',
         () async {
       events.addEvent(at(9));
       final lap = at(10, 'Lap');
@@ -590,6 +587,132 @@ void main() {
       inbox.add(delivery(2, reference: chosen(lap, 1)));
       await sync.importInbox();
       expect(events.referenceEvent, same(first));
+    });
+
+    group('a choice of reference racing a delete', () {
+      test('the watch chose it, then the phone deleted it', () async {
+        final first = at(9), lap = at(10);
+        events
+          ..addEvent(first)
+          ..addEvent(lap);
+        inbox.add(delivery(1, reference: chosen(lap, 1)));
+        await sync.importInbox();
+        expect(events.referenceEvent, same(lap));
+
+        events.deleteSelectedEvents([lap]);
+        expect(events.referenceEvent, same(first));
+        // The late copy finds the event gone.
+        inbox.add(delivery(2, reference: chosen(lap, 1)));
+        await sync.importInbox();
+        expect(events.referenceEvent, same(first));
+        expect(events.events, [first]);
+        // The watch learns its choice was taken, so it lets go of it and
+        // shows the phone's fallback.
+        expect(lastContext()['referenceSetAt'],
+            DateTime(2026, 3, 5, 10, 1).millisecondsSinceEpoch);
+        expect(lastContext()['reference']['id'], first.id);
+      });
+
+      test('the phone deleted it, then the watch\'s choice came', () async {
+        final first = at(9), lap = at(10);
+        events
+          ..addEvent(first)
+          ..addEvent(lap);
+        events.deleteSelectedEvents([lap]);
+        inbox.add(delivery(1, reference: chosen(lap, 1)));
+        await sync.importInbox();
+        expect(events.referenceEvent, same(first));
+        expect(events.referenceSetAt, isNull);
+      });
+
+      test('the watch chose its own event, then deleted it', () async {
+        final first = at(9), lap = at(10, 'Lap');
+        events.addEvent(first);
+        inbox.addAll([
+          delivery(1, added: [lap]),
+          delivery(2, reference: chosen(lap, 1)),
+          delivery(3, deleted: [lap.id]),
+        ]);
+        await sync.importInbox();
+        expect(events.events, [first]);
+        expect(events.referenceEvent, same(first));
+
+        // The sure copies, later: nothing comes back.
+        inbox.addAll([
+          delivery(4, added: [lap]),
+          delivery(5, reference: chosen(lap, 1)),
+          delivery(6, deleted: [lap.id]),
+        ]);
+        await sync.importInbox();
+        expect(events.events, [first]);
+        expect(events.referenceEvent, same(first));
+      });
+
+      test('the delete\'s fast copy beat the choice\'s', () async {
+        final first = at(9), lap = at(10, 'Lap');
+        events.addEvent(first);
+        inbox.addAll([
+          delivery(1, added: [lap]),
+          delivery(2, deleted: [lap.id]),
+        ]);
+        await sync.importInbox();
+        inbox.add(delivery(3, reference: chosen(lap, 1)));
+        await sync.importInbox();
+        expect(events.events, [first]);
+        expect(events.referenceEvent, same(first));
+      });
+
+      test('the phone deleted everything, then the choice came', () async {
+        final lap = at(10);
+        events.addEvent(lap);
+        events.deleteAllEvents();
+        inbox.add(delivery(1, reference: chosen(lap, 1)));
+        await sync.importInbox();
+        expect(events.events, isEmpty);
+        expect(events.referenceEvent, isNull);
+      });
+
+      test('the watch deleted the phone\'s reference and chose another',
+          () async {
+        final first = at(9), lap = at(10, 'Lap'), later = at(11);
+        events.addEvent(first);
+        inbox.add(delivery(1, added: [lap]));
+        await sync.importInbox();
+        events
+          ..addEvent(later)
+          ..setReference(events.events.firstWhere((e) => e.id == lap.id),
+              at: DateTime(2026, 3, 5, 10, 0));
+        inbox.addAll([
+          delivery(2, deleted: [lap.id]),
+          delivery(3, reference: chosen(later, 1)),
+        ]);
+        await sync.importInbox();
+        expect(events.referenceEvent, same(later));
+      });
+
+      test('a choice for an event the phone never had adds nothing', () async {
+        events.addEvent(at(9));
+        inbox.add(delivery(1,
+            reference: WatchReference('unknown', DateTime(2026, 3, 5, 10, 1))));
+        await sync.importInbox();
+        expect(events.events, hasLength(1));
+        expect(events.referenceSetAt, isNull);
+      });
+
+      test('a choice survives a restart before its event arrives', () async {
+        final lap = at(10, 'Lap');
+        events.addEvent(at(9));
+        // Read, ignored for want of the event, cleared.
+        inbox.add(delivery(1, reference: chosen(lap, 1)));
+        await sync.importInbox();
+        // The sure copies come after a restart.
+        final restarted = await reloaded();
+        await restarted.applyWatchChanges([
+          WatchChanges(added: [lap]),
+          WatchChanges(reference: chosen(lap, 1)),
+        ]);
+        expect(restarted.referenceEvent?.id, lap.id);
+      });
     });
 
     test('tells the watch when the reference was chosen', () async {
