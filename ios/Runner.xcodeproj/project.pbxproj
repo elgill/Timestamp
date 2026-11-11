@@ -11,6 +11,7 @@
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
 		16379ADFA3D20B805BFD6E1B /* ClockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5060BC5FFC9C59B359DBD5E /* ClockView.swift */; };
 		1E60DF32332364826C043701 /* RecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F1FDEA5A8283792F09B09A8 /* RecordView.swift */; };
+		29AE0ED4C62A41EAAAE52C9A /* ButtonLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = E887827540B1453ABE8DC468 /* ButtonLayout.swift */; };
 		3189DC5A1595CD7E2A6A3109 /* PhoneLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AA098EEDBB2C44372177AEE /* PhoneLink.swift */; };
 		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
@@ -30,6 +31,7 @@
 		D77B50532281787212EE341F /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DDF90944E32D8D612242089 /* Pods_RunnerTests.framework */; };
 		DA178ED38E71E3CE638386E8 /* TimeSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = E007E84580D8199BEF0198A6 /* TimeSource.swift */; };
 		DBD53F1CBFB88FE3BBD145A0 /* TimeFormattingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B9F975F0524B7F5E730192 /* TimeFormattingTests.swift */; };
+		298A5D10D844413E9E84B09F /* ButtonLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B0E47CCB344FECA95DAD88 /* ButtonLayoutTests.swift */; };
 		DED74BDE65E7F6A96B6EDD59 /* PhoneProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33473D5E59F531786EBE9A9A /* PhoneProtocol.swift */; };
 		E2FCA001FB01FD604056F32F /* TimestampWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C2194AC1D8FD818D6AD010 /* TimestampWatchApp.swift */; };
 		EEAEC8FBC1108F8B2A0A0F14 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A1F1C29E862E1CDB9F6315F5 /* Pods_Runner.framework */; };
@@ -102,6 +104,7 @@
 		3DDF90944E32D8D612242089 /* Pods_RunnerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RunnerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5FCA6C3FB50E382107A4BF9E /* TimeFormatting.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TimeFormatting.swift; sourceTree = "<group>"; };
 		6F1FDEA5A8283792F09B09A8 /* RecordView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RecordView.swift; sourceTree = "<group>"; };
+		E887827540B1453ABE8DC468 /* ButtonLayout.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ButtonLayout.swift; sourceTree = "<group>"; };
 		733E943EB5DBB2D5950469B8 /* PhoneProtocolTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PhoneProtocolTests.swift; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -128,6 +131,7 @@
 		C38D534E1D16BCF10D99C9BE /* Pods-RunnerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.debug.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug.xcconfig"; sourceTree = "<group>"; };
 		C7933E06B04A4DEB10E01901 /* TimestampWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TimestampWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3B9F975F0524B7F5E730192 /* TimeFormattingTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TimeFormattingTests.swift; sourceTree = "<group>"; };
+		40B0E47CCB344FECA95DAD88 /* ButtonLayoutTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ButtonLayoutTests.swift; sourceTree = "<group>"; };
 		E007E84580D8199BEF0198A6 /* TimeSource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TimeSource.swift; sourceTree = "<group>"; };
 		E38E72134EB225F512E18235 /* Pods-RunnerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -192,6 +196,7 @@
 				165824154C8A26A395F58260 /* EventStore.swift */,
 				7CCF582ADD5F8EB7492D087E /* EventsView.swift */,
 				6F1FDEA5A8283792F09B09A8 /* RecordView.swift */,
+				E887827540B1453ABE8DC468 /* ButtonLayout.swift */,
 				5FCA6C3FB50E382107A4BF9E /* TimeFormatting.swift */,
 				E007E84580D8199BEF0198A6 /* TimeSource.swift */,
 				96C2194AC1D8FD818D6AD010 /* TimestampWatchApp.swift */,
@@ -270,6 +275,7 @@
 			children = (
 				16186391A7A4C8549D16A449 /* EventStoreTests.swift */,
 				D3B9F975F0524B7F5E730192 /* TimeFormattingTests.swift */,
+				40B0E47CCB344FECA95DAD88 /* ButtonLayoutTests.swift */,
 				733E943EB5DBB2D5950469B8 /* PhoneProtocolTests.swift */,
 				19589D08C2AC30A9D5C59288 /* WatchClockTests.swift */,
 			);
@@ -569,6 +575,7 @@
 			files = (
 				6A8C0E82D061C3767750E909 /* EventStoreTests.swift in Sources */,
 				DBD53F1CBFB88FE3BBD145A0 /* TimeFormattingTests.swift in Sources */,
+				298A5D10D844413E9E84B09F /* ButtonLayoutTests.swift in Sources */,
 				CC7C5240E9CB23DF4A3BA653 /* PhoneProtocolTests.swift in Sources */,
 				9F915D898D078E430DB23833 /* WatchClockTests.swift in Sources */,
 			);
@@ -582,6 +589,7 @@
 				A0BD2A3338EAA08FA41C1A30 /* EventStore.swift in Sources */,
 				F322D8D4D9FBEB3D4D052FB3 /* EventsView.swift in Sources */,
 				1E60DF32332364826C043701 /* RecordView.swift in Sources */,
+				29AE0ED4C62A41EAAAE52C9A /* ButtonLayout.swift in Sources */,
 				104A6B0ABD331278C68FD0BF /* TimeFormatting.swift in Sources */,
 				DA178ED38E71E3CE638386E8 /* TimeSource.swift in Sources */,
 				E2FCA001FB01FD604056F32F /* TimestampWatchApp.swift in Sources */,

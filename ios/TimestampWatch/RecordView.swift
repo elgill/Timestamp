@@ -1,83 +1,21 @@
 import SwiftUI
 import WatchKit
 
-/// The clock and the record buttons.
-struct RecordView: View {
-    let timeSource: TimeSource
-    let link: PhoneLink
+/// Records and deletes events, telling the phone. Remembers the last
+/// event recorded, which every record page confirms in its top bar.
+@Observable
+final class Recorder {
+    private(set) var lastRecorded: WatchEvent?
 
-    @Environment(EventStore.self) private var store
-    @Environment(WatchSettings.self) private var settings
-    @State private var lastRecorded: WatchEvent?
+    @ObservationIgnored private let store: EventStore
+    @ObservationIgnored private let link: PhoneLink
 
-    private static let spacing: CGFloat = 4
-    /// Below this the buttons scroll instead of shrinking further.
-    private static let minButtonHeight: CGFloat = 40
-
-    var body: some View {
-        VStack(spacing: Self.spacing) {
-            ClockView(timeSource: timeSource, format: settings.timeFormat)
-            GeometryReader { geometry in
-                buttons(height: geometry.size.height)
-            }
-            // The buttons are the point of the screen; give them every bit.
-            .ignoresSafeArea(edges: .bottom)
-        }
-        .overlay(alignment: .bottom) {
-            if let lastRecorded {
-                ConfirmationBanner(event: lastRecorded, format: settings.timeFormat)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
-            }
-        }
-        .task(id: lastRecorded?.id) {
-            guard lastRecorded != nil else { return }
-            try? await Task.sleep(for: .seconds(1.5))
-            withAnimation { lastRecorded = nil }
-        }
+    init(store: EventStore, link: PhoneLink) {
+        self.store = store
+        self.link = link
     }
 
-    /// With no buttons set up there is one unnamed button, as on the phone.
-    private var configs: [RecordButtonConfig?] {
-        settings.buttons.isEmpty ? [nil] : settings.buttons
-    }
-
-    @ViewBuilder
-    private func buttons(height: CGFloat) -> some View {
-        let count = CGFloat(configs.count)
-        let fitted = (height - Self.spacing * (count - 1)) / count
-        if fitted >= Self.minButtonHeight {
-            VStack(spacing: Self.spacing) {
-                ForEach(Array(configs.enumerated()), id: \.offset) { _, config in
-                    pad(config, onTouchDown: settings.recordOnTouchDown)
-                }
-            }
-        } else {
-            ScrollView {
-                VStack(spacing: Self.spacing) {
-                    ForEach(Array(configs.enumerated()), id: \.offset) { _, config in
-                        // A drag that starts on a button has to scroll, not
-                        // record, so these record when the finger lifts.
-                        pad(config, onTouchDown: false)
-                            .frame(height: Self.minButtonHeight + 4)
-                    }
-                }
-            }
-        }
-    }
-
-    private func pad(_ config: RecordButtonConfig?, onTouchDown: Bool) -> some View {
-        RecordPad(
-            label: config?.name,
-            color: (config?.color ?? .defaultColor).color,
-            recordsOnTouchDown: onTouchDown
-        ) {
-            record(config)
-        }
-    }
-
-    private func record(_ config: RecordButtonConfig?) {
-        // Read the time before doing anything else.
-        let reading = timeSource.now()
+    func record(_ config: RecordButtonConfig?, at reading: TimeReading) {
         let event = WatchEvent(
             time: reading.time,
             precision: reading.precision,
@@ -86,46 +24,126 @@ struct RecordView: View {
         WKInterfaceDevice.current().play(.click)
         store.add(event)
         link.send(added: [event])
-        withAnimation { lastRecorded = event }
+        lastRecorded = event
+    }
+
+    /// Deletes an event recorded on this watch. The phone's own events are
+    /// deleted on the phone.
+    func delete(_ ids: Set<String>) {
+        link.send(deleted: store.delete(ids: ids))
+    }
+}
+
+/// One page of record buttons, with the clock in the top bar.
+struct RecordView: View {
+    let page: ButtonPage
+    let timeSource: TimeSource
+
+    @Environment(WatchSettings.self) private var settings
+    @Environment(Recorder.self) private var recorder
+
+    private static let spacing: CGFloat = 4
+
+    var body: some View {
+        VStack(spacing: Self.spacing) {
+            ForEach(Array(page.rows.enumerated()), id: \.offset) { _, row in
+                HStack(spacing: Self.spacing) {
+                    ForEach(Array(row.enumerated()), id: \.offset) { _, config in
+                        RecordPad(
+                            config: config,
+                            timeSource: timeSource,
+                            readsTimeOnTouchDown: settings.recordOnTouchDown
+                        ) { reading in
+                            recorder.record(config, at: reading)
+                        }
+                    }
+                }
+            }
+        }
+        // The buttons are the point of the screen; give them every bit.
+        .ignoresSafeArea(edges: .bottom)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                RecordHeader(timeSource: timeSource, recorder: recorder)
+            }
+        }
+    }
+}
+
+/// The clock, or for a moment after recording, what was recorded. Tapping
+/// the confirmation opens the event, which is how to undo it.
+private struct RecordHeader: View {
+    let timeSource: TimeSource
+    let recorder: Recorder
+
+    @Environment(WatchSettings.self) private var settings
+
+    private static let confirmFor: TimeInterval = 2
+
+    var body: some View {
+        TimelineView(.periodic(from: .now, by: 0.25)) { context in
+            if let event = recorder.lastRecorded,
+               context.date.timeIntervalSince(event.time) < Self.confirmFor {
+                NavigationLink(value: event.id) { confirmation(event) }
+                    .buttonStyle(.plain)
+            } else {
+                ClockView(timeSource: timeSource, format: settings.timeFormat)
+            }
+        }
+    }
+
+    private func confirmation(_ event: WatchEvent) -> some View {
+        HStack(spacing: 4) {
+            // A long label gives way; the time always shows.
+            Text("✓ \(event.label.isEmpty ? "Recorded" : event.label)")
+                .lineLimit(1)
+                .truncationMode(.tail)
+            Text(TimeFormatting.parts(event.time, settings.timeFormat).time)
+                .monospacedDigit()
+                .fixedSize()
+        }
+        .font(.system(size: 15, weight: .semibold, design: .rounded))
+        .foregroundStyle(.tint)
+        .accessibilityElement(children: .combine)
+        .accessibilityHint("Opens the event")
     }
 }
 
 /// One record button.
+///
+/// The event is saved when the finger lifts, so a touch that turns into a
+/// swipe or a Crown turn changes page instead of recording. With
+/// `readsTimeOnTouchDown` the event still gets the time the finger landed,
+/// which is closer to the moment the user reacted to.
 private struct RecordPad: View {
-    let label: String?
-    let color: Color
-    let recordsOnTouchDown: Bool
-    let action: () -> Void
+    let config: RecordButtonConfig?
+    let timeSource: TimeSource
+    let readsTimeOnTouchDown: Bool
+    let record: (TimeReading) -> Void
 
-    @State private var isPressed = false
+    @State private var press = PressTime()
 
     var body: some View {
-        if recordsOnTouchDown {
+        Button {
+            let reading = (readsTimeOnTouchDown ? press.reading() : nil) ?? timeSource.now()
+            record(reading)
+        } label: {
             face
-                .contentShape(shape)
-                .gesture(
-                    DragGesture(minimumDistance: 0)
-                        .onChanged { _ in
-                            guard !isPressed else { return }
-                            isPressed = true
-                            action()
-                        }
-                        .onEnded { _ in isPressed = false }
-                )
-                .accessibilityAddTraits(.isButton)
-                .accessibilityAction { action() }
-        } else {
-            Button(action: action) { face }
-                .buttonStyle(.plain)
         }
+        .buttonStyle(RecordPadStyle(color: (config?.color ?? .defaultColor).color) { pressed in
+            if pressed {
+                // Read the time before doing anything else.
+                press.down(timeSource.now())
+            } else {
+                press.up()
+            }
+        })
     }
-
-    private var shape: RoundedRectangle { RoundedRectangle(cornerRadius: 12) }
 
     private var face: some View {
         Group {
-            if let label {
-                Text(label)
+            if let name = config?.name {
+                Text(name)
                     .font(.headline)
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
@@ -138,26 +156,49 @@ private struct RecordPad: View {
             }
         }
         .foregroundStyle(.white)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(color.opacity(isPressed ? 0.6 : 1), in: shape)
     }
 }
 
-/// Briefly confirms what was just recorded.
-private struct ConfirmationBanner: View {
-    let event: WatchEvent
-    let format: TimeFormat
+/// When the finger landed on a button, for the button's action to use.
+private final class PressTime {
+    private var downReading: TimeReading?
+    private var liftedAt: Date?
 
-    var body: some View {
-        let time = TimeFormatting.parts(event.time, format).time
-        Text(event.label.isEmpty ? time : "\(event.label) · \(time)")
-            .font(.footnote.monospacedDigit())
-            .lineLimit(1)
-            .minimumScaleFactor(0.7)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 6)
-            .background(.thinMaterial, in: Capsule())
-            .padding(.bottom, 4)
-            .allowsHitTesting(false)
+    /// How long after the finger lifts the action can still take the
+    /// touch-down time. The action runs as the finger lifts; anything later
+    /// (an accessibility action long after a cancelled press) gets its own.
+    private static let window: TimeInterval = 0.5
+
+    func down(_ reading: TimeReading) {
+        downReading = reading
+        liftedAt = nil
+    }
+
+    func up() {
+        liftedAt = Date()
+    }
+
+    /// The touch-down time for the press that just ended, used once.
+    func reading() -> TimeReading? {
+        defer { downReading = nil }
+        if let liftedAt, Date().timeIntervalSince(liftedAt) > Self.window { return nil }
+        return downReading
+    }
+}
+
+private struct RecordPadStyle: ButtonStyle {
+    let color: Color
+    let pressChanged: (Bool) -> Void
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(
+                color.opacity(configuration.isPressed ? 0.6 : 1),
+                in: RoundedRectangle(cornerRadius: 12))
+            .contentShape(RoundedRectangle(cornerRadius: 12))
+            .onChange(of: configuration.isPressed) { _, pressed in
+                pressChanged(pressed)
+            }
     }
 }
