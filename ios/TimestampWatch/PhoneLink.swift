@@ -82,6 +82,7 @@ final class PhoneLink: NSObject, WCSessionDelegate {
             if settings.phoneAccuracy != context.accuracy {
                 settings.phoneAccuracy = context.accuracy
             }
+            Complications.update(store: store, settings: settings)
         } catch {
             print("Reading what the phone sent failed: \(error)")
         }

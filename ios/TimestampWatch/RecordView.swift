@@ -8,10 +8,12 @@ final class Recorder {
     private(set) var lastRecorded: WatchEvent?
 
     @ObservationIgnored private let store: EventStore
+    @ObservationIgnored private let settings: WatchSettings
     @ObservationIgnored private let link: PhoneLink
 
-    init(store: EventStore, link: PhoneLink) {
+    init(store: EventStore, settings: WatchSettings, link: PhoneLink) {
         self.store = store
+        self.settings = settings
         self.link = link
     }
 
@@ -25,18 +27,21 @@ final class Recorder {
         store.add(event)
         link.send(added: [event])
         lastRecorded = event
+        Complications.update(store: store, settings: settings)
     }
 
     /// Makes `event` the reference, here and on the phone.
     func setReference(_ event: WatchEvent) {
         WKInterfaceDevice.current().play(.click)
         link.send(reference: store.setReference(event))
+        Complications.update(store: store, settings: settings)
     }
 
     /// Deletes an event recorded on this watch. The phone's own events are
     /// deleted on the phone.
     func delete(_ ids: Set<String>) {
         link.send(deleted: store.delete(ids: ids))
+        Complications.update(store: store, settings: settings)
     }
 }
 

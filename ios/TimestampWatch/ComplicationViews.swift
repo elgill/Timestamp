@@ -1,0 +1,127 @@
+import SwiftUI
+import WidgetKit
+
+/// The complication faces, one per family: the reference event and a count
+/// up from it, like a stopwatch since the Start. The count runs on its own
+/// (`Text(_:style: .timer)`), so the complication only reloads when the
+/// reference changes. Tapping any of them opens the app.
+///
+/// Built in the watch app too, so tests can draw them.
+struct ComplicationView: View {
+    let family: WidgetFamily
+    let snapshot: ComplicationSnapshot?
+
+    var body: some View {
+        switch family {
+        case .accessoryRectangular: rectangular
+        case .accessoryInline: inline
+        case .accessoryCorner: corner
+        default: circular
+        }
+    }
+
+    private var reference: WatchEvent? { snapshot?.reference }
+
+    private var name: String {
+        guard let reference else { return "Timestamp" }
+        return reference.label.isEmpty ? "Event" : reference.label
+    }
+
+    private var circular: some View {
+        ZStack {
+            AccessoryWidgetBackground()
+            if let reference {
+                VStack(spacing: 0) {
+                    Image(systemName: "stopwatch")
+                        .font(.system(size: 11, weight: .semibold))
+                        .widgetAccentable()
+                    Text(reference.time, style: .timer)
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .monospacedDigit()
+                        .multilineTextAlignment(.center)
+                        .lineLimit(1)
+                        // Room for "10:00:00" once it's been hours.
+                        .minimumScaleFactor(0.5)
+                        .padding(.horizontal, 3)
+                }
+            } else {
+                Image(systemName: "stopwatch")
+                    .font(.system(size: 22, weight: .semibold))
+                    .widgetAccentable()
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilityLabel)
+    }
+
+    private var rectangular: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Label(name, systemImage: "stopwatch")
+                .font(.headline)
+                .lineLimit(1)
+                .widgetAccentable()
+            if let reference {
+                Text(ComplicationView.clockTime(reference.time, snapshot?.timeFormat ?? .local24Hour))
+                    .font(.body.monospacedDigit())
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                // "+5:12", counting up.
+                Text("+\(reference.time, style: .timer)")
+                    .font(.body.monospacedDigit())
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            } else {
+                Text("No events yet")
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+                Text("Tap to record")
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilityLabel)
+    }
+
+    private var inline: some View {
+        Group {
+            if let reference {
+                Text("\(Image(systemName: "stopwatch")) \(name) +\(reference.time, style: .timer)")
+            } else {
+                Text("\(Image(systemName: "stopwatch")) Timestamp")
+            }
+        }
+        .accessibilityLabel(accessibilityLabel)
+    }
+
+    private var corner: some View {
+        Image(systemName: "stopwatch")
+            .font(.system(size: 20, weight: .semibold))
+            .widgetAccentable()
+            .widgetLabel {
+                if let reference {
+                    Text("+\(reference.time, style: .timer)")
+                } else {
+                    Text("Timestamp")
+                }
+            }
+            .accessibilityLabel(accessibilityLabel)
+    }
+
+    /// The event's time of day, with what says which clock it's on but not
+    /// the time zone, which wouldn't fit: "5:32:15.1 PM", "17:32:15.1 UTC".
+    static func clockTime(_ time: Date, _ format: TimeFormat, timeZone: TimeZone = .current) -> String {
+        let parts = TimeFormatting.parts(time, format, timeZone: timeZone)
+        switch format {
+        case .local12Hour: return "\(parts.time) \(parts.suffix.prefix(2))"
+        case .utc24Hour: return "\(parts.time) UTC"
+        case .local24Hour: return parts.time
+        }
+    }
+
+    private var accessibilityLabel: Text {
+        guard let reference else { return Text("Timestamp, no events yet") }
+        return Text("\(name), \(reference.time, style: .relative) ago")
+    }
+}

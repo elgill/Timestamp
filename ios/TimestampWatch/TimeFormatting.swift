@@ -1,5 +1,12 @@
 import Foundation
 
+/// The phone's `TimeFormat`, by the same index.
+enum TimeFormat: Int, Codable {
+    case local12Hour = 0
+    case local24Hour
+    case utc24Hour
+}
+
 /// The phone's time formats (lib/utils/time_utils.dart), so a time reads the
 /// same on both. Tenths are truncated, never rounded, as on the phone.
 enum TimeFormatting {

@@ -65,7 +65,7 @@ struct SharedButtonsTests {
         let settings = WatchSettings(defaults: suite(), shared: shared)
         settings.buttons = []
         let store = EventStore(fileURL: URL.temporaryDirectory.appending(path: "\(UUID()).json"))
-        IntentRecorder.recorder = Recorder(store: store, link: PhoneLink(store: store, settings: settings))
+        IntentRecorder.recorder = Recorder(store: store, settings: settings, link: PhoneLink(store: store, settings: settings))
         IntentRecorder.settings = settings
         defer {
             IntentRecorder.recorder = nil

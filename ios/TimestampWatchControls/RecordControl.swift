@@ -5,13 +5,17 @@ import WidgetKit
 @main
 struct TimestampWatchControls: WidgetBundle {
     var body: some Widget {
-        RecordControl()
+        ReferenceComplication()
+        if #available(watchOS 26.0, *) {
+            RecordControl()
+        }
     }
 }
 
 /// A control that records an event, for the Action button on Apple Watch
 /// Ultra (and Control Center and the Smart Stack). Which event is chosen
 /// when the control is set up.
+@available(watchOS 26.0, *)
 struct RecordControl: ControlWidget {
     var body: some ControlWidgetConfiguration {
         AppIntentControlConfiguration(

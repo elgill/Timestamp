@@ -1,13 +1,6 @@
 import Foundation
 import Observation
 
-/// The phone's `TimeFormat`, by the same index.
-enum TimeFormat: Int, Codable {
-    case local12Hour = 0
-    case local24Hour
-    case utc24Hour
-}
-
 /// Settings the watch shares with the phone. Saved so the watch keeps them
 /// when the phone isn't around.
 @Observable

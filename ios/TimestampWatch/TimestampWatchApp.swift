@@ -14,7 +14,7 @@ struct TimestampWatchApp: App {
         let link = PhoneLink(store: store, settings: settings)
         _store = State(initialValue: store)
         _settings = State(initialValue: settings)
-        let recorder = Recorder(store: store, link: link)
+        let recorder = Recorder(store: store, settings: settings, link: link)
         let timeSource = WatchClock(settings: settings)
         _recorder = State(initialValue: recorder)
         self.timeSource = timeSource
@@ -22,6 +22,8 @@ struct TimestampWatchApp: App {
         link.activate()
         IntentRecorder.recorder = recorder
         IntentRecorder.settings = settings
+        // Events from before there were complications.
+        Complications.update(store: store, settings: settings)
     }
 
     var body: some Scene {
