@@ -39,3 +39,35 @@ class PhoneRecorderTests: XCTestCase {
     XCTAssertEqual(id, id.lowercased())
   }
 }
+
+/// What the phone compares to decide whether the watch's complications need
+/// the context sent the fast way, which is limited to 50 a day.
+class ComplicationContextTests: XCTestCase {
+  func context(reference: String = "a", timeFormat: Int = 1, extra: String = "") -> String {
+    """
+    {"buttons": [{"name": "Lap", "color": 2}], "timeFormat": \(timeFormat), "importedIds": ["x"\(extra)],
+     "events": [{"id": "b", "time": 1794164600000, "precision": -1, "description": "", "color": 0},
+                {"id": "a", "time": 1794164500000, "precision": -1, "description": "", "color": 0}],
+     "reference": {"id": "\(reference)", "time": 1794164500000, "precision": -1, "description": "", "color": 0}}
+    """
+  }
+
+  func testOnlyWhatTheComplicationsShowCounts() {
+    let shown = WatchBridge.complicationsShow(context())
+    XCTAssertNotNil(shown)
+    // Buttons and imported ids aren't shown.
+    XCTAssertEqual(WatchBridge.complicationsShow(context(extra: ", \"y\"")), shown)
+    XCTAssertNotEqual(WatchBridge.complicationsShow(context(reference: "b")), shown)
+    XCTAssertNotEqual(WatchBridge.complicationsShow(context(timeFormat: 2)), shown)
+  }
+
+  func testTheLatestEventCounts() {
+    let more = context().replacingOccurrences(
+      of: "\"events\": [", with: "\"events\": [{\"id\": \"c\", \"time\": 1794164700000, \"precision\": -1, \"description\": \"\", \"color\": 0}, ")
+    XCTAssertNotEqual(WatchBridge.complicationsShow(more), WatchBridge.complicationsShow(context()))
+  }
+
+  func testAnUnreadableContextIsNotSent() {
+    XCTAssertNil(WatchBridge.complicationsShow("not json"))
+  }
+}

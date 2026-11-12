@@ -49,5 +49,9 @@ struct TimestampWatchApp: App {
             .environment(settings)
             .environment(recorder)
         }
+        // Woken to take in what the phone sent, mostly for the complications.
+        .backgroundTask(.watchConnectivity) {
+            await PhoneLink.receivePending()
+        }
     }
 }

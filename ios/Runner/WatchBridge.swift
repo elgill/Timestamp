@@ -14,6 +14,8 @@ final class WatchBridge: NSObject, WCSessionDelegate {
     private static let channelName = "dev.gillin.timestamp/watch"
     private static let inboxKey = "watchInbox"
     private static let lastSequenceKey = "watchInboxLastSequence"
+    /// What the complications showed when last sent to them.
+    private static let complicationKey = "watchComplicationSent"
 
     private let defaults = UserDefaults.standard
     /// Every inbox read and write goes through here, since watch deliveries
@@ -90,13 +92,49 @@ final class WatchBridge: NSObject, WCSessionDelegate {
               session.isPaired, session.isWatchAppInstalled,
               let json = pendingContext
         else { return }
+        // So the watch can tell which of two copies is newer.
+        let payload: [String: Any] = ["json": json, "sentAt": Date().timeIntervalSince1970]
         do {
-            try session.updateApplicationContext(["json": json])
+            try session.updateApplicationContext(payload)
             pendingContext = nil
+            sendToComplications(payload, json: json, session: session)
         } catch {
             // Kept, to try again when the session next activates.
             print("Sending context to the watch failed: \(error)")
         }
+    }
+
+    /// Sends the context again in the way the watch delivers soonest, waking
+    /// its app to update the complications, but only when what they show has
+    /// changed: a complication on the face gets only 50 of these a day. The
+    /// context alone arrives when the watch next runs the app, which can be
+    /// a long while.
+    private func sendToComplications(_ payload: [String: Any], json: String, session: WCSession) {
+        guard session.isComplicationEnabled, session.remainingComplicationUserInfoTransfers > 0,
+              let shown = Self.complicationsShow(json),
+              shown != defaults.string(forKey: Self.complicationKey)
+        else { return }
+        session.transferCurrentComplicationUserInfo(payload)
+        defaults.set(shown, forKey: Self.complicationKey)
+    }
+
+    /// What of a context the watch's complications show, as a string to
+    /// compare: the reference, the latest event and the time format.
+    static func complicationsShow(_ json: String) -> String? {
+        struct Context: Decodable {
+            var events: [Lossy<WatchEvent>]?
+            var reference: WatchEvent?
+            var timeFormat: Int?
+        }
+        struct Shown: Encodable {
+            var reference: WatchEvent?
+            var latest: WatchEvent?
+            var timeFormat: Int?
+        }
+        guard let context = try? WatchJSON.decoder.decode(Context.self, from: Data(json.utf8)) else { return nil }
+        let latest = context.events?.compactMap(\.value).max { $0.time < $1.time }
+        let shown = Shown(reference: context.reference, latest: latest, timeFormat: context.timeFormat)
+        return (try? WatchJSON.encoder.encode(shown)).map { String(decoding: $0, as: UTF8.self) }
     }
 
     /// Changes waiting for Flutter, oldest first: `sequence` and `json`.

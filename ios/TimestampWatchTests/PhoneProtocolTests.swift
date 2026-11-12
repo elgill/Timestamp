@@ -88,3 +88,44 @@ struct PhoneProtocolTests {
         #expect(context.timeFormat == .local24Hour)
     }
 }
+
+/// The phone's context can come twice, once for the complications, and the
+/// copies can arrive in either order.
+@MainActor
+struct PhoneContextOrderTests {
+    func context(reference: String) -> String {
+        """
+        {"buttons": [], "timeFormat": 1, "importedIds": [],
+         "events": [{"id": "a", "time": 1794164500000, "precision": -1, "description": "", "color": 0},
+                    {"id": "b", "time": 1794164600000, "precision": -1, "description": "", "color": 0}],
+         "reference": {"id": "\(reference)", "time": \(reference == "a" ? 1794164500000 : 1794164600000), "precision": -1, "description": "", "color": 0}}
+        """
+    }
+
+    @Test func anOlderCopyArrivingLateIsPassedOver() {
+        let store = EventStore(fileURL: URL.temporaryDirectory.appending(path: "\(UUID()).json"))
+        let suite = UserDefaults(suiteName: UUID().uuidString)!
+        let link = PhoneLink(store: store, settings: WatchSettings(defaults: suite, shared: nil), defaults: suite)
+
+        link.apply(["json": context(reference: "b"), "sentAt": 200.0])
+        link.apply(["json": context(reference: "a"), "sentAt": 100.0])
+        #expect(store.reference?.id == "b")
+
+        // The other copy of the same send.
+        link.apply(["json": context(reference: "b"), "sentAt": 200.0])
+        #expect(store.reference?.id == "b")
+
+        link.apply(["json": context(reference: "a"), "sentAt": 300.0])
+        #expect(store.reference?.id == "a")
+    }
+
+    /// From a phone app from before contexts said when they were sent.
+    @Test func aContextWithoutASendTimeIsApplied() {
+        let store = EventStore(fileURL: URL.temporaryDirectory.appending(path: "\(UUID()).json"))
+        let suite = UserDefaults(suiteName: UUID().uuidString)!
+        let link = PhoneLink(store: store, settings: WatchSettings(defaults: suite, shared: nil), defaults: suite)
+        link.apply(["json": context(reference: "b"), "sentAt": 200.0])
+        link.apply(["json": context(reference: "a")])
+        #expect(store.reference?.id == "a")
+    }
+}
