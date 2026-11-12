@@ -7,10 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		01E3A7074A281500D3AB784E /* TimestampWatchControls.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 5AF87EDCCA8BD8277A4832BC /* TimestampWatchControls.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		04D17D8B66BC95B3A3C15CC3 /* ActionButtonTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AD715250C71A9606DF6AEE /* ActionButtonTests.swift */; };
 		104A6B0ABD331278C68FD0BF /* TimeFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FCA6C3FB50E382107A4BF9E /* TimeFormatting.swift */; };
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
 		16379ADFA3D20B805BFD6E1B /* ClockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5060BC5FFC9C59B359DBD5E /* ClockView.swift */; };
 		1E60DF32332364826C043701 /* RecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F1FDEA5A8283792F09B09A8 /* RecordView.swift */; };
+		298A5D10D844413E9E84B09F /* ButtonLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B0E47CCB344FECA95DAD88 /* ButtonLayoutTests.swift */; };
 		29AE0ED4C62A41EAAAE52C9A /* ButtonLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = E887827540B1453ABE8DC468 /* ButtonLayout.swift */; };
 		3189DC5A1595CD7E2A6A3109 /* PhoneLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AA098EEDBB2C44372177AEE /* PhoneLink.swift */; };
 		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
@@ -19,24 +22,31 @@
 		5333C3C1E5C7058143E98FAA /* WatchSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846B73B066D29990071D58D3 /* WatchSettings.swift */; };
 		58C83BC7831DDC4ABF1D6FC8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0143EB4F65C13D5635F57EAC /* Assets.xcassets */; };
 		5C25944455722F16D5F0230C /* WatchBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C7A8B22C8FB1CF50E2534F6 /* WatchBridge.swift */; };
+		5E61405C8393628D87C8672D /* RecordEventIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9E6E534478A37311F5139E /* RecordEventIntent.swift */; };
+		69234DDA5B38CCD7729B9627 /* WatchEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D9FE5EAAA11B4FC2CFB307 /* WatchEvent.swift */; };
 		6A8C0E82D061C3767750E909 /* EventStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16186391A7A4C8549D16A449 /* EventStoreTests.swift */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
 		78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
+		9AED765B605BE0F9DB4681B8 /* SharedButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = B144ED492255B63D635E3D1E /* SharedButtons.swift */; };
 		9F915D898D078E430DB23833 /* WatchClockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19589D08C2AC30A9D5C59288 /* WatchClockTests.swift */; };
 		A0BD2A3338EAA08FA41C1A30 /* EventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 165824154C8A26A395F58260 /* EventStore.swift */; };
+		A6A9F8F293B1A2C3E71EFAEF /* SharedButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = B144ED492255B63D635E3D1E /* SharedButtons.swift */; };
+		B3347E06763A5300AAC3CF9C /* RecordControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7C58A1D1B264CB3D642B062 /* RecordControl.swift */; };
+		BB472A5373F3E3C9FEADB741 /* SharedButtonsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7879810A76CC233B6355B8FE /* SharedButtonsTests.swift */; };
 		CC7C5240E9CB23DF4A3BA653 /* PhoneProtocolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 733E943EB5DBB2D5950469B8 /* PhoneProtocolTests.swift */; };
+		D21B701B1731FF82230C0716 /* ActionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F71857D55B120AC137CCD4 /* ActionButton.swift */; };
 		D77B50532281787212EE341F /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DDF90944E32D8D612242089 /* Pods_RunnerTests.framework */; };
 		DA178ED38E71E3CE638386E8 /* TimeSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = E007E84580D8199BEF0198A6 /* TimeSource.swift */; };
 		DBD53F1CBFB88FE3BBD145A0 /* TimeFormattingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B9F975F0524B7F5E730192 /* TimeFormattingTests.swift */; };
-		298A5D10D844413E9E84B09F /* ButtonLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B0E47CCB344FECA95DAD88 /* ButtonLayoutTests.swift */; };
 		DED74BDE65E7F6A96B6EDD59 /* PhoneProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33473D5E59F531786EBE9A9A /* PhoneProtocol.swift */; };
 		E2FCA001FB01FD604056F32F /* TimestampWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C2194AC1D8FD818D6AD010 /* TimestampWatchApp.swift */; };
 		EEAEC8FBC1108F8B2A0A0F14 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A1F1C29E862E1CDB9F6315F5 /* Pods_Runner.framework */; };
 		F22E9FFDD9B85D6B12465B36 /* WatchEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D9FE5EAAA11B4FC2CFB307 /* WatchEvent.swift */; };
 		F322D8D4D9FBEB3D4D052FB3 /* EventsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCF582ADD5F8EB7492D087E /* EventsView.swift */; };
+		FB5400DC6983970323145E77 /* RecordEventIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9E6E534478A37311F5139E /* RecordEventIntent.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +56,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 97C146ED1CF9000F007C117D;
 			remoteInfo = Runner;
+		};
+		556CAA22F5E45B72F69BDD28 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 480779F8AFF1EE98D7A7A7D1;
+			remoteInfo = TimestampWatchControls;
 		};
 		ADC00CDEED04A246980BE8CB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -64,6 +81,17 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		77F5D1CE17F0AF0889519246 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				01E3A7074A281500D3AB784E /* TimestampWatchControls.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		9705A1C41CF9048500538489 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -89,10 +117,12 @@
 
 /* Begin PBXFileReference section */
 		0143EB4F65C13D5635F57EAC /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		0C03D6FA54C99784CD9EB026 /* TimestampWatch.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = TimestampWatch.entitlements; sourceTree = "<group>"; };
 		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
 		16186391A7A4C8549D16A449 /* EventStoreTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventStoreTests.swift; sourceTree = "<group>"; };
 		165824154C8A26A395F58260 /* EventStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventStore.swift; sourceTree = "<group>"; };
+		16B10439447C4CECDF7E19E4 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		19589D08C2AC30A9D5C59288 /* WatchClockTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchClockTests.swift; sourceTree = "<group>"; };
 		25D9FE5EAAA11B4FC2CFB307 /* WatchEvent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchEvent.swift; sourceTree = "<group>"; };
 		25ED91D8029F1D9378D0B85B /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
@@ -102,18 +132,22 @@
 		33473D5E59F531786EBE9A9A /* PhoneProtocol.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PhoneProtocol.swift; sourceTree = "<group>"; };
 		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
 		3DDF90944E32D8D612242089 /* Pods_RunnerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RunnerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		3F9E6E534478A37311F5139E /* RecordEventIntent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RecordEventIntent.swift; sourceTree = "<group>"; };
+		40B0E47CCB344FECA95DAD88 /* ButtonLayoutTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ButtonLayoutTests.swift; sourceTree = "<group>"; };
+		5AF87EDCCA8BD8277A4832BC /* TimestampWatchControls.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TimestampWatchControls.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		5FCA6C3FB50E382107A4BF9E /* TimeFormatting.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TimeFormatting.swift; sourceTree = "<group>"; };
 		6F1FDEA5A8283792F09B09A8 /* RecordView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RecordView.swift; sourceTree = "<group>"; };
-		E887827540B1453ABE8DC468 /* ButtonLayout.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ButtonLayout.swift; sourceTree = "<group>"; };
 		733E943EB5DBB2D5950469B8 /* PhoneProtocolTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PhoneProtocolTests.swift; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7629CEFC6539CB6869D3B617 /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
+		7879810A76CC233B6355B8FE /* SharedButtonsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SharedButtonsTests.swift; sourceTree = "<group>"; };
 		78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterGeneratedPluginSwiftPackage; path = Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
 		7CCF582ADD5F8EB7492D087E /* EventsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventsView.swift; sourceTree = "<group>"; };
 		7FEC54446D70040D8AE1383F /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
 		846B73B066D29990071D58D3 /* WatchSettings.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchSettings.swift; sourceTree = "<group>"; };
+		84AD715250C71A9606DF6AEE /* ActionButtonTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ActionButtonTests.swift; sourceTree = "<group>"; };
 		96C2194AC1D8FD818D6AD010 /* TimestampWatchApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TimestampWatchApp.swift; sourceTree = "<group>"; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Flutter/Debug.xcconfig; sourceTree = "<group>"; };
 		9740EEB31CF90195004384FC /* Generated.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Generated.xcconfig; path = Flutter/Generated.xcconfig; sourceTree = "<group>"; };
@@ -127,16 +161,28 @@
 		A1F1C29E862E1CDB9F6315F5 /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A5060BC5FFC9C59B359DBD5E /* ClockView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ClockView.swift; sourceTree = "<group>"; };
 		A9DA460351EC17C8346E1CEC /* TimestampWatchTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TimestampWatchTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B144ED492255B63D635E3D1E /* SharedButtons.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SharedButtons.swift; sourceTree = "<group>"; };
+		B5F71857D55B120AC137CCD4 /* ActionButton.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ActionButton.swift; sourceTree = "<group>"; };
 		BCA48DE331D1FC66064FE844 /* TimestampWatch.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = TimestampWatch.xcconfig; sourceTree = "<group>"; };
 		C38D534E1D16BCF10D99C9BE /* Pods-RunnerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.debug.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug.xcconfig"; sourceTree = "<group>"; };
+		C619C9CA3568508BF3CA9F10 /* TimestampWatchControls.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = TimestampWatchControls.entitlements; sourceTree = "<group>"; };
 		C7933E06B04A4DEB10E01901 /* TimestampWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TimestampWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C7C58A1D1B264CB3D642B062 /* RecordControl.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RecordControl.swift; sourceTree = "<group>"; };
 		D3B9F975F0524B7F5E730192 /* TimeFormattingTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TimeFormattingTests.swift; sourceTree = "<group>"; };
-		40B0E47CCB344FECA95DAD88 /* ButtonLayoutTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ButtonLayoutTests.swift; sourceTree = "<group>"; };
 		E007E84580D8199BEF0198A6 /* TimeSource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TimeSource.swift; sourceTree = "<group>"; };
 		E38E72134EB225F512E18235 /* Pods-RunnerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig"; sourceTree = "<group>"; };
+		E5C9B5C9C05225F09BCD02A1 /* TimestampWatchControls.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = TimestampWatchControls.xcconfig; sourceTree = "<group>"; };
+		E887827540B1453ABE8DC468 /* ButtonLayout.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ButtonLayout.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		511EBEB8779EA67F791D1721 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		530E36DE4FCF81FF737D216E /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -206,6 +252,10 @@
 				BCA48DE331D1FC66064FE844 /* TimestampWatch.xcconfig */,
 				33473D5E59F531786EBE9A9A /* PhoneProtocol.swift */,
 				9AA098EEDBB2C44372177AEE /* PhoneLink.swift */,
+				B144ED492255B63D635E3D1E /* SharedButtons.swift */,
+				3F9E6E534478A37311F5139E /* RecordEventIntent.swift */,
+				B5F71857D55B120AC137CCD4 /* ActionButton.swift */,
+				0C03D6FA54C99784CD9EB026 /* TimestampWatch.entitlements */,
 			);
 			path = TimestampWatch;
 			sourceTree = "<group>";
@@ -240,6 +290,7 @@
 				49CA401D86BC5B659E00B24B /* Frameworks */,
 				56901A8853F89CC61E3DEFAF /* TimestampWatch */,
 				A37E7412828E2B091143D574 /* TimestampWatchTests */,
+				B8910E2DD5BBAB89BD9627B9 /* TimestampWatchControls */,
 			);
 			sourceTree = "<group>";
 		};
@@ -250,6 +301,7 @@
 				331C8081294A63A400263BE5 /* RunnerTests.xctest */,
 				C7933E06B04A4DEB10E01901 /* TimestampWatch.app */,
 				A9DA460351EC17C8346E1CEC /* TimestampWatchTests.xctest */,
+				5AF87EDCCA8BD8277A4832BC /* TimestampWatchControls.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -278,8 +330,22 @@
 				40B0E47CCB344FECA95DAD88 /* ButtonLayoutTests.swift */,
 				733E943EB5DBB2D5950469B8 /* PhoneProtocolTests.swift */,
 				19589D08C2AC30A9D5C59288 /* WatchClockTests.swift */,
+				7879810A76CC233B6355B8FE /* SharedButtonsTests.swift */,
+				84AD715250C71A9606DF6AEE /* ActionButtonTests.swift */,
 			);
 			path = TimestampWatchTests;
+			sourceTree = "<group>";
+		};
+		B8910E2DD5BBAB89BD9627B9 /* TimestampWatchControls */ = {
+			isa = PBXGroup;
+			children = (
+				E5C9B5C9C05225F09BCD02A1 /* TimestampWatchControls.xcconfig */,
+				C7C58A1D1B264CB3D642B062 /* RecordControl.swift */,
+				16B10439447C4CECDF7E19E4 /* Info.plist */,
+				C619C9CA3568508BF3CA9F10 /* TimestampWatchControls.entitlements */,
+			);
+			name = TimestampWatchControls;
+			path = TimestampWatchControls;
 			sourceTree = "<group>";
 		};
 		D09FFCEE9BA13DF05591FABB /* Pods */ = {
@@ -305,10 +371,12 @@
 				5822FE5480650FF44CB533C9 /* Sources */,
 				CCB9C0288E7B70982BE4D414 /* Frameworks */,
 				AD5C60DF59C83712389F44E1 /* Resources */,
+				77F5D1CE17F0AF0889519246 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				CB3FB2DF66DA70E2A6E84C42 /* PBXTargetDependency */,
 			);
 			name = TimestampWatch;
 			productName = TimestampWatch;
@@ -333,6 +401,23 @@
 			productName = RunnerTests;
 			productReference = 331C8081294A63A400263BE5 /* RunnerTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		480779F8AFF1EE98D7A7A7D1 /* TimestampWatchControls */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0F9680C6DCCE55C270780859 /* Build configuration list for PBXNativeTarget "TimestampWatchControls" */;
+			buildPhases = (
+				3E0DA6F57B274EAF0C0069C3 /* Sources */,
+				511EBEB8779EA67F791D1721 /* Frameworks */,
+				965B77FC5818335CF44475F6 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TimestampWatchControls;
+			productName = TimestampWatchControls;
+			productReference = 5AF87EDCCA8BD8277A4832BC /* TimestampWatchControls.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 		97C146ED1CF9000F007C117D /* Runner */ = {
 			isa = PBXNativeTarget;
@@ -425,6 +510,7 @@
 				331C8080294A63A400263BE5 /* RunnerTests */,
 				15E4E323689BC2A5AF3F1798 /* TimestampWatch */,
 				B44AE4DD0846F82647FBA126 /* TimestampWatchTests */,
+				480779F8AFF1EE98D7A7A7D1 /* TimestampWatchControls */,
 			);
 		};
 /* End PBXProject section */
@@ -438,6 +524,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		5BC15A15A7B0EAB50CA72AB9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		965B77FC5818335CF44475F6 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -569,6 +662,17 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		3E0DA6F57B274EAF0C0069C3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B3347E06763A5300AAC3CF9C /* RecordControl.swift in Sources */,
+				A6A9F8F293B1A2C3E71EFAEF /* SharedButtons.swift in Sources */,
+				FB5400DC6983970323145E77 /* RecordEventIntent.swift in Sources */,
+				69234DDA5B38CCD7729B9627 /* WatchEvent.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		532513DCB6396FD29A49FEDD /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -578,6 +682,8 @@
 				298A5D10D844413E9E84B09F /* ButtonLayoutTests.swift in Sources */,
 				CC7C5240E9CB23DF4A3BA653 /* PhoneProtocolTests.swift in Sources */,
 				9F915D898D078E430DB23833 /* WatchClockTests.swift in Sources */,
+				BB472A5373F3E3C9FEADB741 /* SharedButtonsTests.swift in Sources */,
+				04D17D8B66BC95B3A3C15CC3 /* ActionButtonTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -597,6 +703,9 @@
 				5333C3C1E5C7058143E98FAA /* WatchSettings.swift in Sources */,
 				DED74BDE65E7F6A96B6EDD59 /* PhoneProtocol.swift in Sources */,
 				3189DC5A1595CD7E2A6A3109 /* PhoneLink.swift in Sources */,
+				9AED765B605BE0F9DB4681B8 /* SharedButtons.swift in Sources */,
+				5E61405C8393628D87C8672D /* RecordEventIntent.swift in Sources */,
+				D21B701B1731FF82230C0716 /* ActionButton.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -617,6 +726,12 @@
 			isa = PBXTargetDependency;
 			target = 97C146ED1CF9000F007C117D /* Runner */;
 			targetProxy = 331C8085294A63A400263BE5 /* PBXContainerItemProxy */;
+		};
+		CB3FB2DF66DA70E2A6E84C42 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = TimestampWatchControls;
+			target = 480779F8AFF1EE98D7A7A7D1 /* TimestampWatchControls */;
+			targetProxy = 556CAA22F5E45B72F69BDD28 /* PBXContainerItemProxy */;
 		};
 		D590CE0F00216CCDB747EB46 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -659,6 +774,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = TimestampWatch/TimestampWatch.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = CPAZW3J38G;
 				ENABLE_PREVIEWS = YES;
@@ -775,6 +891,34 @@
 				WATCHOS_DEPLOYMENT_TARGET = 10.0;
 			};
 			name = Profile;
+		};
+		31344014ADDB9C8E0F79B894 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = E5C9B5C9C05225F09BCD02A1 /* TimestampWatchControls.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = TimestampWatchControls/TimestampWatchControls.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = CPAZW3J38G;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TimestampWatchControls/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Timestamp;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = dev.gillin.timestamp.watchkitapp.controls;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG CONTROLS_EXTENSION";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Debug;
 		};
 		331C8088294A63A400263BE5 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -1017,6 +1161,35 @@
 			};
 			name = Release;
 		};
+		D7CD4B7408C5C5402C28BD52 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = E5C9B5C9C05225F09BCD02A1 /* TimestampWatchControls.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = TimestampWatchControls/TimestampWatchControls.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = CPAZW3J38G;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TimestampWatchControls/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Timestamp;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = dev.gillin.timestamp.watchkitapp.controls;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = CONTROLS_EXTENSION;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Profile;
+		};
 		F15A95C4D494C927904B50AB /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BCA48DE331D1FC66064FE844 /* TimestampWatch.xcconfig */;
@@ -1024,6 +1197,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = TimestampWatch/TimestampWatch.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = CPAZW3J38G;
 				ENABLE_PREVIEWS = YES;
@@ -1049,6 +1223,35 @@
 			};
 			name = Release;
 		};
+		F63C89D076905329CED992FC /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = E5C9B5C9C05225F09BCD02A1 /* TimestampWatchControls.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = TimestampWatchControls/TimestampWatchControls.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = CPAZW3J38G;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TimestampWatchControls/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Timestamp;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = dev.gillin.timestamp.watchkitapp.controls;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = CONTROLS_EXTENSION;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Release;
+		};
 		F98DC87EDA6B7462703C7B1A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BCA48DE331D1FC66064FE844 /* TimestampWatch.xcconfig */;
@@ -1056,6 +1259,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = TimestampWatch/TimestampWatch.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = CPAZW3J38G;
 				ENABLE_PREVIEWS = YES;
@@ -1083,6 +1287,16 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		0F9680C6DCCE55C270780859 /* Build configuration list for PBXNativeTarget "TimestampWatchControls" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F63C89D076905329CED992FC /* Release */,
+				31344014ADDB9C8E0F79B894 /* Debug */,
+				D7CD4B7408C5C5402C28BD52 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		331C8087294A63A400263BE5 /* Build configuration list for PBXNativeTarget "RunnerTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

@@ -1,0 +1,6 @@
+// The same version and build number as the phone and watch apps, which an
+// embedded extension must have.
+#include "../Flutter/Generated.xcconfig"
+
+MARKETING_VERSION = $(FLUTTER_BUILD_NAME)
+CURRENT_PROJECT_VERSION = $(FLUTTER_BUILD_NUMBER)

@@ -8,14 +8,6 @@ enum TimeFormat: Int, Codable {
     case utc24Hour
 }
 
-/// A named, colored record button, like the phone's `ButtonModel`.
-struct RecordButtonConfig: Codable, Equatable, Identifiable {
-    var name: String
-    var color: EventColor
-
-    var id: String { name }
-}
-
 /// Settings the watch shares with the phone. Saved so the watch keeps them
 /// when the phone isn't around.
 @Observable
@@ -30,6 +22,7 @@ final class WatchSettings {
     var phoneAccuracy: PhoneAccuracy? { didSet { save() } }
 
     @ObservationIgnored private let defaults: UserDefaults
+    @ObservationIgnored private let shared: UserDefaults?
 
     private enum Key {
         static let buttons = "buttons"
@@ -38,8 +31,9 @@ final class WatchSettings {
         static let phoneAccuracy = "phoneAccuracy"
     }
 
-    init(defaults: UserDefaults = .standard) {
+    init(defaults: UserDefaults = .standard, shared: UserDefaults? = SharedButtons.defaults) {
         self.defaults = defaults
+        self.shared = shared
         buttons = defaults.data(forKey: Key.buttons)
             .flatMap { try? JSONDecoder().decode([RecordButtonConfig].self, from: $0) } ?? []
         timeFormat = (defaults.object(forKey: Key.timeFormat) as? Int)
@@ -47,10 +41,13 @@ final class WatchSettings {
         recordOnTouchDown = defaults.object(forKey: Key.recordOnTouchDown) as? Bool ?? true
         phoneAccuracy = defaults.data(forKey: Key.phoneAccuracy)
             .flatMap { try? JSONDecoder().decode(PhoneAccuracy.self, from: $0) }
+        // Buttons saved before the controls extension existed.
+        SharedButtons.save(buttons, to: shared)
     }
 
     private func save() {
         defaults.set(try? JSONEncoder().encode(buttons), forKey: Key.buttons)
+        SharedButtons.save(buttons, to: shared)
         defaults.set(timeFormat.rawValue, forKey: Key.timeFormat)
         defaults.set(recordOnTouchDown, forKey: Key.recordOnTouchDown)
         defaults.set(try? JSONEncoder().encode(phoneAccuracy), forKey: Key.phoneAccuracy)

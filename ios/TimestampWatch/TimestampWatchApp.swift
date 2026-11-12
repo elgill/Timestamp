@@ -14,10 +14,15 @@ struct TimestampWatchApp: App {
         let link = PhoneLink(store: store, settings: settings)
         _store = State(initialValue: store)
         _settings = State(initialValue: settings)
-        _recorder = State(initialValue: Recorder(store: store, link: link))
-        timeSource = WatchClock(settings: settings)
+        let recorder = Recorder(store: store, link: link)
+        let timeSource = WatchClock(settings: settings)
+        _recorder = State(initialValue: recorder)
+        self.timeSource = timeSource
         self.link = link
         link.activate()
+        ActionButton.recorder = recorder
+        ActionButton.settings = settings
+        ActionButton.timeSource = timeSource
     }
 
     var body: some Scene {
