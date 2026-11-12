@@ -61,9 +61,26 @@ final class WatchBridge: NSObject, WCSessionDelegate {
             }
             pendingContext = json
             sendPendingContext()
+            shareButtons(fromContext: json)
             result(nil)
         default:
             result(FlutterMethodNotImplemented)
+        }
+    }
+
+    /// Keeps the buttons from Flutter's context for `RecordEventIntent`,
+    /// which can run while Flutter isn't.
+    private func shareButtons(fromContext json: String) {
+        struct Context: Decodable {
+            var buttons: [Lossy<RecordButtonConfig>]
+        }
+        guard let context = try? JSONDecoder().decode(Context.self, from: Data(json.utf8)) else { return }
+        let buttons = context.buttons.compactMap(\.value)
+        guard buttons != SharedButtons.load() else { return }
+        SharedButtons.save(buttons)
+        if #available(iOS 16.0, *) {
+            // So Siri knows the button names its phrases can include.
+            TimestampShortcuts.updateAppShortcutParameters()
         }
     }
 
@@ -103,6 +120,12 @@ final class WatchBridge: NSObject, WCSessionDelegate {
 
     private func receive(_ payload: [String: Any]) {
         guard let json = payload["json"] as? String else { return }
+        deliver(json: json)
+    }
+
+    /// Puts changes in the inbox, in the watch's format, for Flutter to
+    /// take in. Also how the phone's own Record Event intent records.
+    func deliver(json: String) {
         inboxQueue.async {
             let sequence = self.defaults.integer(forKey: Self.lastSequenceKey) + 1
             self.defaults.set(sequence, forKey: Self.lastSequenceKey)

@@ -10,5 +10,6 @@ What it does:
 - Events are grouped by day, and you can add a description to any of them
 - Edit or delete events, or add one by hand if you missed it
 - Share your event log as plain text
+- Record from Shortcuts, Siri, Spotlight or the Action button on iPhone and Apple Watch Ultra. These events are timed when the action runs, a moment after you start it, so they're less precise than a tap
 - 12-hour, 24-hour or UTC time, light or dark theme, and an option to keep the screen on
 - Choose your time server: pool.ntp.org, Google, Apple, Cloudflare or NIST

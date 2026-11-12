@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:timestamp/main_screen.dart';
@@ -58,7 +59,8 @@ void main() {
     await tester.pumpWidget(const MaterialApp(home: HelpPage()));
 
     final top = tester.getTopLeft(find.text('Relative time')).dy;
-    expect(top, greaterThan(tester.getTopLeft(find.text('Record an event')).dy));
+    expect(
+        top, greaterThan(tester.getTopLeft(find.text('Record an event')).dy));
     expect(top, lessThan(iPhoneSEPortrait.size.height));
   });
 
@@ -79,4 +81,21 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   }
+
+  testWidgets('only iOS explains Shortcuts and the Action button',
+      (tester) async {
+    setDevice(tester, iPhoneSEPortrait);
+    const title = 'Shortcuts, Siri and the Action button';
+
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    await tester.pumpWidget(const MaterialApp(home: HelpPage()));
+    await tester.scrollUntilVisible(find.text(title), 200);
+    expect(find.textContaining('less precise than a tap'), findsOneWidget);
+
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    await tester.pumpWidget(
+        const MaterialApp(home: HelpPage(key: ValueKey('android'))));
+    expect(find.text(title, skipOffstage: false), findsNothing);
+    debugDefaultTargetPlatformOverride = null;
+  });
 }

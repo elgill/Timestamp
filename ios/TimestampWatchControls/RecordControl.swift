@@ -24,7 +24,7 @@ struct RecordControl: ControlWidget {
             .tint((intent.button?.color ?? .defaultColor).color)
         }
         .displayName("Record Event")
-        .description("Records the time, as tapping one of your buttons does.")
+        .description("Records the time, as tapping one of your buttons does. It’s timed when the app opens, a moment after the press, so it’s less precise than a tap.")
         .promptsForUserConfiguration()
     }
 }

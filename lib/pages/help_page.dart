@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class HelpPage extends StatelessWidget {
@@ -70,6 +71,18 @@ class HelpPage extends StatelessWidget {
         'until you tap another event and choose Set as Reference.',
   );
 
+  /// Only the iOS app has the Record Event action.
+  static const _shortcuts = (
+    icon: Icons.bolt,
+    title: 'Shortcuts, Siri and the Action button',
+    text: 'Record Event records with any of your buttons from Shortcuts, '
+        'Siri, Spotlight or the Action button, on iPhone and Apple Watch. On '
+        'an Apple Watch Ultra, choose Settings > Action Button > Controls > '
+        'Timestamp. These events are timed when the action runs, a moment '
+        'after you start it, so they are less precise than a tap and their '
+        'precision shows as unknown.',
+  );
+
   Widget _buildTopic(
     ({IconData icon, String title, String text}) topic, {
     Widget? example,
@@ -116,6 +129,8 @@ class HelpPage extends StatelessWidget {
             _buildTopic(_topics.first),
             _buildTopic(_relativeTime, example: _buildRelativeTimeExample()),
             ..._topics.skip(1).map(_buildTopic),
+            if (defaultTargetPlatform == TargetPlatform.iOS)
+              _buildTopic(_shortcuts),
           ],
         ),
       ),

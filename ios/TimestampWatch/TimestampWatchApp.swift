@@ -20,9 +20,8 @@ struct TimestampWatchApp: App {
         self.timeSource = timeSource
         self.link = link
         link.activate()
-        ActionButton.recorder = recorder
-        ActionButton.settings = settings
-        ActionButton.timeSource = timeSource
+        IntentRecorder.recorder = recorder
+        IntentRecorder.settings = settings
     }
 
     var body: some Scene {

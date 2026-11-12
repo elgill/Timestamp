@@ -8,8 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		01E3A7074A281500D3AB784E /* TimestampWatchControls.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 5AF87EDCCA8BD8277A4832BC /* TimestampWatchControls.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		04D17D8B66BC95B3A3C15CC3 /* ActionButtonTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AD715250C71A9606DF6AEE /* ActionButtonTests.swift */; };
+		04D17D8B66BC95B3A3C15CC3 /* IntentRecorderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AD715250C71A9606DF6AEE /* IntentRecorderTests.swift */; };
 		104A6B0ABD331278C68FD0BF /* TimeFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FCA6C3FB50E382107A4BF9E /* TimeFormatting.swift */; };
+		1188442925044B4FED00BEBF /* PhoneRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2E5B2FE83227D4B5D92D281 /* PhoneRecorder.swift */; };
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
 		16379ADFA3D20B805BFD6E1B /* ClockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5060BC5FFC9C59B359DBD5E /* ClockView.swift */; };
 		1E60DF32332364826C043701 /* RecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F1FDEA5A8283792F09B09A8 /* RecordView.swift */; };
@@ -18,6 +19,7 @@
 		3189DC5A1595CD7E2A6A3109 /* PhoneLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AA098EEDBB2C44372177AEE /* PhoneLink.swift */; };
 		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
+		3D4AD10B04E3832F7990DD86 /* RecordEventIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9E6E534478A37311F5139E /* RecordEventIntent.swift */; };
 		3E454C4A8867F7C0ADC76CFE /* TimestampWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = C7933E06B04A4DEB10E01901 /* TimestampWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		5333C3C1E5C7058143E98FAA /* WatchSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846B73B066D29990071D58D3 /* WatchSettings.swift */; };
 		58C83BC7831DDC4ABF1D6FC8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0143EB4F65C13D5635F57EAC /* Assets.xcassets */; };
@@ -27,17 +29,19 @@
 		6A8C0E82D061C3767750E909 /* EventStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16186391A7A4C8549D16A449 /* EventStoreTests.swift */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
 		78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };
+		7E38C4CA4309D726C155779F /* WatchEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D9FE5EAAA11B4FC2CFB307 /* WatchEvent.swift */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		9AED765B605BE0F9DB4681B8 /* SharedButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = B144ED492255B63D635E3D1E /* SharedButtons.swift */; };
 		9F915D898D078E430DB23833 /* WatchClockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19589D08C2AC30A9D5C59288 /* WatchClockTests.swift */; };
 		A0BD2A3338EAA08FA41C1A30 /* EventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 165824154C8A26A395F58260 /* EventStore.swift */; };
+		A66C18C936982167EAF8EFCE /* SharedButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = B144ED492255B63D635E3D1E /* SharedButtons.swift */; };
 		A6A9F8F293B1A2C3E71EFAEF /* SharedButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = B144ED492255B63D635E3D1E /* SharedButtons.swift */; };
 		B3347E06763A5300AAC3CF9C /* RecordControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7C58A1D1B264CB3D642B062 /* RecordControl.swift */; };
 		BB472A5373F3E3C9FEADB741 /* SharedButtonsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7879810A76CC233B6355B8FE /* SharedButtonsTests.swift */; };
 		CC7C5240E9CB23DF4A3BA653 /* PhoneProtocolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 733E943EB5DBB2D5950469B8 /* PhoneProtocolTests.swift */; };
-		D21B701B1731FF82230C0716 /* ActionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F71857D55B120AC137CCD4 /* ActionButton.swift */; };
+		D21B701B1731FF82230C0716 /* IntentRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F71857D55B120AC137CCD4 /* IntentRecorder.swift */; };
 		D77B50532281787212EE341F /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DDF90944E32D8D612242089 /* Pods_RunnerTests.framework */; };
 		DA178ED38E71E3CE638386E8 /* TimeSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = E007E84580D8199BEF0198A6 /* TimeSource.swift */; };
 		DBD53F1CBFB88FE3BBD145A0 /* TimeFormattingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B9F975F0524B7F5E730192 /* TimeFormattingTests.swift */; };
@@ -147,7 +151,7 @@
 		7CCF582ADD5F8EB7492D087E /* EventsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventsView.swift; sourceTree = "<group>"; };
 		7FEC54446D70040D8AE1383F /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
 		846B73B066D29990071D58D3 /* WatchSettings.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchSettings.swift; sourceTree = "<group>"; };
-		84AD715250C71A9606DF6AEE /* ActionButtonTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ActionButtonTests.swift; sourceTree = "<group>"; };
+		84AD715250C71A9606DF6AEE /* IntentRecorderTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = IntentRecorderTests.swift; sourceTree = "<group>"; };
 		96C2194AC1D8FD818D6AD010 /* TimestampWatchApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TimestampWatchApp.swift; sourceTree = "<group>"; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Flutter/Debug.xcconfig; sourceTree = "<group>"; };
 		9740EEB31CF90195004384FC /* Generated.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Generated.xcconfig; path = Flutter/Generated.xcconfig; sourceTree = "<group>"; };
@@ -162,7 +166,7 @@
 		A5060BC5FFC9C59B359DBD5E /* ClockView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ClockView.swift; sourceTree = "<group>"; };
 		A9DA460351EC17C8346E1CEC /* TimestampWatchTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TimestampWatchTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B144ED492255B63D635E3D1E /* SharedButtons.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SharedButtons.swift; sourceTree = "<group>"; };
-		B5F71857D55B120AC137CCD4 /* ActionButton.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ActionButton.swift; sourceTree = "<group>"; };
+		B5F71857D55B120AC137CCD4 /* IntentRecorder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = IntentRecorder.swift; sourceTree = "<group>"; };
 		BCA48DE331D1FC66064FE844 /* TimestampWatch.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = TimestampWatch.xcconfig; sourceTree = "<group>"; };
 		C38D534E1D16BCF10D99C9BE /* Pods-RunnerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.debug.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug.xcconfig"; sourceTree = "<group>"; };
 		C619C9CA3568508BF3CA9F10 /* TimestampWatchControls.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = TimestampWatchControls.entitlements; sourceTree = "<group>"; };
@@ -170,6 +174,7 @@
 		C7C58A1D1B264CB3D642B062 /* RecordControl.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RecordControl.swift; sourceTree = "<group>"; };
 		D3B9F975F0524B7F5E730192 /* TimeFormattingTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TimeFormattingTests.swift; sourceTree = "<group>"; };
 		E007E84580D8199BEF0198A6 /* TimeSource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TimeSource.swift; sourceTree = "<group>"; };
+		E2E5B2FE83227D4B5D92D281 /* PhoneRecorder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PhoneRecorder.swift; sourceTree = "<group>"; };
 		E38E72134EB225F512E18235 /* Pods-RunnerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig"; sourceTree = "<group>"; };
 		E5C9B5C9C05225F09BCD02A1 /* TimestampWatchControls.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = TimestampWatchControls.xcconfig; sourceTree = "<group>"; };
 		E887827540B1453ABE8DC468 /* ButtonLayout.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ButtonLayout.swift; sourceTree = "<group>"; };
@@ -254,7 +259,7 @@
 				9AA098EEDBB2C44372177AEE /* PhoneLink.swift */,
 				B144ED492255B63D635E3D1E /* SharedButtons.swift */,
 				3F9E6E534478A37311F5139E /* RecordEventIntent.swift */,
-				B5F71857D55B120AC137CCD4 /* ActionButton.swift */,
+				B5F71857D55B120AC137CCD4 /* IntentRecorder.swift */,
 				0C03D6FA54C99784CD9EB026 /* TimestampWatch.entitlements */,
 			);
 			path = TimestampWatch;
@@ -318,6 +323,7 @@
 				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
 				9C7A8B22C8FB1CF50E2534F6 /* WatchBridge.swift */,
+				E2E5B2FE83227D4B5D92D281 /* PhoneRecorder.swift */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
@@ -331,7 +337,7 @@
 				733E943EB5DBB2D5950469B8 /* PhoneProtocolTests.swift */,
 				19589D08C2AC30A9D5C59288 /* WatchClockTests.swift */,
 				7879810A76CC233B6355B8FE /* SharedButtonsTests.swift */,
-				84AD715250C71A9606DF6AEE /* ActionButtonTests.swift */,
+				84AD715250C71A9606DF6AEE /* IntentRecorderTests.swift */,
 			);
 			path = TimestampWatchTests;
 			sourceTree = "<group>";
@@ -683,7 +689,7 @@
 				CC7C5240E9CB23DF4A3BA653 /* PhoneProtocolTests.swift in Sources */,
 				9F915D898D078E430DB23833 /* WatchClockTests.swift in Sources */,
 				BB472A5373F3E3C9FEADB741 /* SharedButtonsTests.swift in Sources */,
-				04D17D8B66BC95B3A3C15CC3 /* ActionButtonTests.swift in Sources */,
+				04D17D8B66BC95B3A3C15CC3 /* IntentRecorderTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -705,7 +711,7 @@
 				3189DC5A1595CD7E2A6A3109 /* PhoneLink.swift in Sources */,
 				9AED765B605BE0F9DB4681B8 /* SharedButtons.swift in Sources */,
 				5E61405C8393628D87C8672D /* RecordEventIntent.swift in Sources */,
-				D21B701B1731FF82230C0716 /* ActionButton.swift in Sources */,
+				D21B701B1731FF82230C0716 /* IntentRecorder.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -716,6 +722,10 @@
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
 				5C25944455722F16D5F0230C /* WatchBridge.swift in Sources */,
+				1188442925044B4FED00BEBF /* PhoneRecorder.swift in Sources */,
+				3D4AD10B04E3832F7990DD86 /* RecordEventIntent.swift in Sources */,
+				A66C18C936982167EAF8EFCE /* SharedButtons.swift in Sources */,
+				7E38C4CA4309D726C155779F /* WatchEvent.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

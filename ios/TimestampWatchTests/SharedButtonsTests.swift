@@ -27,8 +27,55 @@ struct SharedButtonsTests {
         #expect(SharedButtons.load(from: shared) == buttons)
     }
 
-    @Test func aRenamedButtonStillResolves() async throws {
-        let entities = try await RecordButtonQuery().entities(for: ["Gone"])
-        #expect(entities.map(\.config) == [RecordButtonConfig(name: "Gone", color: .defaultColor)])
+    @Test func aCurrentButtonIsAsItIsNow() {
+        let shared = suite()
+        SharedButtons.save(buttons, to: shared)
+        SharedButtons.save([RecordButtonConfig(name: "Start", color: .purple)], to: shared)
+        #expect(SharedButtons.config(named: "Start", from: shared).color == .purple)
+    }
+
+    /// A shortcut or control set up with a button deleted since still
+    /// records, as it looked.
+    @Test func aDeletedButtonKeepsItsColor() {
+        let shared = suite()
+        SharedButtons.save(buttons, to: shared)
+        SharedButtons.save([], to: shared)
+        #expect(SharedButtons.config(named: "Stop", from: shared) == RecordButtonConfig(name: "Stop", color: .red))
+    }
+
+    @Test func aButtonNeverSeenGetsTheDefaultColor() {
+        #expect(SharedButtons.config(named: "Gone", from: suite()) == RecordButtonConfig(name: "Gone", color: .defaultColor))
+    }
+
+    @Test func onlyTheLatestButtonsAreRemembered() {
+        let shared = suite()
+        for index in 0...SharedButtons.seenKept {
+            SharedButtons.save([RecordButtonConfig(name: "B\(index)", color: .green)], to: shared)
+        }
+        #expect(SharedButtons.config(named: "B0", from: shared).color == .defaultColor)
+        #expect(SharedButtons.config(named: "B1", from: shared).color == .green)
+    }
+
+    /// From what the control or shortcut stored, the button's name, to the
+    /// event in the watch's list.
+    @MainActor
+    @Test func aDeletedButtonIsRecordedInItsColor() throws {
+        let shared = suite()
+        SharedButtons.save(buttons, to: shared)
+        let settings = WatchSettings(defaults: suite(), shared: shared)
+        settings.buttons = []
+        let store = EventStore(fileURL: URL.temporaryDirectory.appending(path: "\(UUID()).json"))
+        IntentRecorder.recorder = Recorder(store: store, link: PhoneLink(store: store, settings: settings))
+        IntentRecorder.settings = settings
+        defer {
+            IntentRecorder.recorder = nil
+            IntentRecorder.settings = nil
+        }
+
+        IntentRecorder.record(SharedButtons.config(named: "Stop", from: shared), at: Date(), pressedAt: nil)
+
+        let event = try #require(store.events.first)
+        #expect(event.label == "Stop")
+        #expect(event.color == .red)
     }
 }

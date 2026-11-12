@@ -13,7 +13,13 @@ enum TimeFormat: Int, Codable {
 @Observable
 final class WatchSettings {
     /// Empty means a single unnamed button, as on the phone.
-    var buttons: [RecordButtonConfig] { didSet { save() } }
+    var buttons: [RecordButtonConfig] {
+        didSet {
+            save()
+            // So Siri knows the button names its phrases can include.
+            if buttons != oldValue { TimestampShortcuts.updateAppShortcutParameters() }
+        }
+    }
     var timeFormat: TimeFormat { didSet { save() } }
     /// Record when the finger lands instead of when it lifts, which is
     /// earlier and so closer to the moment the user reacted to.
