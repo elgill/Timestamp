@@ -89,26 +89,27 @@ struct ComplicationView: View {
                 .font(.headline)
                 .lineLimit(1)
                 .widgetAccentable()
-            if let reference {
-                Text(ComplicationView.clockTime(reference.time, snapshot?.timeFormat ?? .local24Hour))
-                    .font(.body.monospacedDigit())
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-                // "+5:12", counting up.
-                Text("+\(count(reference.time))")
-                    .font(.body.monospacedDigit())
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-            } else {
-                Text("No events yet")
-                    .font(.body)
-                    .foregroundStyle(.secondary)
-                Text("Tap to record")
-                    .font(.body)
-                    .foregroundStyle(.secondary)
+            // The two lines below the name share what height is left, so on
+            // the smallest faces they shrink alike to fit.
+            Group {
+                if let reference {
+                    Text(ComplicationView.clockTime(reference.time, snapshot?.timeFormat ?? .local24Hour))
+                    // "+5:12", counting up.
+                    Text("+\(count(reference.time))")
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text("No events yet")
+                        .foregroundStyle(.secondary)
+                    Text("Tap to record")
+                        .foregroundStyle(.secondary)
+                }
             }
+            .font(.body.monospacedDigit())
+            .lineLimit(1)
+            .minimumScaleFactor(0.5)
+            .frame(maxHeight: .infinity, alignment: .leading)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityLabel)
     }
@@ -116,7 +117,8 @@ struct ComplicationView: View {
     private var inline: some View {
         Group {
             if let reference {
-                Text("\(Image(systemName: icon)) \(name) +\(count(reference.time))")
+                // The count first, so a long name is what's cut short.
+                Text("\(Image(systemName: icon)) +\(count(reference.time)) \(name)")
             } else {
                 Text("\(Image(systemName: icon)) Timestamp")
             }
