@@ -6,6 +6,7 @@ import WidgetKit
 struct TimestampWatchControls: WidgetBundle {
     var body: some Widget {
         ReferenceComplication()
+        LatestComplication()
         if #available(watchOS 26.0, *) {
             RecordControl()
         }

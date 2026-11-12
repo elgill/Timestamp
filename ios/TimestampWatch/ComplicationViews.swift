@@ -1,15 +1,20 @@
 import SwiftUI
 import WidgetKit
 
-/// The complication faces, one per family: the reference event and a count
-/// up from it, like a stopwatch since the Start. The count runs on its own
-/// (`Text(_:style: .timer)`), so the complication only reloads when the
-/// reference changes. Tapping any of them opens the app.
+/// The complication faces, one per family: an event (the reference, or the
+/// latest) and a count up from it, like a stopwatch since the Start. The
+/// count runs on its own, so the complication only reloads when the event
+/// changes. Tapping any of them opens the app.
 ///
 /// Built in the watch app too, so tests can draw them.
 struct ComplicationView: View {
     let family: WidgetFamily
     let snapshot: ComplicationSnapshot?
+    var source: ComplicationSource = .reference
+    /// Dimmed, for Always On, where the face updates about once a minute.
+    var luminanceReduced = false
+    /// When this is shown, for the dimmed count.
+    var date = Date()
 
     var body: some View {
         switch family {
@@ -20,7 +25,31 @@ struct ComplicationView: View {
         }
     }
 
-    private var reference: WatchEvent? { snapshot?.reference }
+    private var reference: WatchEvent? { source.event(in: snapshot) }
+
+    private var icon: String {
+        switch source {
+        case .reference: "stopwatch"
+        case .latest: "clock.arrow.circlepath"
+        }
+    }
+
+    /// Counts up from `time`. Dimmed, it's to the minute and set from the
+    /// timeline, since the face then updates about once a minute and the
+    /// seconds would stand still.
+    private func count(_ time: Date) -> Text {
+        luminanceReduced ? Text(Self.shortAge(of: time, at: date)) : Text(time, style: .timer)
+    }
+
+    /// How long since `time`, to the minute and short enough for any face:
+    /// "0m", "47m", "1h 05m", "2d 7h".
+    static func shortAge(of time: Date, at now: Date) -> String {
+        let minutes = max(0, Int(now.timeIntervalSince(time) / 60))
+        let (days, hours, mins) = (minutes / 1440, minutes / 60 % 24, minutes % 60)
+        if days > 0 { return "\(days)d \(hours)h" }
+        if hours > 0 { return "\(hours)h " + String(format: "%02d", mins) + "m" }
+        return "\(mins)m"
+    }
 
     private var name: String {
         guard let reference else { return "Timestamp" }
@@ -32,10 +61,10 @@ struct ComplicationView: View {
             AccessoryWidgetBackground()
             if let reference {
                 VStack(spacing: 0) {
-                    Image(systemName: "stopwatch")
+                    Image(systemName: icon)
                         .font(.system(size: 11, weight: .semibold))
                         .widgetAccentable()
-                    Text(reference.time, style: .timer)
+                    count(reference.time)
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
                         .monospacedDigit()
                         .multilineTextAlignment(.center)
@@ -45,7 +74,7 @@ struct ComplicationView: View {
                         .padding(.horizontal, 3)
                 }
             } else {
-                Image(systemName: "stopwatch")
+                Image(systemName: icon)
                     .font(.system(size: 22, weight: .semibold))
                     .widgetAccentable()
             }
@@ -56,7 +85,7 @@ struct ComplicationView: View {
 
     private var rectangular: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Label(name, systemImage: "stopwatch")
+            Label(name, systemImage: icon)
                 .font(.headline)
                 .lineLimit(1)
                 .widgetAccentable()
@@ -66,7 +95,7 @@ struct ComplicationView: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
                 // "+5:12", counting up.
-                Text("+\(reference.time, style: .timer)")
+                Text("+\(count(reference.time))")
                     .font(.body.monospacedDigit())
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
@@ -87,21 +116,21 @@ struct ComplicationView: View {
     private var inline: some View {
         Group {
             if let reference {
-                Text("\(Image(systemName: "stopwatch")) \(name) +\(reference.time, style: .timer)")
+                Text("\(Image(systemName: icon)) \(name) +\(count(reference.time))")
             } else {
-                Text("\(Image(systemName: "stopwatch")) Timestamp")
+                Text("\(Image(systemName: icon)) Timestamp")
             }
         }
         .accessibilityLabel(accessibilityLabel)
     }
 
     private var corner: some View {
-        Image(systemName: "stopwatch")
+        Image(systemName: icon)
             .font(.system(size: 20, weight: .semibold))
             .widgetAccentable()
             .widgetLabel {
                 if let reference {
-                    Text("+\(reference.time, style: .timer)")
+                    Text("+\(count(reference.time))")
                 } else {
                     Text("Timestamp")
                 }
@@ -118,6 +147,17 @@ struct ComplicationView: View {
         case .utc24Hour: return "\(parts.time) UTC"
         case .local24Hour: return parts.time
         }
+    }
+
+    /// How far ahead the entries go before the timeline is asked for again.
+    static let span: TimeInterval = 4 * 60 * 60
+
+    /// Now, then each time the count reaches another whole minute, for the
+    /// next `span`, for the dimmed count. Just now without an event.
+    static func entryDates(from time: Date?, now: Date) -> [Date] {
+        guard let time else { return [now] }
+        let next = time.addingTimeInterval(((now.timeIntervalSince(time) / 60).rounded(.down) + 1) * 60)
+        return [now] + stride(from: max(next, time), to: now.addingTimeInterval(span), by: 60)
     }
 
     private var accessibilityLabel: Text {

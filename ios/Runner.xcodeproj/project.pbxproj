@@ -43,7 +43,7 @@
 		A0BD2A3338EAA08FA41C1A30 /* EventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 165824154C8A26A395F58260 /* EventStore.swift */; };
 		A66C18C936982167EAF8EFCE /* SharedButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = B144ED492255B63D635E3D1E /* SharedButtons.swift */; };
 		A6A9F8F293B1A2C3E71EFAEF /* SharedButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = B144ED492255B63D635E3D1E /* SharedButtons.swift */; };
-		B284C6F262275D02ADE96522 /* ReferenceComplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98812AF4BBD688F11C97F11A /* ReferenceComplication.swift */; };
+		B284C6F262275D02ADE96522 /* EventComplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98812AF4BBD688F11C97F11A /* EventComplication.swift */; };
 		B28C978AED6F2E7708A8915B /* ComplicationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF8FEF6AE4030992231CAD50 /* ComplicationTests.swift */; };
 		B3347E06763A5300AAC3CF9C /* RecordControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7C58A1D1B264CB3D642B062 /* RecordControl.swift */; };
 		BB472A5373F3E3C9FEADB741 /* SharedButtonsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7879810A76CC233B6355B8FE /* SharedButtonsTests.swift */; };
@@ -171,7 +171,7 @@
 		97C146FD1CF9000F007C117D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		98812AF4BBD688F11C97F11A /* ReferenceComplication.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReferenceComplication.swift; sourceTree = "<group>"; };
+		98812AF4BBD688F11C97F11A /* EventComplication.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventComplication.swift; sourceTree = "<group>"; };
 		9AA098EEDBB2C44372177AEE /* PhoneLink.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PhoneLink.swift; sourceTree = "<group>"; };
 		9C7A8B22C8FB1CF50E2534F6 /* WatchBridge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchBridge.swift; sourceTree = "<group>"; };
 		A1F1C29E862E1CDB9F6315F5 /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -366,7 +366,7 @@
 				C7C58A1D1B264CB3D642B062 /* RecordControl.swift */,
 				16B10439447C4CECDF7E19E4 /* Info.plist */,
 				C619C9CA3568508BF3CA9F10 /* TimestampWatchControls.entitlements */,
-				98812AF4BBD688F11C97F11A /* ReferenceComplication.swift */,
+				98812AF4BBD688F11C97F11A /* EventComplication.swift */,
 			);
 			name = TimestampWatchControls;
 			path = TimestampWatchControls;
@@ -697,7 +697,7 @@
 				3C196FB86732E15BBCE7E098 /* ComplicationSnapshot.swift in Sources */,
 				8A6D576F907FF00FCDB93A98 /* ComplicationViews.swift in Sources */,
 				7F611BF21EBB8F618312858B /* TimeFormatting.swift in Sources */,
-				B284C6F262275D02ADE96522 /* ReferenceComplication.swift in Sources */,
+				B284C6F262275D02ADE96522 /* EventComplication.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
