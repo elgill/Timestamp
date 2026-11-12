@@ -162,7 +162,12 @@ struct EventDetailView: View {
                         recorder.setReference(event)
                     } label: {
                         Label("Set as Reference", systemImage: "plusminus")
+                            // One line, even on the smallest watch.
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                            .frame(maxWidth: .infinity)
                     }
+                    .fullWidth()
                     .padding(.top, 6)
                 }
 
@@ -172,7 +177,9 @@ struct EventDetailView: View {
                         dismiss()
                     } label: {
                         Label("Delete", systemImage: "trash")
+                            .frame(maxWidth: .infinity)
                     }
+                    .fullWidth()
                     .padding(.top, 6)
                 } else {
                     Text("Delete it on the iPhone.")
@@ -182,6 +189,9 @@ struct EventDetailView: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+            // The system's margins, which its full-width buttons already
+            // keep, so the text lines up with them.
+            .scenePadding(.horizontal)
         }
     }
 
@@ -189,5 +199,19 @@ struct EventDetailView: View {
         let precision = event.precision >= 0 ? "±\(event.precision) ms" : "Precision unknown"
         let source = store.canDelete(event) ? "recorded on this watch" : "from iPhone"
         return "\(precision) · \(source)"
+    }
+}
+
+private extension View {
+    /// Full width, as watchOS stacks a screen's actions. From watchOS 26 a
+    /// button fits its label unless told otherwise; before, the label's
+    /// frame is enough.
+    @ViewBuilder
+    func fullWidth() -> some View {
+        if #available(watchOS 26, *) {
+            buttonSizing(.flexible).frame(maxWidth: .infinity)
+        } else {
+            frame(maxWidth: .infinity)
+        }
     }
 }
