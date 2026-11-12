@@ -152,7 +152,11 @@ struct ComplicationView: View {
     }
 
     /// How far ahead the entries go before the timeline is asked for again.
-    static let span: TimeInterval = 4 * 60 * 60
+    /// The watch draws every entry when the timeline loads, before the
+    /// complication changes, so this is kept short: four hours' worth took
+    /// about 5 seconds a complication in the simulator. An hour means a
+    /// budgeted reload of each an hour, well within what watchOS allows.
+    static let span: TimeInterval = 60 * 60
 
     /// Now, then each time the count reaches another whole minute, for the
     /// next `span`, for the dimmed count. Just now without an event.

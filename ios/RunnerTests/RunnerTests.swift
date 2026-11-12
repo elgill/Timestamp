@@ -55,6 +55,10 @@ class ComplicationContextTests: XCTestCase {
   func testOnlyWhatTheComplicationsShowCounts() {
     let shown = WatchBridge.complicationsShow(context())
     XCTAssertNotNil(shown)
+    // The same every time, or every context would look like a change.
+    for _ in 0..<20 {
+      XCTAssertEqual(WatchBridge.complicationsShow(context()), shown)
+    }
     // Buttons and imported ids aren't shown.
     XCTAssertEqual(WatchBridge.complicationsShow(context(extra: ", \"y\"")), shown)
     XCTAssertNotEqual(WatchBridge.complicationsShow(context(reference: "b")), shown)

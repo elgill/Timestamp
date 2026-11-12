@@ -61,13 +61,18 @@ final class WatchBridge: NSObject, WCSessionDelegate {
             guard let json = arguments?["json"] as? String else {
                 return result(FlutterError(code: "bad-arguments", message: "json missing", details: nil))
             }
-            pendingContext = json
-            sendPendingContext()
-            shareButtons(fromContext: json)
+            updateContext(json: json)
             result(nil)
         default:
             result(FlutterMethodNotImplemented)
         }
+    }
+
+    /// Sends Flutter's latest context to the watch.
+    func updateContext(json: String) {
+        pendingContext = json
+        sendPendingContext()
+        shareButtons(fromContext: json)
     }
 
     /// Keeps the buttons from Flutter's context for `RecordEventIntent`,
@@ -134,8 +139,17 @@ final class WatchBridge: NSObject, WCSessionDelegate {
         guard let context = try? WatchJSON.decoder.decode(Context.self, from: Data(json.utf8)) else { return nil }
         let latest = context.events?.compactMap(\.value).max { $0.time < $1.time }
         let shown = Shown(reference: context.reference, latest: latest, timeFormat: context.timeFormat)
-        return (try? WatchJSON.encoder.encode(shown)).map { String(decoding: $0, as: UTF8.self) }
+        return (try? comparableEncoder.encode(shown)).map { String(decoding: $0, as: UTF8.self) }
     }
+
+    /// Writes the same text for the same content every time, which
+    /// JSONEncoder only does with its keys sorted.
+    private static let comparableEncoder: JSONEncoder = {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .sortedKeys
+        encoder.dateEncodingStrategy = .millisecondsSince1970
+        return encoder
+    }()
 
     /// Changes waiting for Flutter, oldest first: `sequence` and `json`.
     private var inbox: [[String: Any]] {
