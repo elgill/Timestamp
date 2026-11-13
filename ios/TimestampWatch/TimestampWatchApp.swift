@@ -22,6 +22,10 @@ struct TimestampWatchApp: App {
         link.activate()
         IntentRecorder.recorder = recorder
         IntentRecorder.settings = settings
+        // So Siri has the button names its phrases can include, even if
+        // they haven't changed: it drops the names it was given while the
+        // app's shortcuts were off.
+        TimestampShortcuts.updateAppShortcutParameters()
         // Events from before there were complications.
         Complications.update(store: store, settings: settings)
     }

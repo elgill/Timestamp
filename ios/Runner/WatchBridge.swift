@@ -24,6 +24,8 @@ final class WatchBridge: NSObject, WCSessionDelegate {
     private var channel: FlutterMethodChannel?
     /// The latest context from Flutter, kept to send once the session is up.
     private var pendingContext: String?
+    /// Whether Siri has been given the button names since launch.
+    private var sentShortcutParameters = false
 
     /// Call at launch, so changes the watch sent while the app was closed
     /// are delivered.
@@ -83,10 +85,14 @@ final class WatchBridge: NSObject, WCSessionDelegate {
         }
         guard let context = try? JSONDecoder().decode(Context.self, from: Data(json.utf8)) else { return }
         let buttons = context.buttons.compactMap(\.value)
-        guard buttons != SharedButtons.load() else { return }
-        SharedButtons.save(buttons)
+        let changed = buttons != SharedButtons.load()
+        if changed { SharedButtons.save(buttons) }
+        // So Siri knows the button names its phrases can include. Also
+        // once per launch, unchanged or not: Siri drops the names it was
+        // given while the app's shortcuts were off, or before it was ready.
+        guard changed || !sentShortcutParameters else { return }
+        sentShortcutParameters = true
         if #available(iOS 16.0, *) {
-            // So Siri knows the button names its phrases can include.
             TimestampShortcuts.updateAppShortcutParameters()
         }
     }
