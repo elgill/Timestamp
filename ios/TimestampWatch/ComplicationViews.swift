@@ -93,9 +93,10 @@ struct ComplicationView: View {
             // the smallest faces they shrink alike to fit.
             Group {
                 if let reference {
-                    Text(ComplicationView.clockTime(reference.time, snapshot?.timeFormat ?? .local24Hour))
-                    // "+5:12", counting up.
+                    // "+5:12", counting up, first and brighter, then
+                    // when the event was.
                     Text("+\(count(reference.time))")
+                    Text(ComplicationView.clockTime(reference.time, snapshot?.timeFormat ?? .local24Hour))
                         .foregroundStyle(.secondary)
                 } else {
                     Text("No events yet")
