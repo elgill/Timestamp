@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:timestamp/enums/predefined_colors.dart';
 import 'package:timestamp/models/button_model.dart';
 import 'package:timestamp/providers/shared_pref_provider.dart';

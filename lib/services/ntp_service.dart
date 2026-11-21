@@ -14,7 +14,7 @@ typedef NtpFetcher = Future<NTPResponse> Function(
 const ntpQueryTimeout = Duration(seconds: 5);
 
 class NtpService {
-  final ProviderRef _ref;
+  final Ref _ref;
   final NtpFetcher _fetchNtpData;
   bool _isInfoRecieved = false;
   int? _ntpOffset; //ms

@@ -78,7 +78,7 @@ class _ManualEventEntryScreenState
     );
   }
 
-  _selectDate(DateTime picked) async {
+  Future<void> _selectDate(DateTime picked) async {
     setState(() {
       selectedDate = DateTime(
         picked.year,
@@ -166,7 +166,7 @@ class _ManualEventEntryScreenState
     );
   }
 
-  _addEvent() {
+  void _addEvent() {
     DateTime finalDate = DateTime(
       selectedDate.year,
       selectedDate.month,

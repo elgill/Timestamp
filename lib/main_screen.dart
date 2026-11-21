@@ -402,7 +402,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     });
   }
 
-  _onEventTap(Event event) async {
+  Future<void> _onEventTap(Event event) async {
     if (!isInDeleteMode) {
       // Not List.indexOf: it compares by value, which would confuse two
       // identical events.
