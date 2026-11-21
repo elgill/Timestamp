@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -491,6 +492,34 @@ void main() {
       expect(find.text('NTP Details'), findsOneWidget);
       await unmountApp(tester);
     });
+
+    testWidgets('dialog is a Cupertino alert on iOS', (tester) async {
+      setDevice(tester, phone);
+      await pumpApp(tester, buttons: [], rows: 1);
+
+      await tester.tap(find.text('Offset: 12ms'));
+      await settle(tester);
+      expect(find.byType(CupertinoAlertDialog), findsOneWidget);
+      expect(find.text('Time Server: time.test'), findsOneWidget);
+
+      await tester.tap(find.widgetWithText(CupertinoDialogAction, 'Close'));
+      await settle(tester);
+      expect(find.text('NTP Details'), findsNothing);
+      await unmountApp(tester);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
+    testWidgets('dialog is a Material alert on Android', (tester) async {
+      setDevice(tester, phone);
+      await pumpApp(tester, buttons: [], rows: 1);
+
+      await tester.tap(find.text('Offset: 12ms'));
+      await settle(tester);
+      // AlertDialog.adaptive is a private subclass, so match by type check.
+      expect(find.byWidgetPredicate((w) => w is AlertDialog), findsOneWidget);
+      expect(find.byType(CupertinoAlertDialog), findsNothing);
+      expect(find.widgetWithText(TextButton, 'Get Time'), findsOneWidget);
+      await unmountApp(tester);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
   });
 
   group('delete mode', () {
@@ -610,6 +639,52 @@ void main() {
       expect(remaining(tester), hasLength(3));
       await unmountApp(tester);
     });
+
+    testWidgets('on iOS, confirming is a Cupertino alert with a red Delete',
+        (tester) async {
+      await startWithEvents(tester);
+
+      await tester.tap(find.text('Delete All'));
+      await settle(tester);
+      expect(find.byType(CupertinoAlertDialog), findsOneWidget);
+      final delete = tester.widget<CupertinoDialogAction>(
+          find.widgetWithText(CupertinoDialogAction, 'Delete'));
+      expect(delete.isDestructiveAction, isTrue);
+
+      await tester.tap(find.widgetWithText(CupertinoDialogAction, 'Delete'));
+      await settle(tester);
+      expect(remaining(tester), isEmpty);
+      await unmountApp(tester);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
+    testWidgets('on iOS, canceling keeps the selected events', (tester) async {
+      await startWithEvents(tester);
+      await tester.tap(find.byType(Checkbox).first);
+      await tester.pump();
+
+      await tester.tap(find.text('Delete Selected'));
+      await settle(tester);
+      expect(find.byType(CupertinoAlertDialog), findsOneWidget);
+      await tester.tap(find.widgetWithText(CupertinoDialogAction, 'Cancel'));
+      await settle(tester);
+
+      expect(find.byType(CupertinoAlertDialog), findsNothing);
+      expect(remaining(tester), hasLength(3));
+      await unmountApp(tester);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
+    testWidgets('tapping outside dismisses the confirmation', (tester) async {
+      await startWithEvents(tester);
+
+      await tester.tap(find.text('Delete All'));
+      await settle(tester);
+      await tester.tapAt(const Offset(5, 5));
+      await settle(tester);
+
+      expect(find.text('Confirm Deletion'), findsNothing);
+      expect(remaining(tester), hasLength(3));
+      await unmountApp(tester);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
     testWidgets('recording while selecting keeps the selection on its event',
         (tester) async {

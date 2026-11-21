@@ -6,7 +6,6 @@ import 'dart:io' show Platform;
 // External package imports
 import 'package:collection/collection.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timestamp/enums/button_location.dart';
 import 'package:timestamp/enums/predefined_colors.dart';
@@ -71,21 +70,51 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     });
   }
 
+  /// A dialog button that matches [AlertDialog.adaptive]: Cupertino on
+  /// Apple platforms, Material elsewhere. [destructive] shows it in red.
+  Widget _dialogAction(BuildContext context,
+      {required String label,
+      required VoidCallback onPressed,
+      bool destructive = false}) {
+    switch (Theme.of(context).platform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        return CupertinoDialogAction(
+          isDestructiveAction: destructive,
+          onPressed: onPressed,
+          child: Text(label),
+        );
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return TextButton(
+          onPressed: onPressed,
+          child: Text(label,
+              style: destructive ? const TextStyle(color: Colors.red) : null),
+        );
+    }
+  }
+
   void showDeleteSelectedEventsDialog() {
-    showDialog(
+    showAdaptiveDialog<void>(
       context: context,
+      barrierDismissible: true,
       builder: (context) {
-        return PlatformAlertDialog(
+        return AlertDialog.adaptive(
           title: const Text('Confirm Deletion'),
           content:
               const Text('Are you sure you want to delete selected events?'),
           actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
+            _dialogAction(
+              context,
+              label: 'Cancel',
               onPressed: () => Navigator.of(context).pop(),
             ),
-            TextButton(
-              child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            _dialogAction(
+              context,
+              label: 'Delete',
+              destructive: true,
               onPressed: () {
                 setState(() {
                   eventManager.deleteSelectedEvents(selectedEvents);
@@ -101,19 +130,23 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   }
 
   void showDeleteAllEventsDialog() {
-    showDialog(
+    showAdaptiveDialog<void>(
       context: context,
+      barrierDismissible: true,
       builder: (context) {
-        return PlatformAlertDialog(
+        return AlertDialog.adaptive(
           title: const Text('Confirm Deletion'),
           content: const Text('Are you sure you want to delete all events?'),
           actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
+            _dialogAction(
+              context,
+              label: 'Cancel',
               onPressed: () => Navigator.of(context).pop(),
             ),
-            TextButton(
-              child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            _dialogAction(
+              context,
+              label: 'Delete',
+              destructive: true,
               onPressed: () {
                 setState(() {
                   eventManager.deleteAllEvents();
@@ -196,11 +229,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   }
 
   Future<void> _showNtpDetailsDialog() async {
-    return showPlatformDialog<void>(
+    return showAdaptiveDialog<void>(
       context: context,
       barrierDismissible: true,
       builder: (BuildContext context) {
-        return PlatformAlertDialog(
+        return AlertDialog.adaptive(
           title: const Text('NTP Details'),
           content: ntpService.isInfoRecieved
               ? Column(
@@ -218,14 +251,16 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           )
               : const Text('No Time Data Received'),
           actions: <Widget>[
-            TextButton(
-              child: const Text('Close'),
+            _dialogAction(
+              context,
+              label: 'Close',
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
-            TextButton(
-              child: const Text('Get Time'),
+            _dialogAction(
+              context,
+              label: 'Get Time',
               onPressed: () async {
                 Navigator.of(context).pop();
                 await ntpService
