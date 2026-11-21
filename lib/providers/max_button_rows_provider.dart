@@ -1,19 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 import 'package:timestamp/providers/shared_pref_provider.dart';
 
-final maxButtonRowsProvider = StateNotifierProvider<MaxButtonRowNotifier, int>((ref) {
-  return MaxButtonRowNotifier(ref: ref);
-});
+final maxButtonRowsProvider = NotifierProvider<MaxButtonRowNotifier, int>(MaxButtonRowNotifier.new);
 
-class MaxButtonRowNotifier extends StateNotifier<int> {
-  MaxButtonRowNotifier({required this.ref}) : super(1) {
-    state = ref.watch(sharedUtilityProvider).getMaxButtonRows();
-  }
-  Ref ref;
+class MaxButtonRowNotifier extends Notifier<int> {
+  @override
+  int build() => ref.watch(sharedUtilityProvider).getMaxButtonRows();
 
-  void setMaxButtonRows(int rows) {
-    ref.watch(sharedUtilityProvider).setMaxButtonRows(rows);
-    state = rows;
+  void setMaxButtonRows(int value) {
+    ref.read(sharedUtilityProvider).setMaxButtonRows(value);
+    state = value;
   }
 }

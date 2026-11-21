@@ -1,23 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 import 'package:timestamp/enums/predefined_colors.dart';
 import 'package:timestamp/models/button_model.dart';
 import 'package:timestamp/providers/shared_pref_provider.dart';
 import 'package:timestamp/providers/theme_mode_provider.dart';
 
-final customButtonModelsProvider = StateNotifierProvider<CustomButtonModelsNotifier, List<ButtonModel>>((ref) {
-  return CustomButtonModelsNotifier(ref: ref);
-});
+final customButtonModelsProvider =
+    NotifierProvider<CustomButtonModelsNotifier, List<ButtonModel>>(
+        CustomButtonModelsNotifier.new);
 
-class CustomButtonModelsNotifier extends StateNotifier<List<ButtonModel>> {
-  CustomButtonModelsNotifier({required this.ref}) : super([]) {
-    state = ref.watch(sharedUtilityProvider).getCustomButtonModels();
-  }
-  Ref ref;
+class CustomButtonModelsNotifier extends Notifier<List<ButtonModel>> {
+  @override
+  List<ButtonModel> build() =>
+      ref.watch(sharedUtilityProvider).getCustomButtonModels();
 
   void setCustomButtonModels(List<ButtonModel> models) {
-    ref.watch(sharedUtilityProvider).setCustomButtonModels(models);
+    ref.read(sharedUtilityProvider).setCustomButtonModels(models);
     state = models;
   }
 
@@ -34,13 +32,15 @@ class CustomButtonModelsNotifier extends StateNotifier<List<ButtonModel>> {
     setCustomButtonModels(updatedModels);
   }
 
+  /// Reads, not watches, the theme: a widget showing this color should watch
+  /// [customButtonModelsProvider] and [themeModeProvider] to stay current.
   Color getButtonColor(String name, BuildContext context) {
     final model = state.firstWhere(
           (model) => model.name == name,
       orElse: () => ButtonModel(name, PredefinedColor.defaultColor),
     );
 
-    final themeMode = ref.watch(themeModeProvider);
+    final themeMode = ref.read(themeModeProvider);
     return model.predefinedColor.getColor(themeMode, context);
   }
 

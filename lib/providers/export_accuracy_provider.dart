@@ -1,19 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 import 'package:timestamp/providers/shared_pref_provider.dart';
 
-final exportAccuracyProvider = StateNotifierProvider<ExportAccuracyNotifier, bool>((ref) {
-  return ExportAccuracyNotifier(ref: ref);
-});
+final exportAccuracyProvider = NotifierProvider<ExportAccuracyNotifier, bool>(ExportAccuracyNotifier.new);
 
-class ExportAccuracyNotifier extends StateNotifier<bool> {
-  ExportAccuracyNotifier({required this.ref}) : super(false) {
-    state = ref.watch(sharedUtilityProvider).getExportAccuracy();
-  }
-  Ref ref;
+class ExportAccuracyNotifier extends Notifier<bool> {
+  @override
+  bool build() => ref.watch(sharedUtilityProvider).getExportAccuracy();
 
   void setExportAccuracy(bool value) {
-    ref.watch(sharedUtilityProvider).setExportAccuracy(value);
+    ref.read(sharedUtilityProvider).setExportAccuracy(value);
     state = value;
   }
 }

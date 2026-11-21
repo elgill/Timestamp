@@ -1,19 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 import 'package:timestamp/providers/shared_pref_provider.dart';
 
-final autoLockProvider = StateNotifierProvider<AutoLockNotifier, bool>((ref) {
-  return AutoLockNotifier(ref: ref);
-});
+final autoLockProvider = NotifierProvider<AutoLockNotifier, bool>(AutoLockNotifier.new);
 
-class AutoLockNotifier extends StateNotifier<bool> {
-  AutoLockNotifier({required this.ref}) : super(true) {
-    state = ref.watch(sharedUtilityProvider).getDisableAutoLock();
-  }
-  Ref ref;
+class AutoLockNotifier extends Notifier<bool> {
+  @override
+  bool build() => ref.watch(sharedUtilityProvider).getDisableAutoLock();
 
-  void setAutoLock(bool enable) {
-    ref.watch(sharedUtilityProvider).setDisableAutoLock(enable);
-    state = enable;
+  void setAutoLock(bool value) {
+    ref.read(sharedUtilityProvider).setDisableAutoLock(value);
+    state = value;
   }
 }

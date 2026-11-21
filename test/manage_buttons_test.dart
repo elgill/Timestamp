@@ -285,6 +285,19 @@ void main() {
       await unmountApp(tester);
     });
 
+    testWidgets('a color changed elsewhere shows without leaving the screen',
+        (tester) async {
+      await openManageScreen(tester, ['Aura']);
+
+      appContainer(tester)
+          .read(customButtonModelsProvider.notifier)
+          .updateButtonColor('Aura', PredefinedColor.purple);
+      await tester.pump();
+
+      expect(circleColor(tester, 'Aura'), Colors.purple);
+      await unmountApp(tester);
+    });
+
     testWidgets('the color picker checks the current color', (tester) async {
       await openManageScreen(tester, ['Aura'], prefs: {
         customButtonModelsKey: [

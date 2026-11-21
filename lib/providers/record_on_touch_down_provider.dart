@@ -1,19 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 import 'package:timestamp/providers/shared_pref_provider.dart';
 
-final recordOnTouchDownProvider = StateNotifierProvider<RecordOnTouchDownNotifier, bool>((ref) {
-  return RecordOnTouchDownNotifier(ref: ref);
-});
+final recordOnTouchDownProvider = NotifierProvider<RecordOnTouchDownNotifier, bool>(RecordOnTouchDownNotifier.new);
 
-class RecordOnTouchDownNotifier extends StateNotifier<bool> {
-  RecordOnTouchDownNotifier({required this.ref}) : super(false) {
-    state = ref.watch(sharedUtilityProvider).getRecordOnTouchDown();
-  }
-  Ref ref;
+class RecordOnTouchDownNotifier extends Notifier<bool> {
+  @override
+  bool build() => ref.watch(sharedUtilityProvider).getRecordOnTouchDown();
 
   void setRecordOnTouchDown(bool value) {
-    ref.watch(sharedUtilityProvider).setRecordOnTouchDown(value);
+    ref.read(sharedUtilityProvider).setRecordOnTouchDown(value);
     state = value;
   }
 }

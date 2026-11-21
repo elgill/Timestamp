@@ -1,20 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 import 'package:timestamp/enums/time_server.dart';
 import 'package:timestamp/providers/shared_pref_provider.dart';
 
-final timeServerProvider = StateNotifierProvider<TimeServerNotifier, TimeServer>((ref) {
-  return TimeServerNotifier(ref: ref);
-});
+final timeServerProvider = NotifierProvider<TimeServerNotifier, TimeServer>(TimeServerNotifier.new);
 
-class TimeServerNotifier extends StateNotifier<TimeServer> {
-  TimeServerNotifier({required this.ref}) : super(TimeServer.timeGoogleCom) {
-    state = ref.watch(sharedUtilityProvider).getTimeServer();
-  }
-  Ref ref;
+class TimeServerNotifier extends Notifier<TimeServer> {
+  @override
+  TimeServer build() => ref.watch(sharedUtilityProvider).getTimeServer();
 
   void setTimeServer(TimeServer value) {
-    ref.watch(sharedUtilityProvider).setTimeServer(value);
+    ref.read(sharedUtilityProvider).setTimeServer(value);
     state = value;
   }
 }

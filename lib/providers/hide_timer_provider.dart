@@ -1,19 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 import 'package:timestamp/providers/shared_pref_provider.dart';
 
-final hideTimerProvider = StateNotifierProvider<HideTimerNotifier, bool>((ref) {
-  return HideTimerNotifier(ref: ref);
-});
+final hideTimerProvider = NotifierProvider<HideTimerNotifier, bool>(HideTimerNotifier.new);
 
-class HideTimerNotifier extends StateNotifier<bool> {
-  HideTimerNotifier({required this.ref}) : super(false) {
-    state = ref.watch(sharedUtilityProvider).getHideRunningTimer();
-  }
-  Ref ref;
+class HideTimerNotifier extends Notifier<bool> {
+  @override
+  bool build() => ref.watch(sharedUtilityProvider).getHideRunningTimer();
 
-  void setHideTimer(bool hide) {
-    ref.watch(sharedUtilityProvider).setHideRunningTimer(hide);
-    state = hide;
+  void setHideTimer(bool value) {
+    ref.read(sharedUtilityProvider).setHideRunningTimer(value);
+    state = value;
   }
 }
